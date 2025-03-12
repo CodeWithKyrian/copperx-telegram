@@ -1,5 +1,7 @@
 import { Telegraf } from 'telegraf';
 import { environment } from './config/environment';
+import { startCommand, helpCommand, aboutCommand } from './commands';
+
 
 /**
  * Initializes the Telegram bot
@@ -21,31 +23,11 @@ export const initBot = (): Telegraf => {
  * Registers the commands for the bot
  */
 const registerCommands = (bot: Telegraf) => {
-    bot.start((ctx) => {
-        ctx.reply('Welcome to CopperX Telegram Bot! 🚀\n\nI can help you manage your USDC transactions directly through Telegram.\n\nUse /help to see available commands.');
-    });
+    bot.start(startCommand.handler);
 
-    bot.help((ctx) => {
-        ctx.reply(
-            'Here are the available commands:\n\n' +
-            '/start - Start the bot\n' +
-            '/help - Show this help message\n' +
-            '/about - About CopperX\n\n' +
-            'More commands will be available after you authenticate.'
-        );
-    });
+    bot.help(helpCommand.handler);
 
-    bot.command('about', (ctx) => {
-        ctx.reply(
-            'CopperX is building a stablecoin bank for individuals and businesses.\n\n' +
-            'This bot allows you to deposit, withdraw, and transfer USDC directly through Telegram without visiting our web app.\n\n' +
-            'For support, please visit: https://t.me/copperxcommunity/2183'
-        );
-    });
-
-    bot.command('deposit', (ctx) => {
-        ctx.reply('Deposit USDC to your CopperX account.');
-    });
+    bot.command(aboutCommand.name, aboutCommand.handler);
 
     bot.on('text', (ctx) => {
         if (ctx.message.text.startsWith('/')) {

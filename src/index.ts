@@ -1,0 +1,1 @@
+console.log('CopperX Telegram Bot starting...');

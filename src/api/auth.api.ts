@@ -27,9 +27,7 @@ export class AuthApi {
     }
 
     public async logout(): Promise<SuccessResponse> {
-        const response = await apiClient.post<SuccessResponse>('/api/auth/logout');
-        apiClient.setAccessToken(null);
-        return response;
+        return apiClient.post<SuccessResponse>('/api/auth/logout');
     }
 
     public async getAuthUser(): Promise<AuthUser> {

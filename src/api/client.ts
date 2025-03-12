@@ -95,6 +95,7 @@ export class ApiClient {
      */
     public setAccessToken(token: string | null): void {
         this.accessToken = token;
+        this.client.defaults.headers.common.Authorization = token ? `Bearer ${token}` : undefined;
     }
 
     /**

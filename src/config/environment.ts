@@ -29,6 +29,14 @@ export const environment = {
         collection: process.env.MONGO_COLLECTION || 'sessions',
     },
 
+    postgres: {
+        host: process.env.POSTGRES_HOST || 'localhost',
+        port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+        database: process.env.POSTGRES_DB || 'copperx_bot',
+        user: process.env.POSTGRES_USER || 'postgres',
+        password: process.env.POSTGRES_PASSWORD || 'postgres',
+    },
+
     pusher: {
         appId: process.env.PUSHER_APP_ID || '',
         key: process.env.PUSHER_KEY || '',

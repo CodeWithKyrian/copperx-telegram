@@ -1,9 +1,8 @@
 import { Context, Telegraf } from 'telegraf';
 import { environment } from './config/environment';
 import { startCommand, helpCommand, aboutCommand } from './commands';
-import { loggerMiddleware } from './middlewares/logger.middleware';
+import { loggerMiddleware, createSessionMiddleware, updateSessionMiddleware } from './middlewares';
 import logger from './utils/logger';
-
 
 /**
  * Initializes the Telegram bot
@@ -12,6 +11,8 @@ export const initBot = (): Telegraf => {
     const bot = new Telegraf(environment.bot.token);
 
     bot.use(loggerMiddleware());
+    bot.use(createSessionMiddleware());
+    bot.use(updateSessionMiddleware());
 
     bot.catch((err: any, ctx: Context) => {
         logger.error(`Error processing update`, {

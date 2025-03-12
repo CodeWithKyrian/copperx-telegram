@@ -14,6 +14,7 @@ try {
 logger.info(`CopperX Telegram Bot starting`, {
     environment: config.env.nodeEnv,
     logLevel: config.env.logging.level,
+    sessionDriver: config.env.session.driver,
 });
 
 const bot = initBot();

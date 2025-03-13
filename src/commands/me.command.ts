@@ -11,21 +11,47 @@ export const handleMeCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
         const profile = await authService.getCurrentUser();
 
+        // Helper function to format wallet addresses
+        const formatAddress = (address?: string): string => {
+            if (!address) return 'Not set';
+            // Format as first 8 chars + ... + last 8 chars
+            return address.length > 16 ?
+                `${address.substring(0, 8)}...${address.substring(address.length - 8)}` :
+                address;
+        };
+
+        // Helper function to capitalize first letter of each word
+        const capitalize = (text?: string): string => {
+            if (!text) return 'Not set';
+            return text.split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        };
 
         await ctx.reply(
-            '👤 *Your CopperX Profile*\n\n' +
-            `*Name:* ${profile.firstName || 'Not set'}\n` +
-            `*Email:* ${profile.email}\n` +
-            `*User ID:* ${profile.id}\n` +
-            `*Organization ID:* ${profile.organizationId || 'Not set'}\n` +
-            `*Role:* ${profile.role}\n` +
-            `*Status:* ${profile.status}\n` +
-            `*Type:* ${profile.type}\n` +
-            `*Relay Address:* ${profile.relayerAddress}\n` +
-            `*Wallet Address:* ${profile.walletAddress}\n` +
-            `*Wallet ID:* ${profile.walletId}\n` +
-            `*Wallet Account Type:* ${profile.walletAccountType}\n` +
-            'Use /balance to check your wallet balance.',
+            '👤 *YOUR COPPERX PROFILE*\n\n' +
+
+            '📝 *Account Info*\n' +
+            `• Name: ${profile.firstName || 'Not set'}\n` +
+            `• Email: ${profile.email || 'Not set'}\n` +
+            `• Status: ${profile.status === 'active' ? '✅ Active' :
+                profile.status === 'pending' ? '⏳ Pending' : capitalize(profile.status)}\n` +
+            `• Type: ${capitalize(profile.type)}\n\n` +
+
+            '🏢 *Organization*\n' +
+            `• Role: ${capitalize(profile.role)}\n` +
+            `• Organization ID: ${profile.organizationId ?
+                '`' + profile.organizationId + '`' : 'Not set'}\n\n` +
+
+            '💼 *Wallet Details*\n' +
+            `• Wallet ID: ${profile.walletId ? '`' + profile.walletId + '`' : 'Not set'}\n` +
+            `• Type: ${capitalize(profile.walletAccountType)}\n` +
+            `• Address: ${formatAddress(profile.walletAddress)}\n\n` +
+
+            '🔄 *Relay Address*\n' +
+            `• ${formatAddress(profile.relayerAddress)}\n\n` +
+
+            '_Use /balance to check your wallet balance._',
             { parse_mode: 'Markdown' }
         );
     } catch (error) {

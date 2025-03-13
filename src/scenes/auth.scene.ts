@@ -12,7 +12,7 @@ interface AuthSceneSessionData extends Scenes.SceneSessionData {
     tempOtpSid?: string;
 }
 
-interface AuthSceneContext extends GlobalContext {
+export interface AuthSceneContext extends GlobalContext {
     session: Scenes.SceneSession<AuthSceneSessionData>;
     scene: Scenes.SceneContextScene<AuthSceneContext, AuthSceneSessionData>;
 }
@@ -48,13 +48,8 @@ const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
         // Show loading message
         await ctx.reply('Sending verification code...');
 
-        // Request OTP
-        const response = await authService.initiateEmailAuth(email);
-
-        // Store data in scene session
-        ctx.scene.session.email = email;
-        ctx.scene.session.tempOtpSid = response.sid;
-        ctx.scene.session.waitingForOtp = true;
+        // Request OTP - this now handles updating scene session
+        await authService.initiateEmailAuth(ctx, email);
 
         // Prompt for OTP
         await ctx.reply(
@@ -79,20 +74,13 @@ const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
     }
 };
 
-
 const handleOtpVerification = async (ctx: AuthSceneContext, otp: string) => {
     try {
-        const { email, tempOtpSid } = ctx.scene.session;
-
-        if (!email || !tempOtpSid) {
-            throw new Error('Missing authentication data. Please restart the login process.');
-        }
-
         // Show loading message
         await ctx.reply('Verifying OTP...');
 
-        // Verify OTP
-        const user = await authService.verifyOtp(email, otp, tempOtpSid);
+        // Verify OTP - this now handles everything internally
+        const user = await authService.verifyOtp(ctx, otp);
 
         // Success message
         await ctx.reply(

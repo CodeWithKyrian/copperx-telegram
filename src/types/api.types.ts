@@ -45,7 +45,7 @@ export interface AuthUser {
     organizationId?: string;
     role: UserRole;
     status: UserStatus;
-    type: CustomerProfileType;
+    type?: CustomerProfileType;
     relayerAddress: string;
     flags?: string[];
     walletAddress?: string;

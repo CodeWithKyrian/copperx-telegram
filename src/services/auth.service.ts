@@ -4,6 +4,7 @@ import apiClient from '../api/client';
 import logger from '../utils/logger';
 import { GlobalContext } from '../types';
 import { Encryption } from '../utils/encryption.utils';
+import { AuthSceneContext } from '../scenes/auth.scene';
 
 /**
  * Authentication service for handling user authentication
@@ -11,13 +12,22 @@ import { Encryption } from '../utils/encryption.utils';
 export class AuthService {
     /**
      * Initiates email-based authentication by requesting an OTP
+     * @param ctx Telegraf context with scene session
      * @param email User's email address
      * @returns Promise with the result of the operation
      */
-    public async initiateEmailAuth(email: string): Promise<LoginEmailOtpResponse> {
+    public async initiateEmailAuth(ctx: AuthSceneContext, email: string): Promise<LoginEmailOtpResponse> {
         try {
             // Request OTP to be sent to user's email
             const response = await authApi.loginEmailOtp({ email });
+
+            // Store email and sid in scene session
+            ctx.scene.session.email = email;
+            ctx.scene.session.tempOtpSid = response.sid;
+            ctx.scene.session.waitingForOtp = true;
+
+            logger.info('Email authentication initiated', { email });
+
             return response;
         } catch (error: any) {
             logger.error('Failed to initiate email authentication', {
@@ -30,46 +40,46 @@ export class AuthService {
 
     /**
      * Verifies OTP to complete authentication
-     * @param email User's email address
+     * @param ctx Telegraf context with scene session
      * @param otp One-time password received by the user
-     * @param sid Session ID from the initial OTP request
      * @returns Promise with the user profile
      */
-    public async verifyOtp(email: string, otp: string, sid: string): Promise<AuthUser> {
+    public async verifyOtp(ctx: AuthSceneContext, otp: string): Promise<AuthUser> {
         try {
+            const { email, tempOtpSid } = ctx.scene.session;
+
+            if (!email || !tempOtpSid) {
+                throw new Error('Missing authentication data. Please restart the login process.');
+            }
+
             // Verify OTP with the API
             const authResponse = await authApi.verifyEmailOtp({
                 email,
                 otp,
-                sid,
+                sid: tempOtpSid,
             });
 
-            // Store authentication data
-            await this.setAuthToken(authResponse);
+            // Set token for API client
+            apiClient.setAccessToken(authResponse.accessToken);
 
-            // Fetch user profile
-            const userProfile = await this.getCurrentUser();
+            // Update session with authentication data
+            this.updateSessionAuth(ctx, authResponse);
 
-            return userProfile;
+            // Update user profile data in session
+            this.updateSessionUserProfile(ctx, authResponse.user);
+
+            logger.info('User authenticated successfully', {
+                userId: authResponse.user.id,
+                email: email,
+            });
+
+            return authResponse.user;
         } catch (error: any) {
             logger.error('Failed to verify OTP', {
                 error: error.message,
             });
             throw error;
         }
-    }
-
-    /**
-     * Sets the authentication token in the API client
-     * @param authResponse Authentication response from API
-     */
-    private async setAuthToken(authResponse: AuthenticateResponse): Promise<void> {
-        // Set access token for API client
-        apiClient.setAccessToken(authResponse.accessToken);
-
-        logger.info('Authentication token set successfully', {
-            expiresAt: authResponse.expireAt,
-        });
     }
 
     /**
@@ -99,7 +109,6 @@ export class AuthService {
 
         // Update session with auth data
         ctx.session.auth = {
-            isAuthenticated: true,
             accessToken: encryptedToken, // Store encrypted token
             expiresAt: expiresAtMs,
             email: ctx.session.auth?.email,
@@ -162,7 +171,7 @@ export class AuthService {
      */
     public clearSessionAuth(ctx: GlobalContext): void {
         if (ctx.session) {
-            ctx.session.auth = { isAuthenticated: false };
+            ctx.session.auth = { accessToken: undefined };
         }
     }
 
@@ -172,7 +181,7 @@ export class AuthService {
      * @returns Whether the user is authenticated
      */
     public isAuthenticated(ctx: GlobalContext): boolean {
-        if (!ctx.session?.auth?.isAuthenticated || !ctx.session?.auth?.accessToken) {
+        if (!ctx.session?.auth?.accessToken) {
             return false;
         }
 
@@ -189,7 +198,7 @@ export class AuthService {
      * @returns Decrypted access token or null if not available
      */
     public getDecryptedToken(ctx: GlobalContext): string | null {
-        if (!ctx.session?.auth?.accessToken || !ctx.session.auth.isAuthenticated) {
+        if (!ctx.session?.auth?.accessToken) {
             return null;
         }
 

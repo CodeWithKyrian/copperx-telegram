@@ -1,7 +1,6 @@
 import { Context, Scenes } from "telegraf";
 
 export interface AuthState {
-    isAuthenticated: boolean;
     accessToken?: string;
     refreshToken?: string;
     expiresAt?: number; // timestamp when token expires

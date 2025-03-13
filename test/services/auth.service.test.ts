@@ -2,7 +2,7 @@ import { authService } from '../../src/services/auth.service';
 import { Encryption } from '../../src/utils/encryption.utils';
 import apiClient from '../../src/api/client';
 import { authApi } from '../../src/api/auth.api';
-import { AuthenticateResponse, AuthUser } from '../../src/types';
+import { AuthenticateResponse } from '../../src/types';
 
 // Mock dependencies
 jest.mock('../../src/api/auth.api');
@@ -31,24 +31,20 @@ describe('AuthService', () => {
             relayerAddress: '0x123',
         }
     };
-    const mockUserProfile: AuthUser = {
-        id: 'user-123',
-        email: mockEmail,
-        firstName: 'Test',
-        lastName: 'User',
-        role: 'user',
-        status: 'active',
-        type: 'individual',
-        relayerAddress: '0x123',
-        organizationId: 'org-123',
-    };
 
-    // Mock context with session
+    // Mock context with session and scene
     const mockCtx = {
         session: {
             auth: {
                 isAuthenticated: false,
                 email: mockEmail,
+            }
+        },
+        scene: {
+            session: {
+                email: mockEmail,
+                tempOtpSid: mockSid,
+                waitingForOtp: true,
             }
         }
     };
@@ -61,13 +57,55 @@ describe('AuthService', () => {
         (Encryption.decrypt as jest.Mock).mockReturnValue(mockToken);
     });
 
-    describe('verifyOtp', () => {
-        it('should verify OTP and return user profile', async () => {
-            // Mock API responses
-            (authApi.verifyEmailOtp as jest.Mock).mockResolvedValue(mockAuthResponse);
-            (authApi.getAuthUser as jest.Mock).mockResolvedValue(mockUserProfile);
+    describe('initiateEmailAuth', () => {
+        it('should request OTP and update scene session', async () => {
+            // Mock API response
+            const mockResponse = { email: mockEmail, sid: mockSid };
+            (authApi.loginEmailOtp as jest.Mock).mockResolvedValue(mockResponse);
 
-            const result = await authService.verifyOtp(mockEmail, mockOtp, mockSid);
+            // Create context with empty scene session
+            const ctx = {
+                scene: {
+                    session: {}
+                }
+            };
+
+            const result = await authService.initiateEmailAuth(ctx as any, mockEmail);
+
+            // Verify API was called with correct parameters
+            expect(authApi.loginEmailOtp).toHaveBeenCalledWith({ email: mockEmail });
+
+            // Verify scene session was updated
+            expect(ctx.scene.session).toEqual({
+                email: mockEmail,
+                tempOtpSid: mockSid,
+                waitingForOtp: true
+            });
+
+            // Verify correct response was returned
+            expect(result).toEqual(mockResponse);
+        });
+
+        it('should handle errors during OTP request', async () => {
+            // Mock API error
+            const mockError = new Error('API unavailable');
+            (authApi.loginEmailOtp as jest.Mock).mockRejectedValue(mockError);
+
+            await expect(authService.initiateEmailAuth(mockCtx as any, mockEmail))
+                .rejects.toThrow(mockError);
+        });
+    });
+
+    describe('verifyOtp', () => {
+        it('should verify OTP and update session auth data', async () => {
+            // Mock API response
+            (authApi.verifyEmailOtp as jest.Mock).mockResolvedValue(mockAuthResponse);
+
+            // Spy on methods that should be called internally
+            jest.spyOn(authService, 'updateSessionAuth');
+            jest.spyOn(authService, 'updateSessionUserProfile');
+
+            const result = await authService.verifyOtp(mockCtx as any, mockOtp);
 
             // Verify API was called with correct parameters
             expect(authApi.verifyEmailOtp).toHaveBeenCalledWith({
@@ -79,8 +117,31 @@ describe('AuthService', () => {
             // Verify token was set in API client
             expect(apiClient.setAccessToken).toHaveBeenCalledWith(mockToken);
 
+            // Verify session auth was updated
+            expect(authService.updateSessionAuth).toHaveBeenCalledWith(mockCtx, mockAuthResponse);
+
+            // Verify session user profile was updated
+            expect(authService.updateSessionUserProfile).toHaveBeenCalledWith(
+                mockCtx,
+                mockAuthResponse.user
+            );
+
             // Verify returned user profile
-            expect(result).toEqual(mockUserProfile);
+            expect(result).toEqual(mockAuthResponse.user);
+        });
+
+        it('should throw error if scene session is missing required data', async () => {
+            // Create context with incomplete scene session
+            const incompleteCtx = {
+                scene: {
+                    session: {
+                        // Missing email and tempOtpSid
+                    }
+                }
+            };
+
+            await expect(authService.verifyOtp(incompleteCtx as any, mockOtp))
+                .rejects.toThrow('Missing authentication data');
         });
 
         it('should handle errors during OTP verification', async () => {
@@ -88,7 +149,7 @@ describe('AuthService', () => {
             const mockError = new Error('Invalid OTP');
             (authApi.verifyEmailOtp as jest.Mock).mockRejectedValue(mockError);
 
-            await expect(authService.verifyOtp(mockEmail, mockOtp, mockSid))
+            await expect(authService.verifyOtp(mockCtx as any, mockOtp))
                 .rejects.toThrow(mockError);
         });
     });
@@ -102,7 +163,6 @@ describe('AuthService', () => {
 
             // Verify session was updated with encrypted token
             expect(mockCtx.session.auth).toEqual({
-                isAuthenticated: true,
                 accessToken: mockEncryptedToken,
                 expiresAt: expect.any(Number),
                 email: mockEmail,
@@ -142,8 +202,7 @@ describe('AuthService', () => {
             const unauthenticatedCtx = {
                 session: {
                     auth: {
-                        isAuthenticated: false,
-                        accessToken: mockEncryptedToken,
+                        accessToken: undefined,
                     }
                 }
             };

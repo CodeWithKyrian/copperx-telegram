@@ -9,13 +9,17 @@ export const environment = {
     },
 
     api: {
-        baseUrl: process.env.API_BASE_URL || 'https://income-api.copperx.io/api',
+        baseUrl: process.env.API_BASE_URL || 'https://income-api.copperx.io',
         timeout: parseInt(process.env.API_TIMEOUT || '30000', 10),
     },
 
     session: {
         driver: process.env.SESSION_DRIVER || 'memory',
         ttl: parseInt(process.env.SESSION_TTL || '604800', 10), // 7days
+    },
+
+    security: {
+        appKey: process.env.APP_KEY || '',
     },
 
     redis: {

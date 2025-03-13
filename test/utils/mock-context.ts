@@ -1,3 +1,4 @@
+import { Middleware } from 'telegraf';
 import { GlobalContext } from '../../src/types';
 /**
  * Creates a mock Telegraf context for testing
@@ -46,3 +47,21 @@ export function createMockContext(overrides = {}): GlobalContext {
         ...overrides,
     } as unknown as GlobalContext;
 }
+
+/**
+ * Calls a middleware function
+ */
+export const callMiddleware = async (
+    middleware: Middleware<GlobalContext>,
+    ctx: any,
+    next: () => Promise<void>
+): Promise<void> => {
+    if (typeof middleware === 'function') {
+        await middleware(ctx, next);
+    } else if (middleware && typeof middleware.middleware === 'function') {
+        const fn = middleware.middleware();
+        await fn(ctx, next);
+    } else {
+        throw new Error('Invalid middleware type');
+    }
+};

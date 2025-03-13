@@ -26,7 +26,7 @@ describe('Environment Configuration', () => {
         // Arrange
         process.env.BOT_TOKEN = 'test-token';
         process.env.SESSION_DRIVER = 'redis';
-        process.env.API_BASE_URL = 'https://test.example.com/api';
+        process.env.API_BASE_URL = 'https://test.example.com';
 
         // We need to re-import the module to pick up new env vars
         jest.resetModules();
@@ -35,6 +35,6 @@ describe('Environment Configuration', () => {
         // Act & Assert
         expect(refreshedEnv.bot.token).toBe('test-token');
         expect(refreshedEnv.session.driver).toBe('redis');
-        expect(refreshedEnv.api.baseUrl).toBe('https://test.example.com/api');
+        expect(refreshedEnv.api.baseUrl).toBe('https://test.example.com');
     });
 });

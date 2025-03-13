@@ -13,8 +13,10 @@ export const createAuthMiddleware = (): Middleware<GlobalContext> => {
             // Extract command name without the slash
             const commandWithArgs = ctx.message.text.substring(1); // Remove leading slash
             const commandParts = commandWithArgs.split(' ');
-            const command = commandParts[0].split('@')[0]; // Remove bot username if present
+            const commandWithBot = commandParts[0];
+            const command = commandWithBot.split('@')[0];
 
+            // Check if this command requires authentication
             if (isProtectedCommand(command)) {
                 if (!authService.isAuthenticated(ctx)) {
                     logger.info('Unauthenticated access attempt to protected command', {
@@ -29,7 +31,7 @@ export const createAuthMiddleware = (): Middleware<GlobalContext> => {
                         'Please use /login to authenticate with your CopperX account.',
                         { parse_mode: 'Markdown' }
                     );
-                    return;
+                    return; // Stop middleware chain
                 }
 
                 logger.debug('Authenticated access to protected command', { command });

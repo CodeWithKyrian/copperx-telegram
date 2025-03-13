@@ -3,6 +3,7 @@ import { AuthenticateResponse, AuthUser, LoginEmailOtpResponse } from '../types/
 import apiClient from '../api/client';
 import logger from '../utils/logger';
 import { GlobalContext } from '../types';
+import { Encryption } from '../utils/encryption.utils';
 
 /**
  * Authentication service for handling user authentication
@@ -82,7 +83,6 @@ export class AuthService {
         }
 
         // Parse date string to get expiration time in milliseconds
-        // First try as ISO string
         let expiresAtMs: number;
         try {
             expiresAtMs = new Date(authResponse.expireAt).getTime();
@@ -94,10 +94,13 @@ export class AuthService {
             expiresAtMs = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
         }
 
+        // Encrypt the access token before storing in session
+        const encryptedToken = Encryption.encrypt(authResponse.accessToken);
+
         // Update session with auth data
         ctx.session.auth = {
             isAuthenticated: true,
-            accessToken: authResponse.accessToken,
+            accessToken: encryptedToken, // Store encrypted token
             expiresAt: expiresAtMs,
             email: ctx.session.auth?.email,
         };
@@ -178,6 +181,33 @@ export class AuthService {
         const expiresAt = ctx.session.auth.expiresAt || 0;
 
         return expiresAt > now;
+    }
+
+    /**
+     * Gets the decrypted token from session for API requests
+     * @param ctx Telegraf context
+     * @returns Decrypted access token or null if not available
+     */
+    public getDecryptedToken(ctx: GlobalContext): string | null {
+        if (!ctx.session?.auth?.accessToken || !ctx.session.auth.isAuthenticated) {
+            return null;
+        }
+
+        try {
+            return Encryption.decrypt(ctx.session.auth.accessToken);
+        } catch (error) {
+            logger.error('Failed to decrypt token', { error });
+            return null;
+        }
+    }
+
+    /**
+     * Sets up the API client with the current user's token
+     * @param ctx Telegraf context
+     */
+    public setupApiClientForRequest(ctx: GlobalContext): void {
+        const token = this.getDecryptedToken(ctx);
+        apiClient.setAccessToken(token);
     }
 }
 

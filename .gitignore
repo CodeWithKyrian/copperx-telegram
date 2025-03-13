@@ -49,3 +49,8 @@ docker-compose.override.yml
 .temp/
 tmp/
 temp/
+
+# Database
+.sessions.db
+sessions.db
+*.db

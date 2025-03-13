@@ -24,6 +24,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
     "@types/dotenv": "^6.1.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.10",
@@ -43,6 +44,7 @@
   "dependencies": {
     "@telegraf/session": "^2.0.0-beta.7",
     "axios": "^1.8.3",
+    "better-sqlite3": "^9.6.0",
     "dotenv": "^16.4.7",
     "ioredis": "^5.6.0",
     "kysely": "^0.27.2",

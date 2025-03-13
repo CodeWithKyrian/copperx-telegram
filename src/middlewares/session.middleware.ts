@@ -2,6 +2,7 @@ import { Middleware, session, SessionStore } from 'telegraf';
 import { Redis } from '@telegraf/session/redis';
 import { Mongo } from '@telegraf/session/mongodb';
 import { Postgres } from '@telegraf/session/pg';
+import { SQLite } from "@telegraf/session/sqlite";
 import { GlobalContext, GlobalSession } from '../types/session.types';
 import { environment } from '../config/environment';
 import logger from '../utils/logger';
@@ -25,6 +26,12 @@ export function createSessionStore(): SessionStore<GlobalSession> {
             return Mongo({
                 url: environment.mongo.uri,
                 database: environment.mongo.database,
+            });
+
+        case 'sqlite':
+            return SQLite({
+                filename: environment.sqlite.filename,
+                config: { fileMustExist: false }
             });
 
         case 'postgres':

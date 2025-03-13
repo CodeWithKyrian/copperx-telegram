@@ -33,6 +33,10 @@ export const environment = {
         collection: process.env.MONGO_COLLECTION || 'sessions',
     },
 
+    sqlite: {
+        filename: process.env.SQLITE_FILENAME || '.sessions.db',
+    },
+
     postgres: {
         host: process.env.POSTGRES_HOST || 'localhost',
         port: parseInt(process.env.POSTGRES_PORT || '5432', 10),

@@ -1,5 +1,4 @@
-import { Context } from 'telegraf';
-import { SessionData } from '../types/session.types';
+import { GlobalContext, GlobalSession } from '../types/session.types';
 
 /**
  * Session utility functions for working with the bot's session data
@@ -8,7 +7,7 @@ export const sessionUtils = {
     /**
      * Stores user preferences in the session
      */
-    setPreferences: (ctx: Context, preferences: Partial<SessionData['preferences']>) => {
+    setPreferences: (ctx: GlobalContext, preferences: Partial<GlobalSession['preferences']>) => {
         if (!ctx.session) {
             return false;
         }
@@ -22,21 +21,21 @@ export const sessionUtils = {
     /**
      * Gets user preferences from the session
      */
-    getPreferences: (ctx: Context): SessionData['preferences'] => {
+    getPreferences: (ctx: GlobalContext): GlobalSession['preferences'] => {
         return ctx.session?.preferences || {};
     },
 
     /**
      * Gets user language preference or default
      */
-    getLanguage: (ctx: Context): string => {
+    getLanguage: (ctx: GlobalContext): string => {
         return ctx.session?.preferences?.language || 'en';
     },
 
     /**
      * Sets user language preference
      */
-    setLanguage: (ctx: Context, language: string) => {
+    setLanguage: (ctx: GlobalContext, language: string) => {
         if (!ctx.session) {
             return false;
         }
@@ -52,14 +51,14 @@ export const sessionUtils = {
     /**
      * Gets notification preferences
      */
-    getNotificationsEnabled: (ctx: Context): boolean => {
+    getNotificationsEnabled: (ctx: GlobalContext): boolean => {
         return ctx.session?.preferences?.notificationsEnabled !== false; // Default to true
     },
 
     /**
      * Sets notification preferences
      */
-    setNotificationsEnabled: (ctx: Context, enabled: boolean) => {
+    setNotificationsEnabled: (ctx: GlobalContext, enabled: boolean) => {
         if (!ctx.session) {
             return false;
         }

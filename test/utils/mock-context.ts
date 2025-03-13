@@ -1,9 +1,8 @@
-import { Context } from 'telegraf';
-
+import { GlobalContext } from '../../src/types';
 /**
  * Creates a mock Telegraf context for testing
  */
-export function createMockContext(overrides = {}): Context {
+export function createMockContext(overrides = {}): GlobalContext {
     const defaults = {
         from: {
             id: 123456789,
@@ -45,5 +44,5 @@ export function createMockContext(overrides = {}): Context {
     return {
         ...defaults,
         ...overrides,
-    } as unknown as Context;
+    } as unknown as GlobalContext;
 }

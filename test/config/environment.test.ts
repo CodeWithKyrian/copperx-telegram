@@ -19,7 +19,7 @@ describe('Environment Configuration', () => {
 
         // Act & Assert - these should use default values
         expect(environment.session.driver).toBe('memory');
-        expect(environment.api.baseUrl).toBe('https://income-api.copperx.io/api');
+        expect(environment.api.baseUrl).toBe('https://income-api.copperx.io');
     });
 
     it('should use environment variables when set', () => {

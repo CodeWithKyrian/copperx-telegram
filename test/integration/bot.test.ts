@@ -1,5 +1,6 @@
-import { Context, Middleware } from 'telegraf';
+import { Middleware } from 'telegraf';
 import { initBot } from '../../src/bot';
+import { GlobalContext } from '../../src/types';
 
 // Mock telegraf and session
 jest.mock('telegraf', () => {
@@ -25,32 +26,60 @@ jest.mock('telegraf', () => {
 
     // Create mock for session middleware with proper types
     const mockSession = jest.fn().mockImplementation(() => {
-        return ((_ctx: Context, next: () => Promise<void>) => next()) as Middleware<Context>;
+        return ((_ctx: GlobalContext, next: () => Promise<void>) => next()) as Middleware<GlobalContext>;
     });
 
-    // Return the module structure as it would be imported
+    // Create a mock middleware function
+    const mockMiddlewareFn = jest.fn().mockImplementation(() => {
+        return async (_: GlobalContext, next: () => Promise<void>) => {
+            if (next) {
+                await next();
+            }
+        };
+    });
+
+    // Create a Stage mock
+    const mockStage = jest.fn().mockImplementation(() => {
+        return {
+            middleware: () => mockMiddlewareFn(),
+            register: jest.fn(),
+        };
+    });
+
+    // Return the mocked Telegraf object
     return {
         Telegraf: MockTelegraf,
         session: mockSession,
-        Context: class Context { }
+        Scenes: {
+            Stage: mockStage,
+            BaseScene: jest.fn().mockImplementation(() => {
+                return {
+                    enter: jest.fn(),
+                    leave: jest.fn(),
+                    command: jest.fn(),
+                    on: jest.fn(),
+                    use: jest.fn(),
+                };
+            }),
+        },
     };
 });
 
 // Mock the session middleware
 jest.mock('../../src/middlewares/session.middleware', () => ({
     createSessionMiddleware: jest.fn().mockImplementation(() => {
-        return ((_ctx: Context, next: () => Promise<void>) => next()) as Middleware<Context>;
+        return ((_ctx: GlobalContext, next: () => Promise<void>) => next()) as Middleware<GlobalContext>;
     }),
 
     updateSessionMiddleware: jest.fn().mockImplementation(() => {
-        return ((_ctx: Context, next: () => Promise<void>) => next()) as Middleware<Context>;
+        return ((_ctx: GlobalContext, next: () => Promise<void>) => next()) as Middleware<GlobalContext>;
     })
 }));
 
 // Mock the logger middleware
 jest.mock('../../src/middlewares/logger.middleware', () => ({
     loggerMiddleware: jest.fn().mockImplementation(() => {
-        return ((_ctx: Context, next: () => Promise<void>) => next()) as Middleware<Context>;
+        return ((_ctx: GlobalContext, next: () => Promise<void>) => next()) as Middleware<GlobalContext>;
     })
 }));
 
@@ -104,4 +133,17 @@ describe('Bot Integration', () => {
             expect.any(Function)
         );
     });
+});
+
+// Also mock your auth scene
+jest.mock('../../src/scenes/auth.scene', () => {
+    return {
+        AUTH_SCENE_ID: 'auth',
+        createAuthScene: jest.fn().mockReturnValue({
+            enter: jest.fn(),
+            leave: jest.fn(),
+            command: jest.fn(),
+            on: jest.fn(),
+        }),
+    };
 });

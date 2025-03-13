@@ -2,23 +2,38 @@ import { Middleware } from 'telegraf';
 import { authService } from '../services/auth.service';
 import logger from '../utils/logger';
 import { GlobalContext } from '../types';
+import { isProtectedCommand } from '../commands';
 
 /**
- * Middleware to check if user is authenticated
+ * Creates a middleware that checks authentication for protected commands
  */
-export const authMiddleware = (): Middleware<GlobalContext> => {
+export const createAuthMiddleware = (): Middleware<GlobalContext> => {
     return async (ctx, next) => {
-        if (!authService.isAuthenticated(ctx)) {
-            logger.info('Unauthenticated access attempt', {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
-            });
+        if (ctx.message && 'text' in ctx.message && ctx.message.text.startsWith('/')) {
+            // Extract command name without the slash
+            const commandWithArgs = ctx.message.text.substring(1); // Remove leading slash
+            const commandParts = commandWithArgs.split(' ');
+            const command = commandParts[0].split('@')[0]; // Remove bot username if present
 
-            await ctx.reply(
-                '🔒 You need to be logged in to use this feature.\n\n' +
-                'Please use /login to authenticate with your CopperX account.'
-            );
-            return;
+            if (isProtectedCommand(command)) {
+                if (!authService.isAuthenticated(ctx)) {
+                    logger.info('Unauthenticated access attempt to protected command', {
+                        command,
+                        userId: ctx.from?.id,
+                        username: ctx.from?.username,
+                    });
+
+                    await ctx.reply(
+                        '🔒 *Authentication Required*\n\n' +
+                        'You need to be logged in to use this feature.\n\n' +
+                        'Please use /login to authenticate with your CopperX account.',
+                        { parse_mode: 'Markdown' }
+                    );
+                    return;
+                }
+
+                logger.debug('Authenticated access to protected command', { command });
+            }
         }
 
         await next();

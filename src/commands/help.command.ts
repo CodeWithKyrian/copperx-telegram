@@ -5,6 +5,8 @@ const handleHelpCommand = (ctx: Context) => {
         '/start - Start the bot\n' +
         '/help - Show this help message\n' +
         '/about - About CopperX\n\n' +
+        '/login - Login to your CopperX account\n' +
+        '/logout - Logout from your CopperX account\n\n' +
         'More commands will be available after you authenticate.');
 };
 

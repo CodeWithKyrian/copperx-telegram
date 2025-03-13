@@ -57,7 +57,7 @@ export interface AuthenticateResponse {
     scheme: string;
     accessToken: string;
     accessTokenId: string;
-    expireAt: Date;
+    expireAt: string;
     user: AuthUser;
 }
 
@@ -83,8 +83,8 @@ export interface PersonalAccessToken {
     tokenIdentifier: string;
     organizationId: string;
     userId: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface CreatePersonalAccessToken {
@@ -97,8 +97,8 @@ export interface PersonalAccessTokenWithPlainToken {
     tokenIdentifier: string;
     organizationId: string;
     userId: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     token: string;
 }
 
@@ -110,8 +110,8 @@ export type WalletAccountType = 'web3_auth_copperx' | 'safe' | 'circle_dev' | 'e
 
 export interface Wallet {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     walletType: WalletAccountType;
     network?: string;
     walletAddress?: string;
@@ -152,15 +152,15 @@ export type KycProviderCode = 'sumsub' | 'sumsub_uae' | 'sumsub_global' | 'hyper
 
 export interface KycVerification {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     organizationId: string;
     kycDetailId: string;
     kycProviderCode: KycProviderCode;
     externalCustomerId?: string;
     status: KycStatus;
     externalStatus?: string;
-    verifiedAt?: Date;
+    verifiedAt?: string;
 }
 
 export type KycDocumentType = 'passport' | 'aadhar_card' | 'pan_card' | 'driving_license' | 'national_id' | 'tax_id' | 'voter_id' | 'utility_bill' | 'bank_statement' | 'credit_card_statement' | 'other';
@@ -169,8 +169,8 @@ export type KycDocumentVerificationStatus = 'pending' | 'initiated' | 'inprogres
 
 export interface KycDocument {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     organizationId: string;
     kycDetailId: string;
     documentType: KycDocumentType;
@@ -183,8 +183,8 @@ export type UBOType = 'owner' | 'signer' | 'control';
 
 export interface KycDetail {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     organizationId: string;
     kycDetailId?: string;
     nationality?: string;
@@ -202,7 +202,7 @@ export interface KycDetail {
     positionAtCompany?: string;
     sourceOfFund?: string;
     currentKycVerificationId?: string;
-    dateOfBirth?: Date;
+    dateOfBirth?: string;
     placeOfBirth?: string;
     currentKycVerification?: KycVerification;
     kycDocuments?: KycDocument[];
@@ -211,7 +211,7 @@ export interface KycDetail {
     kycStatus?: KycStatus;
     kycDocumentStatus?: KycDocumentVerificationStatus;
     percentageOfShares: number;
-    joiningDate: Date;
+    joiningDate: string;
 }
 
 export type AccountType = 'web3_wallet' | 'bank_account';
@@ -237,8 +237,8 @@ export type AccountStatus = 'pending' | 'initiated' | 'inprogress' | 'review_pen
 
 export interface AccountProviderSlim {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     accountId: string;
     providerId: string;
     status: AccountStatus;
@@ -249,8 +249,8 @@ export interface AccountProviderSlim {
 
 export interface Account {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     organizationId: string;
     type: AccountType;
     walletAccountType: WalletAccountType;
@@ -286,8 +286,8 @@ export interface SubmitPermitResponse {
 
 export interface Customer {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     name?: string;
     businessName?: string;
     email?: string;
@@ -310,8 +310,8 @@ export type TransactionStatus = 'pending' | 'initiated' | 'processing' | 'succes
 
 export interface TransferAccount {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     type: TransferType;
     country?: Country;
     network?: string;
@@ -331,8 +331,8 @@ export interface TransferAccount {
 
 export interface Transaction {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     organizationId: string;
     type: TransactionType;
     providerCode: ProviderCode;
@@ -358,8 +358,8 @@ export interface Transaction {
 
 export interface TransferWithTransactionsOnly {
     id: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
     organizationId: string;
     status: TransferStatus;
     customerId: string;
@@ -414,8 +414,8 @@ export interface CreateOfframpTransferRequest {
 
 export interface TransferWithAccount {
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     organizationId: string;
     status: TransferStatus;
     customerId?: string;
@@ -486,8 +486,8 @@ export interface CreateSendTransferBatchRequest {
 
 export interface Transfer {
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     organizationId: string;
     status: TransferStatus;
     customerId?: string;
@@ -550,8 +550,8 @@ export interface BridgeTransferBalances {
 
 export interface TransferWithTransactions {
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     organizationId: string;
     status: TransferStatus;
     customerId?: string;
@@ -586,8 +586,8 @@ export interface TransferWithTransactions {
 
 export interface TransactionWithAccount {
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     organizationId: string;
     type: TransactionType;
     providerCode: ProviderCode;
@@ -632,7 +632,7 @@ export interface PublicCustomerProfile {
     firstName?: string;
     lastName?: string;
     businessName?: string;
-    email?: string; // Will be converted to lowercase
+    email?: string;
     receiverName: string;
 }
 
@@ -962,13 +962,13 @@ export type HighRiskActivity = "marijuana_or_related_services" | "adult_entertai
 
 export interface KybDetail {
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     organizationId: string;
     companyName: string;
     companyDescription: string;
     website: string;
-    incorporationDate: Date | null;
+    incorporationDate: string | null;
     incorporationCountry: string;
     incorporationNumber: string;
     companyType: string;
@@ -1001,8 +1001,8 @@ export interface KybDetail {
 
 export interface KycAdditionalDocument {
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     organizationId: string;
     kycId: string;
     name: string;
@@ -1011,8 +1011,8 @@ export interface KycAdditionalDocument {
 
 export interface Kyc {
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     organizationId: string;
     status: KycStatus;
     type: CustomerProfileType;
@@ -1028,7 +1028,7 @@ export interface Kyc {
 }
 
 export interface KycUrl {
-    kycDetailId: string; // Kyc detail id
+    kycDetailId: string;
     kycUrl: string;
     kycStatus: KycStatus;
     firstName: string;
@@ -1046,7 +1046,7 @@ export interface CreateKycDetailRequest {
     positionAtCompany?: string;
     uboType?: UBOType;
     percentageOfShares?: number;
-    joiningDate?: string; // Date-time string
+    joiningDate?: string;
 }
 
 

@@ -1,3 +1,5 @@
+import { Context, Scenes } from "telegraf";
+
 export interface AuthState {
     isAuthenticated: boolean;
     accessToken?: string;
@@ -9,7 +11,11 @@ export interface AuthState {
     tempOtpSid?: string; // temporary session ID for OTP flow
 }
 
-export interface SessionData {
+export interface GlobalSessionData extends Scenes.SceneSessionData {
+
+}
+
+export interface GlobalSession extends Scenes.SceneSession<GlobalSessionData> {
     auth?: AuthState;
 
     preferences?: {
@@ -21,8 +27,7 @@ export interface SessionData {
     updatedAt?: number;
 }
 
-declare module 'telegraf' {
-    interface Context {
-        session: SessionData;
-    }
+export interface GlobalContext extends Context {
+    session: GlobalSession;
+    scene: Scenes.SceneContextScene<GlobalContext, GlobalSessionData>;
 }

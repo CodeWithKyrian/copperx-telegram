@@ -1,8 +1,8 @@
-import { Context, Middleware, session, SessionStore } from 'telegraf';
+import { Middleware, session, SessionStore } from 'telegraf';
 import { Redis } from '@telegraf/session/redis';
 import { Mongo } from '@telegraf/session/mongodb';
 import { Postgres } from '@telegraf/session/pg';
-import { SessionData } from '../types/session.types';
+import { GlobalContext, GlobalSession } from '../types/session.types';
 import { environment } from '../config/environment';
 import logger from '../utils/logger';
 
@@ -10,7 +10,7 @@ import logger from '../utils/logger';
 /**
  * Creates and returns the appropriate session store based on environment configuration
  */
-export function createSessionStore(): SessionStore<SessionData> {
+export function createSessionStore(): SessionStore<GlobalSession> {
     const driver = environment.session.driver;
 
     logger.info(`Initializing session store with driver: ${driver}`);
@@ -62,7 +62,7 @@ export function createSessionMiddleware(): ReturnType<typeof session> {
     });
 }
 
-export function updateSessionMiddleware(): Middleware<Context> {
+export function updateSessionMiddleware(): Middleware<GlobalContext> {
     return async (ctx, next) => {
         const session = ctx.session;
         session.updatedAt = Date.now();
@@ -73,7 +73,7 @@ export function updateSessionMiddleware(): Middleware<Context> {
 /**
  * Creates a default empty session with timestamps
  */
-function createDefaultSession(): SessionData {
+function createDefaultSession(): GlobalSession {
     const now = Date.now();
     return {
         createdAt: now,

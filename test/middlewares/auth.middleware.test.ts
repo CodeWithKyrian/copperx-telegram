@@ -1,4 +1,4 @@
-import { createAuthMiddleware } from '../../src/middlewares/auth.middleware';
+import { authMiddleware } from '../../src/middlewares/auth.middleware';
 import { authService } from '../../src/services/auth.service';
 import { isProtectedCommand } from '../../src/commands';
 import { callMiddleware } from '../utils/mock-context';
@@ -31,7 +31,7 @@ describe('Auth Middleware', () => {
         (isProtectedCommand as jest.Mock).mockReturnValue(false);
 
         // Create middleware function
-        const middleware = createAuthMiddleware();
+        const middleware = authMiddleware();
 
         // Call middleware with context and next
         await callMiddleware(middleware, mockCtx as any, mockNext);
@@ -63,7 +63,7 @@ describe('Auth Middleware', () => {
         (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
 
         // Create middleware function
-        const middleware = createAuthMiddleware();
+        const middleware = authMiddleware();
 
         // Call middleware with context and next
         await callMiddleware(middleware, mockCtx as any, mockNext);
@@ -99,7 +99,7 @@ describe('Auth Middleware', () => {
         (authService.isAuthenticated as jest.Mock).mockReturnValue(false);
 
         // Create middleware function
-        const middleware = createAuthMiddleware();
+        const middleware = authMiddleware();
 
         // Call middleware with context and next
         await callMiddleware(middleware, mockCtx as any, mockNext);
@@ -129,7 +129,7 @@ describe('Auth Middleware', () => {
         };
 
         // Create middleware function
-        const middleware = createAuthMiddleware();
+        const middleware = authMiddleware();
 
         // Call middleware with context and next
         await callMiddleware(middleware, mockCtx as any, mockNext);
@@ -158,7 +158,7 @@ describe('Auth Middleware', () => {
         (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
 
         // Create middleware function
-        const middleware = createAuthMiddleware();
+        const middleware = authMiddleware();
 
         // Call middleware with context and next
         await callMiddleware(middleware, mockCtx as any, mockNext);
@@ -184,7 +184,7 @@ describe('Auth Middleware', () => {
         (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
 
         // Create middleware function
-        const middleware = createAuthMiddleware();
+        const middleware = authMiddleware();
 
         // Call middleware with context and next
         await callMiddleware(middleware, mockCtx as any, mockNext);

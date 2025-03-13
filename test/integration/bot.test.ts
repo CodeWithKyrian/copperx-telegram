@@ -67,11 +67,7 @@ jest.mock('telegraf', () => {
 
 // Mock the session middleware
 jest.mock('../../src/middlewares/session.middleware', () => ({
-    createSessionMiddleware: jest.fn().mockImplementation(() => {
-        return ((_ctx: GlobalContext, next: () => Promise<void>) => next()) as Middleware<GlobalContext>;
-    }),
-
-    updateSessionMiddleware: jest.fn().mockImplementation(() => {
+    sessionMiddleware: jest.fn().mockImplementation(() => {
         return ((_ctx: GlobalContext, next: () => Promise<void>) => next()) as Middleware<GlobalContext>;
     })
 }));

@@ -1,6 +1,6 @@
 // src/commands/me.command.ts
 import { authService } from '../services/auth.service';
-import { GlobalContext } from '../types';
+import { GlobalContext, UserStatus } from '../types';
 
 
 /**
@@ -11,21 +11,30 @@ export const handleMeCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
         const profile = await authService.getCurrentUser();
 
-        // Helper function to format wallet addresses
         const formatAddress = (address?: string): string => {
             if (!address) return 'Not set';
-            // Format as first 8 chars + ... + last 8 chars
+
             return address.length > 16 ?
                 `${address.substring(0, 8)}...${address.substring(address.length - 8)}` :
                 address;
         };
 
-        // Helper function to capitalize first letter of each word
         const capitalize = (text?: string): string => {
             if (!text) return 'Not set';
+
             return text.split('_')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(' ');
+        };
+
+        const formatStatus = (status: UserStatus): string => {
+            const message: Record<UserStatus, string> = {
+                'pending': '⏳ Pending',
+                'active': '✅ Active',
+                'suspended': '❌ Suspended',
+            }
+
+            return message[status] || 'Unknown status';
         };
 
         await ctx.reply(
@@ -34,8 +43,7 @@ export const handleMeCommand = async (ctx: GlobalContext): Promise<void> => {
             '📝 *Account Info*\n' +
             `• Name: ${profile.firstName || 'Not set'}\n` +
             `• Email: ${profile.email || 'Not set'}\n` +
-            `• Status: ${profile.status === 'active' ? '✅ Active' :
-                profile.status === 'pending' ? '⏳ Pending' : capitalize(profile.status)}\n` +
+            `• Status: ${formatStatus(profile.status)}\n` +
             `• Type: ${capitalize(profile.type)}\n\n` +
 
             '🏢 *Organization*\n' +

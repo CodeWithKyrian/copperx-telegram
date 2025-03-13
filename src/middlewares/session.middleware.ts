@@ -50,16 +50,15 @@ export function createSessionStore(): SessionStore<GlobalSession> {
 }
 
 /**
- * Creates session middleware with the appropriate store
+ * Creates a middleware that initializes the session
+ * and updates the session timestamp on each request
  */
-export function createSessionMiddleware(): ReturnType<typeof session> {
+export function sessionMiddleware(): Middleware<GlobalContext> {
     const store = createSessionStore();
 
-    return session({
+    const baseSessionMiddleware = session({
         store,
-
         defaultSession: createDefaultSession,
-
         getSessionKey: (ctx) => {
             if (ctx.from?.id) {
                 return `user:${ctx.from.id}`;
@@ -67,13 +66,12 @@ export function createSessionMiddleware(): ReturnType<typeof session> {
             return ctx.chat?.id ? `chat:${ctx.chat.id}` : undefined;
         }
     });
-}
 
-export function updateSessionMiddleware(): Middleware<GlobalContext> {
     return async (ctx, next) => {
-        const session = ctx.session;
-        session.updatedAt = Date.now();
-        await next();
+        await baseSessionMiddleware(ctx, async () => {
+            ctx.session.updatedAt = Date.now();
+            await next();
+        });
     };
 }
 

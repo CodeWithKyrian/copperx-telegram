@@ -4,10 +4,11 @@ import logger from '../utils/logger';
 import { GlobalContext } from '../types';
 import { isProtectedCommand } from '../commands';
 
+
 /**
  * Creates a middleware that checks authentication for protected commands
  */
-export const createAuthMiddleware = (): Middleware<GlobalContext> => {
+export const authMiddleware = (): Middleware<GlobalContext> => {
     return async (ctx, next) => {
         if (ctx.message && 'text' in ctx.message && ctx.message.text.startsWith('/')) {
             // Extract command name without the slash

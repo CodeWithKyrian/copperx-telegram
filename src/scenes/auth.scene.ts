@@ -3,6 +3,8 @@ import { authService } from '../services/auth.service';
 import { message } from 'telegraf/filters';
 import logger from '../utils/logger';
 import { GlobalContext } from '../types/session.types';
+import { RateLimits } from '../middlewares/rate-limit.middleware';
+import { RateLimiterService } from '../services/rate-limiter.service';
 
 export const AUTH_SCENE_ID = 'auth';
 
@@ -45,13 +47,27 @@ const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
     }
 
     try {
-        // Show loading message
+        if (RateLimiterService.isLimited(ctx, RateLimits.AUTH)) {
+            const resetTime = RateLimiterService.availableInText(ctx, `${RateLimits.AUTH.key}:${ctx.from?.id}`) || 'soon';
+
+            await ctx.reply(
+                '⚠️ *Rate Limit Exceeded*\n\n' +
+                'You\'ve made too many login attempts. ' +
+                `Please try again in ${resetTime}.`,
+                { parse_mode: 'Markdown' }
+            );
+            return;
+        }
+
+        RateLimiterService.increment(ctx, {
+            ...RateLimits.AUTH,
+            key: `${RateLimits.AUTH.key}:${ctx.from?.id}`
+        });
+
         await ctx.reply('Sending verification code...');
 
-        // Request OTP - this now handles updating scene session
         await authService.initiateEmailAuth(ctx, email);
 
-        // Prompt for OTP
         await ctx.reply(
             '📧 *Verification Code Sent*\n\n' +
             `A verification code has been sent to ${email}.\n\n` +
@@ -64,7 +80,6 @@ const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
             email
         });
 
-        // Show error message
         await ctx.reply(
             '❌ *Authentication Failed*\n\n' +
             'We could not send a verification code to this email. Please make sure you have a registered CopperX account and try again.\n\n' +
@@ -76,13 +91,27 @@ const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
 
 const handleOtpVerification = async (ctx: AuthSceneContext, otp: string) => {
     try {
-        // Show loading message
+        if (RateLimiterService.isLimited(ctx, RateLimits.OTP_VERIFY)) {
+            const resetTime = RateLimiterService.availableInText(ctx, `${RateLimits.OTP_VERIFY.key}:${ctx.from?.id}`) || 'soon';
+
+            await ctx.reply(
+                '⚠️ *Rate Limit Exceeded*\n\n' +
+                'You\'ve made too many OTP verification attempts. ' +
+                `Please try again in ${resetTime}.`,
+                { parse_mode: 'Markdown' }
+            );
+            return;
+        }
+
+        RateLimiterService.increment(ctx, {
+            ...RateLimits.OTP_VERIFY,
+            key: `${RateLimits.OTP_VERIFY.key}:${ctx.from?.id}`
+        });
+
         await ctx.reply('Verifying OTP...');
 
-        // Verify OTP - this now handles everything internally
         const user = await authService.verifyOtp(ctx, otp);
 
-        // Success message
         await ctx.reply(
             '✅ *Authentication Successful!*\n\n' +
             `Welcome back, ${user.firstName || 'there'}!\n\n` +
@@ -95,6 +124,12 @@ const handleOtpVerification = async (ctx: AuthSceneContext, otp: string) => {
 
         // Exit scene
         await ctx.scene.leave();
+
+        // Clear rate limits on successful authentication
+        if (user) {
+            RateLimiterService.clear(ctx, `${RateLimits.AUTH.key}:${ctx.from?.id}`);
+            RateLimiterService.clear(ctx, `${RateLimits.OTP_VERIFY.key}:${ctx.from?.id}`);
+        }
     } catch (error: any) {
         logger.error('OTP verification failed', { error: error.message });
 

@@ -17,6 +17,8 @@ export interface GlobalSessionData extends Scenes.SceneSessionData {
 export interface GlobalSession extends Scenes.SceneSession<GlobalSessionData> {
     auth?: AuthState;
 
+    rateLimits?: RateLimitsContainer;
+
     preferences?: {
         language?: string;
         notificationsEnabled?: boolean;
@@ -29,4 +31,13 @@ export interface GlobalSession extends Scenes.SceneSession<GlobalSessionData> {
 export interface GlobalContext extends Context {
     session: GlobalSession;
     scene: Scenes.SceneContextScene<GlobalContext, GlobalSessionData>;
+}
+
+export interface RateLimitRecord {
+    attempts: number;
+    resetAt: number;
+}
+
+export interface RateLimitsContainer {
+    [key: string]: RateLimitRecord;
 }

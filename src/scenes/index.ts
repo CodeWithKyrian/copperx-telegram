@@ -4,6 +4,7 @@ import { createAuthScene } from './auth.scene';
 import { walletCreateScene } from './wallet/create.scene';
 import { defaultWalletScene } from './wallet/default.scene';
 import { depositScene } from './transactions/deposit.scene';
+import { transactionDetailsScene } from './transactions/details.scene';
 
 
 /**
@@ -19,7 +20,9 @@ export const configureScenes = (bot: Telegraf<GlobalContext>): void => {
 
         defaultWalletScene,
 
-        depositScene
+        depositScene,
+
+        transactionDetailsScene
     ]);
 
     stage.use(async (ctx, next) => {

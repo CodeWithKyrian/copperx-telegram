@@ -16,6 +16,11 @@ export interface GlobalSession extends Scenes.SceneSession<GlobalSceneSession> {
     };
     createdAt?: number;
     updatedAt?: number;
+    transactions?: {
+        currentPage?: number;
+        totalPages?: number;
+        limit?: number;
+    };
 }
 
 

@@ -896,8 +896,8 @@ export interface AllPointsTotal {
 }
 
 export interface AllPoints {
-    offrampTransferPoints: ListResponse;
-    payoutReferralPoints: ListResponse;
+    offrampTransferPoints: ListResponse<TransactionPoint>;
+    payoutReferralPoints: ListResponse<ReferrerPoint>;
 }
 
 export interface TransactionPoint {

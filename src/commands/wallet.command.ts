@@ -5,10 +5,10 @@ import logger from '../utils/logger';
 import { WalletBalance, Wallet } from '../types/api.types';
 import { formatBalance, formatWalletAddress } from '../utils/formatters';
 import { formatNetworkName } from '../utils/chain.utils';
+import { SCENE_IDS } from '../scenes';
 
 /**
  * Handles the /wallet command - shows wallet information and options
- * Acts as a hub to direct users to more specific scenes for actions
  */
 export const walletCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
@@ -44,6 +44,48 @@ export const walletCommand = async (ctx: GlobalContext): Promise<void> => {
         );
     }
 };
+
+/**
+ * Handles the action to view wallets
+ */
+export async function viewWalletsAction(ctx: GlobalContext) {
+    await ctx.answerCbQuery();
+    return await walletCommand(ctx);
+}
+
+/**
+ * Handles the action to create a wallet
+ */
+export async function walletCreateAction(ctx: GlobalContext) {
+    await ctx.answerCbQuery();
+    return await ctx.scene.enter(SCENE_IDS.WALLET_CREATE);
+}
+
+/**
+ * Handles the action to set a default wallet
+ */
+export async function walletSetDefaultAction(ctx: GlobalContext) {
+    await ctx.answerCbQuery();
+    return await ctx.scene.enter(SCENE_IDS.WALLET_DEFAULT);
+}
+
+/**
+ * Handles the action to set a default wallet with a specific wallet ID
+ */
+export async function walletSetDefaultActionWithWallet(ctx: GlobalContext & { match: RegExpExecArray }) {
+    await ctx.answerCbQuery();
+    const walletId = ctx.match[1];
+    await ctx.scene.leave();
+    return await ctx.scene.enter(SCENE_IDS.WALLET_DEFAULT, { walletId });
+}
+
+/**
+ * Handles the action to cancel a wallet operation
+ */
+export async function walletCancelAction(ctx: GlobalContext) {
+    await ctx.answerCbQuery();
+    await ctx.reply('Operation cancelled.');
+}
 
 /**
  * Handles case when user has no wallets
@@ -109,8 +151,8 @@ async function displayWalletSummary(
 
     const keyboard = Markup.inlineKeyboard([
         [
-            Markup.button.callback('💸 Deposit', 'wallet_deposit'),
-            Markup.button.callback('📤 Transfer', 'wallet_transfer')
+            Markup.button.callback('💸 Deposit', 'deposit_create'),
+            Markup.button.callback('📤 Transfer', 'transfer_create')
         ],
         [
             Markup.button.callback('➕ Create New Wallet', 'wallet_create'),
@@ -118,7 +160,7 @@ async function displayWalletSummary(
             Markup.button.callback('🔁 Set Default Wallet', 'wallet_set_default')
         ],
         [
-            Markup.button.callback('📋 Transaction History', 'wallet_history')
+            Markup.button.callback('📋 Transaction History', 'tx_history')
         ]
     ]);
 
@@ -136,4 +178,4 @@ function truncateId(id: string): string {
     if (id.length <= 8) return id;
 
     return id.substring(0, 8);
-} 
+}

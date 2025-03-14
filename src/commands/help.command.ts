@@ -22,8 +22,9 @@ export const helpCommand = async (ctx: GlobalContext): Promise<void> => {
 
 *Coming Soon:*
 • /transfer - Send funds to another user or wallet
-• /withdraw - Withdraw funds to an external wallet
-• /history - View your transaction history
+
+*Transactions:*
+• /transactions - View your transaction history
 
 *Support:*
 If you need further assistance, please contact [CopperX Support](https://t.me/copperxcommunity/2183).

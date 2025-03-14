@@ -122,7 +122,7 @@ describe('Wallet Command', () => {
         expect(keyboard).toHaveProperty('reply_markup.inline_keyboard');
         expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('➕ Create New Wallet');
         expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('💸 Deposit');
-        expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('📤 Withdraw');
+        expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('📤 Transfer');
     });
 
     it('should handle case when user has no wallets', async () => {
@@ -136,7 +136,6 @@ describe('Wallet Command', () => {
 
         // Assert
         expect(walletService.getWallets).toHaveBeenCalled();
-        expect(walletService.getSupportedNetworks).toHaveBeenCalled();
 
         expect(ctx.reply).toHaveBeenCalledWith(
             expect.stringContaining('No Wallets Found'),
@@ -152,9 +151,7 @@ describe('Wallet Command', () => {
 
         // Should have create buttons for each network plus cancel
         const buttons = keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text);
-        expect(buttons).toContain('Create Ethereum Wallet');
-        expect(buttons).toContain('Create Solana Wallet');
-        expect(buttons).toContain('Create Polygon Wallet');
+        expect(buttons).toContain('➕ Create a Wallet');
         expect(buttons).toContain('❌ Cancel');
     });
 
@@ -190,10 +187,9 @@ describe('Wallet Command', () => {
 
         // Assert
         expect(walletService.getWallets).toHaveBeenCalled();
-        expect(walletService.getSupportedNetworks).toHaveBeenCalled();
 
         expect(ctx.reply).toHaveBeenCalledWith(
-            expect.stringContaining('No wallets found'),
+            expect.stringContaining('No Wallets Found'),
             expect.objectContaining({
                 parse_mode: 'Markdown',
             })

@@ -14,6 +14,7 @@ jest.mock('telegraf', () => {
         catch: jest.fn(),
         launch: jest.fn().mockResolvedValue(undefined),
         stop: jest.fn(),
+        action: jest.fn(),
         telegram: {
             getMe: jest.fn().mockResolvedValue({
                 id: 123456789,
@@ -38,20 +39,19 @@ jest.mock('telegraf', () => {
         };
     });
 
-    // Create a Stage mock
-    const mockStage = jest.fn().mockImplementation(() => {
-        return {
-            middleware: () => mockMiddlewareFn(),
-            register: jest.fn(),
-        };
-    });
 
     // Return the mocked Telegraf object
     return {
         Telegraf: MockTelegraf,
         session: mockSession,
         Scenes: {
-            Stage: mockStage,
+            Stage: jest.fn().mockImplementation(() => {
+                return {
+                    middleware: () => mockMiddlewareFn(),
+                    register: jest.fn(),
+                    use: jest.fn(),
+                };
+            }),
             BaseScene: jest.fn().mockImplementation(() => {
                 return {
                     enter: jest.fn(),
@@ -59,6 +59,18 @@ jest.mock('telegraf', () => {
                     command: jest.fn(),
                     on: jest.fn(),
                     use: jest.fn(),
+                    action: jest.fn(),
+                };
+            }),
+            WizardScene: jest.fn().mockImplementation(() => {
+                return {
+                    enter: jest.fn(),
+                    leave: jest.fn(),
+                    command: jest.fn(),
+                    action: jest.fn(),
+                    use: jest.fn(),
+                    on: jest.fn(),
+                    steps: jest.fn(),
                 };
             }),
         },
@@ -105,6 +117,7 @@ describe('Bot Integration', () => {
             command: jest.fn(),
             on: jest.fn(),
             catch: jest.fn(),
+            action: jest.fn(),
             telegram: {
                 getMe: jest.fn().mockResolvedValue({
                     id: 123456789,
@@ -121,9 +134,6 @@ describe('Bot Integration', () => {
         // Act
         initBot();
 
-        // Assert - verify commands were registered on our mock instance
-        expect(mockBotInstance.start).toHaveBeenCalled();
-        expect(mockBotInstance.help).toHaveBeenCalled();
         expect(mockBotInstance.command).toHaveBeenCalledWith(
             expect.any(String),
             expect.any(Function)

@@ -1,12 +1,12 @@
 import { authMiddleware } from '../../src/middlewares/auth.middleware';
 import { authService } from '../../src/services/auth.service';
-import { isProtectedCommand } from '../../src/commands';
+import { isProtectedCommand } from '../../src/config/protected-routes';
 import { callMiddleware } from '../utils/mock-context';
 
 
 // Mock dependencies
 jest.mock('../../src/services/auth.service');
-jest.mock('../../src/commands');
+jest.mock('../../src/config/protected-routes');
 jest.mock('../../src/utils/logger');
 
 

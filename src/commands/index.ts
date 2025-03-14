@@ -1,4 +1,5 @@
 import { Telegraf } from "telegraf";
+import logger from "../utils/logger";
 import { GlobalContext } from "../types";
 import { startCommand } from "./start.command";
 import { helpCommand } from "./help.command";
@@ -6,25 +7,23 @@ import { aboutCommand } from "./about.command";
 import { loginCommand } from "./login.command";
 import { logoutCommand } from "./logout.command";
 import { meCommand } from "./me.command";
-import { walletCommand } from "./wallet.command";
-import logger from "../utils/logger";
-import { SCENE_IDS } from "../scenes";
-
-/**
- * Registry of commands that require authentication
- */
-export const PROTECTED_COMMANDS = [
-    'me',
-    'logout',
-    'wallet',
-];
-
-/**
- * Checks if a command requires authentication
- */
-export const isProtectedCommand = (command: string) => {
-    return PROTECTED_COMMANDS.some(c => c === command);
-};
+import {
+    viewWalletsAction,
+    walletCancelAction,
+    walletCommand,
+    walletCreateAction,
+    walletSetDefaultAction,
+    walletSetDefaultActionWithWallet,
+} from "./wallet.command";
+import {
+    transactionsCommand,
+    transactionViewDetailsAction,
+    transactionPrevPageAction,
+    transactionNextPageAction,
+    transactionHistoryAction
+} from './transactions.command';
+import { depositAction, depositActionWithWallet, depositCommand } from "./deposit.command";
+import { transferAction, transferCommand } from "./transfer.command";
 
 /**
  * Registers all command handlers with the bot
@@ -43,11 +42,30 @@ export const registerCommands = (bot: Telegraf<GlobalContext>): void => {
 
     // Wallet commands
     bot.command('wallet', walletCommand);
-    bot.command('deposit', (ctx) => ctx.scene.enter(SCENE_IDS.DEPOSIT));
+    bot.action('view_wallets', viewWalletsAction);
+    bot.action('wallet_create', walletCreateAction);
+    bot.action('wallet_set_default', walletSetDefaultAction);
+    bot.action(/wallet_set_default:(.+)/, walletSetDefaultActionWithWallet);
+    bot.action('wallet_cancel', walletCancelAction);
 
-    // Register wallet action handlers
-    registerWalletActionHandlers(bot);
+    // Deposit commands
+    bot.command('deposit', depositCommand);
+    bot.action('deposit_create', depositAction);
+    bot.action(/deposit_create:(.+)/, depositActionWithWallet);
 
+    // Transfer commands
+    bot.command('transfer', transferCommand);
+    bot.action('transfer_create', transferAction);
+
+    // Transaction commands
+    bot.command('transactions', transactionsCommand);
+    bot.command('history', transactionsCommand);
+    bot.action('tx_history', transactionHistoryAction);
+    bot.action('tx_next_page', transactionNextPageAction);
+    bot.action('tx_prev_page', transactionPrevPageAction);
+    bot.action('tx_view_details', transactionViewDetailsAction);
+
+    // Catch all
     bot.on('text', (ctx) => {
         if (ctx.message.text.startsWith('/')) {
             logger.debug(`Unknown command received`, { command: ctx.message.text });
@@ -55,62 +73,4 @@ export const registerCommands = (bot: Telegraf<GlobalContext>): void => {
         }
     });
 };
-
-/**
- * Registers action handlers for wallet-related actions
- */
-function registerWalletActionHandlers(bot: Telegraf<GlobalContext>): void {
-    bot.action('view_wallets', async (ctx) => {
-        await ctx.answerCbQuery();
-        await ctx.reply('Fetching your wallets...');
-        return await walletCommand(ctx);
-    });
-
-    bot.action('wallet_create', async (ctx) => {
-        await ctx.answerCbQuery();
-        return await ctx.scene.enter(SCENE_IDS.WALLET_CREATE);
-    });
-
-    bot.action('wallet_deposit', async (ctx) => {
-        await ctx.answerCbQuery();
-        return await ctx.scene.enter(SCENE_IDS.DEPOSIT);
-    });
-
-    bot.action('wallet_set_default', async (ctx) => {
-        await ctx.answerCbQuery();
-        return await ctx.scene.enter(SCENE_IDS.WALLET_DEFAULT);
-    });
-
-    bot.action('wallet_transfer', async (ctx) => {
-        await ctx.answerCbQuery();
-        await ctx.reply('The transfer feature will be available soon.');
-        // Will later enter transfer scene
-    });
-
-    bot.action('wallet_history', async (ctx) => {
-        await ctx.answerCbQuery();
-        await ctx.reply('Transaction history feature will be available soon.');
-        // Will later show transaction history
-    });
-
-    bot.action('wallet_cancel', async (ctx) => {
-        await ctx.answerCbQuery();
-        await ctx.reply('Operation cancelled.');
-    });
-
-    bot.action(/deposit:(.+)/, async (ctx) => {
-        await ctx.answerCbQuery();
-        const walletId = ctx.match[1];
-        await ctx.scene.leave();
-        return await ctx.scene.enter(SCENE_IDS.DEPOSIT, { walletId });
-    });
-
-    bot.action(/set_default:(.+)/, async (ctx) => {
-        await ctx.answerCbQuery();
-        const walletId = ctx.match[1];
-        await ctx.scene.leave();
-        return await ctx.scene.enter(SCENE_IDS.WALLET_DEFAULT, { walletId });
-    });
-
-}
 

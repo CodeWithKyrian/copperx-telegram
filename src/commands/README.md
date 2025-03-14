@@ -20,15 +20,9 @@ import { GlobalContext } from '../types';
  * Handler for the /yourCommand command
  * @param ctx Telegraf context
  */
-const handleYourCommand = async (ctx: GlobalContext): Promise<void> => {
+export const yourCommand = async (ctx: GlobalContext): Promise<void> => {
     // Your command implementation here
     await ctx.reply('Your command response');
-};
-
-export const yourCommand = {
-    name: 'yourcommand', // The command name without the leading slash
-    description: 'Description of your command', // For the /help command and BotFather
-    handler: handleYourCommand,
 };
 ```
 
@@ -39,7 +33,7 @@ export const yourCommand = {
 import { yourCommand } from './your-command.command';
 
 // Add it to the bot.command() registration
-bot.command(yourCommand.name, yourCommand.handler);
+bot.command('yourCommand', yourCommand);
 ```
 
 ## Protected Commands
@@ -52,9 +46,9 @@ To make your command a protected command:
 
 ```typescript
 export const PROTECTED_COMMANDS = [
-    logoutCommand,
-    meCommand,
-    yourNewCommand, // Add your protected command here
+    'logout',
+    'me',
+    'yourCommand', // Add your protected command here
 ];
 ```
 

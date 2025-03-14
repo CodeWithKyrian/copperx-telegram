@@ -2,7 +2,7 @@ import { AUTH_SCENE_ID } from '../scenes/auth.scene';
 import { authService } from '../services/auth.service';
 import { GlobalContext } from '../types/session.types';
 
-const handleLoginCommand = async (ctx: GlobalContext): Promise<void> => {
+export const loginCommand = async (ctx: GlobalContext): Promise<void> => {
     if (authService.isAuthenticated(ctx)) {
         try {
             const profile = await authService.getCurrentUser();
@@ -34,7 +34,7 @@ const handleLoginCommand = async (ctx: GlobalContext): Promise<void> => {
     await ctx.scene.enter(AUTH_SCENE_ID);
 };
 
-const handleLogoutCommand = async (ctx: GlobalContext): Promise<void> => {
+export const logoutCommand = async (ctx: GlobalContext): Promise<void> => {
     if (!authService.isAuthenticated(ctx)) {
         await ctx.reply(
             '❓ *Not Logged In*\n\n' +
@@ -65,16 +65,4 @@ const handleLogoutCommand = async (ctx: GlobalContext): Promise<void> => {
             { parse_mode: 'Markdown' }
         );
     }
-};
-
-export const loginCommand = {
-    name: 'login',
-    description: 'Login to your CopperX account',
-    handler: handleLoginCommand,
-};
-
-export const logoutCommand = {
-    name: 'logout',
-    description: 'Logout from your CopperX account',
-    handler: handleLogoutCommand,
 };

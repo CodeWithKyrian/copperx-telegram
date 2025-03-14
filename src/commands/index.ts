@@ -6,44 +6,43 @@ import { aboutCommand } from "./about.command";
 import { loginCommand } from "./login.command";
 import { logoutCommand } from "./login.command";
 import { meCommand } from "./me.command";
+import { walletCommand } from "./wallet.command";
 import logger from "../utils/logger";
 
 /**
  * Registry of commands that require authentication
  */
 export const PROTECTED_COMMANDS = [
-    logoutCommand,
-    meCommand,
+    'me',
+    'logout',
+    'wallet',
 ];
 
 /**
  * Checks if a command requires authentication
  */
 export const isProtectedCommand = (command: string) => {
-    return PROTECTED_COMMANDS.some(c => c.name === command);
+    return PROTECTED_COMMANDS.some(c => c === command);
 };
 
 /**
  * Registers the commands for the bot
  */
 export const registerCommands = (bot: Telegraf<GlobalContext>) => {
-    // /start command
-    bot.start(startCommand.handler);
+    bot.start(startCommand);
 
-    // /help command
-    bot.help(helpCommand.handler);
+    bot.help(helpCommand);
 
-    // /about command
-    bot.command(aboutCommand.name, aboutCommand.handler);
+    bot.command('about', aboutCommand);
 
-    // /login and /logout commands
-    bot.command(loginCommand.name, loginCommand.handler);
-    bot.command(logoutCommand.name, logoutCommand.handler);
+    bot.command('login', loginCommand);
 
-    // /me command
-    bot.command(meCommand.name, meCommand.handler);
+    bot.command('logout', logoutCommand);
 
-    // Handle unknown commands
+    bot.command('me', meCommand);
+
+    bot.command('wallet', walletCommand);
+
     bot.on('text', (ctx) => {
         if (ctx.message.text.startsWith('/')) {
             logger.debug(`Unknown command received`, { command: ctx.message.text });

@@ -7,7 +7,7 @@ describe('Start Command', () => {
         const ctx = createMockContext();
 
         // Act
-        await startCommand.handler(ctx);
+        await startCommand(ctx);
 
         // Assert
         expect(ctx.reply).toHaveBeenCalledWith(

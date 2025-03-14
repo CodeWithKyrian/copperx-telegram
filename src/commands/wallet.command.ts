@@ -7,6 +7,7 @@ import { formatBalance, formatWalletAddress } from '../utils/formatters';
 
 /**
  * Handles the /wallet command - shows wallet information and options
+ * Acts as a hub to direct users to more specific scenes for actions
  */
 export const walletCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
@@ -47,36 +48,13 @@ export const walletCommand = async (ctx: GlobalContext): Promise<void> => {
  * Handles case when user has no wallets
  */
 async function handleNoWallets(ctx: GlobalContext): Promise<void> {
-    // Get supported networks first to provide options
-    const networks = await walletService.getSupportedNetworks();
-
-    if (!networks || networks.length === 0) {
-        await ctx.reply(
-            '❌ *No wallets found*\n\n' +
-            'You don\'t have any wallets set up yet, but we couldn\'t retrieve the list of supported networks. ' +
-            'Please try again later or contact support.',
-            { parse_mode: 'Markdown' }
-        );
-        return;
-    }
-
-    const networkButtons = networks.map(network =>
-        Markup.button.callback(`Create ${network} Wallet`, `create_wallet:${network}`)
-    );
-
-    // Group buttons into rows of 2
-    const buttonRows = [];
-    for (let i = 0; i < networkButtons.length; i += 2) {
-        buttonRows.push(networkButtons.slice(i, i + 2));
-    }
-
     await ctx.reply(
         '💼 *No Wallets Found*\n\n' +
         'You don\'t have any wallets set up yet. Would you like to create one?',
         {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
-                ...buttonRows,
+                [Markup.button.callback('➕ Create a Wallet', 'wallet_create')],
                 [Markup.button.callback('❌ Cancel', 'wallet_cancel')]
             ])
         }
@@ -128,21 +106,19 @@ async function displayWalletSummary(
         }
     }
 
-    // Create action buttons
-    const walletButtons = wallets.map(wallet => {
-        const label = wallet.isDefault
-            ? `✓ ${wallet.network || 'Default'} Wallet`
-            : `Set ${wallet.network || 'Wallet'} as Default`;
-        return Markup.button.callback(label, `set_default_wallet:${wallet.id}`);
-    });
-
-    // Create a keyboard with wallet actions
     const keyboard = Markup.inlineKeyboard([
-        [Markup.button.callback('➕ Create New Wallet', 'create_wallet')],
-        [Markup.button.callback('💸 Deposit', 'deposit_funds')],
-        [Markup.button.callback('📤 Withdraw', 'withdraw_funds')],
-        [Markup.button.callback('📋 Transaction History', 'transaction_history')],
-        ...walletButtons.map(button => [button])
+        [
+            Markup.button.callback('💸 Deposit', 'wallet_deposit'),
+            Markup.button.callback('📤 Transfer', 'wallet_transfer')
+        ],
+        [
+            Markup.button.callback('➕ Create New Wallet', 'wallet_create'),
+        ], [
+            Markup.button.callback('🔁 Set Default Wallet', 'wallet_set_default')
+        ],
+        [
+            Markup.button.callback('📋 Transaction History', 'wallet_history')
+        ]
     ]);
 
     await ctx.reply(message, {

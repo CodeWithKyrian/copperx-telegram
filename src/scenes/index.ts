@@ -1,19 +1,45 @@
 import { Scenes, Telegraf } from 'telegraf';
-import { createAuthScene, AUTH_SCENE_ID } from './auth.scene';
-import { GlobalContext } from '../types/session.types';
+import { GlobalContext } from '../types';
+import { createAuthScene } from './auth.scene';
+import { walletCreateScene } from './wallet/create.scene';
+import { defaultWalletScene } from './wallet/default.scene';
+import { depositScene } from './transactions/deposit.scene';
+
 
 /**
  * Configures scene manager for bot
  * @param bot Telegraf instance
  */
 export const configureScenes = (bot: Telegraf<GlobalContext>): void => {
-    const stage = new Scenes.Stage<GlobalContext>([
+    const stage = new Scenes.Stage([
+
+        // Authentication scene
         createAuthScene(),
+
+        // Wallet management scenes
+        walletCreateScene,
+        defaultWalletScene,
+
+        // // Transaction scenes
+        depositScene
     ]);
 
+    // Add scene middleware to handle scene entry/exit events
+    stage.use(async (ctx, next) => {
+        if (ctx.message && 'text' in ctx.message && ctx.message.text === '/cancel') {
+            await ctx.reply('Operation cancelled.');
+            await ctx.scene.leave();
+            return;
+        }
+        await next();
+    });
+
     bot.use(stage.middleware());
-};
+}
 
 export const SCENE_IDS = {
-    AUTH: AUTH_SCENE_ID,
+    AUTH: 'auth',
+    WALLET_CREATE: 'wallet_create',
+    WALLET_DEFAULT: 'wallet_default',
+    DEPOSIT: 'wallet_deposit'
 };

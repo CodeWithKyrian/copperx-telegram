@@ -2,25 +2,48 @@ import { Scenes, Markup } from 'telegraf';
 import { authService } from '../services/auth.service';
 import { message } from 'telegraf/filters';
 import logger from '../utils/logger';
-import { GlobalContext } from '../types/session.types';
+import { GlobalContext, GlobalSceneSession } from '../types/session.types';
 import { RateLimits } from '../middlewares/rate-limit.middleware';
 import { RateLimiterService } from '../services/rate-limiter.service';
 
 export const AUTH_SCENE_ID = 'auth';
 
-interface AuthSceneSessionData extends Scenes.SceneSessionData {
+interface AuthSceneSessionData extends GlobalSceneSession {
     waitingForOtp?: boolean;
     email?: string;
     tempOtpSid?: string;
 }
 
-export interface AuthSceneContext extends GlobalContext {
-    session: Scenes.SceneSession<AuthSceneSessionData>;
-    scene: Scenes.SceneContextScene<AuthSceneContext, AuthSceneSessionData>;
-}
+export type AuthSceneContext = GlobalContext<AuthSceneSessionData>;
 
 
-const handleSceneEnter = async (ctx: AuthSceneContext) => {
+/**
+ * Creates and configures the authentication scene
+ * @returns Configured authentication scene
+ */
+export const createAuthScene = (): Scenes.BaseScene<AuthSceneContext> => {
+    const scene = new Scenes.BaseScene<AuthSceneContext>(AUTH_SCENE_ID);
+
+    scene.enter(handleSceneEnter);
+
+    scene.leave(handleSceneLeave);
+
+    scene.command('cancel', handleCancelCommand);
+
+    scene.on(message('text'), async (ctx) => {
+        const text = ctx.message.text;
+
+        if (ctx.scene.session.waitingForOtp) {
+            await handleOtpVerification(ctx, text.trim());
+        } else {
+            await handleEmailInput(ctx, text.trim().toLowerCase());
+        }
+    });
+
+    return scene;
+};
+
+const handleSceneEnter = async (ctx: GlobalContext & { scene: { session: AuthSceneSessionData } }) => {
     // Reset scene session data
     ctx.scene.session.waitingForOtp = false;
     ctx.scene.session.email = undefined;
@@ -68,6 +91,7 @@ const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
 
         await authService.initiateEmailAuth(ctx, email);
 
+        // Prompt for OTP
         await ctx.reply(
             '📧 *Verification Code Sent*\n\n' +
             `A verification code has been sent to ${email}.\n\n` +
@@ -80,6 +104,7 @@ const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
             email
         });
 
+        // Show error message
         await ctx.reply(
             '❌ *Authentication Failed*\n\n' +
             'We could not send a verification code to this email. Please make sure you have a registered CopperX account and try again.\n\n' +
@@ -158,29 +183,3 @@ const handleCancelCommand = async (ctx: AuthSceneContext) => {
     );
     await ctx.scene.leave();
 }
-
-/**
- * Creates and configures the authentication scene
- * @returns Configured authentication scene
- */
-export const createAuthScene = (): Scenes.BaseScene<AuthSceneContext> => {
-    const scene = new Scenes.BaseScene<AuthSceneContext>(AUTH_SCENE_ID);
-
-    scene.enter(handleSceneEnter);
-
-    scene.leave(handleSceneLeave);
-
-    scene.command('cancel', handleCancelCommand);
-
-    scene.on(message('text'), async (ctx) => {
-        const text = ctx.message.text;
-
-        if (ctx.scene.session.waitingForOtp) {
-            await handleOtpVerification(ctx, text.trim());
-        } else {
-            await handleEmailInput(ctx, text.trim().toLowerCase());
-        }
-    });
-
-    return scene;
-};

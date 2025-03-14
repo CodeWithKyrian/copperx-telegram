@@ -1,4 +1,18 @@
-import { BalanceResponse, Wallet } from "../types";
+import { Wallet, BalanceResponse } from '../types/api.types';
+
+/**
+ * Formats wallet address for display (truncates middle)
+ * @param address Wallet address to format
+ * @returns Formatted wallet address
+ */
+export function formatWalletAddress(address: string): string {
+    if (!address) return '';
+    if (address.length <= 16) return address;
+
+    const start = address.substring(0, 8);
+    const end = address.substring(address.length - 8);
+    return `${start}...${end}`;
+}
 
 /**
  * Formats a currency amount with proper decimal places
@@ -18,6 +32,18 @@ export function formatCurrency(amount: string, decimals: number = 6): string {
         minimumFractionDigits: 2,
         maximumFractionDigits: decimals
     });
+}
+
+/**
+ * Formats wallet balance information for display
+ * @param balance Balance response from API
+ * @returns Formatted balance string
+ */
+export function formatBalance(balance: BalanceResponse): string {
+    if (!balance) return 'N/A';
+
+    const amount = formatCurrency(balance.balance, balance.decimals);
+    return `${amount} ${balance.symbol}`;
 }
 
 /**
@@ -41,48 +67,10 @@ export function formatDate(dateString: string): string {
 }
 
 /**
- * Truncates text to specified length with ellipsis
- * @param text Text to truncate
- * @param maxLength Maximum length before truncation
- * @returns Truncated text
+ * Generates a message showing wallet information
+ * @param wallet Wallet object
+ * @returns Formatted wallet info message
  */
-export function truncateText(text: string, maxLength: number = 30): string {
-    if (!text || text.length <= maxLength) return text;
-    return text.substring(0, maxLength - 3) + '...';
-}
-
-/**
- * Formats wallet address for display (truncates middle)
- * @param address Wallet address to format
- * @returns Formatted wallet address
- */
-export function formatWalletAddress(address: string): string {
-    if (!address) return '';
-    if (address.length <= 16) return address;
-
-    const start = address.substring(0, 8);
-    const end = address.substring(address.length - 8);
-    return `${start}...${end}`;
-}
-
-
-/**
- * Formats wallet balance information for display
- * @param balance Balance response from API
- * @returns Formatted balance string
-*/
-export function formatBalance(balance: BalanceResponse): string {
-    if (!balance) return 'N/A';
-
-    const amount = formatCurrency(balance.balance, balance.decimals);
-    return `${amount} ${balance.symbol}`;
-}
-
-/**
-  * Generates a message showing wallet information
-  * @param wallet Wallet object
-  * @returns Formatted wallet info message
-  */
 export function formatWalletInfo(wallet: Wallet): string {
     const isDefault = wallet.isDefault ? '✓ Default' : '';
     const network = wallet.network ? `Network: ${wallet.network}` : '';
@@ -94,6 +82,17 @@ export function formatWalletInfo(wallet: Wallet): string {
         network,
         `Type: ${wallet.walletType}`,
         address,
-        `Created: ${new Date(wallet.createdAt || '').toLocaleDateString()}`
+        `Created: ${formatDate(wallet.createdAt || '')}`
     ].filter(Boolean).join('\n');
+}
+
+/**
+ * Truncates text to specified length with ellipsis
+ * @param text Text to truncate
+ * @param maxLength Maximum length before truncation
+ * @returns Truncated text
+ */
+export function truncateText(text: string, maxLength: number = 30): string {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + '...';
 }

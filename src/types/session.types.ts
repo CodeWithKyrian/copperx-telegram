@@ -1,36 +1,37 @@
 import { Context, Scenes } from "telegraf";
+import { WizardContextWizard } from "telegraf/typings/scenes";
 
-export interface AuthState {
-    accessToken?: string;
-    refreshToken?: string;
-    expiresAt?: number; // timestamp when token expires
-    email?: string; // user's email
-    userId?: string;
-    organizationId?: string;
-    tempOtpSid?: string; // temporary session ID for OTP flow
+
+export interface GlobalSceneSession extends Scenes.WizardSessionData {
+    // available under `ctx.scene.session`
 }
 
-export interface GlobalSessionData extends Scenes.SceneSessionData {
-
-}
-
-export interface GlobalSession extends Scenes.SceneSession<GlobalSessionData> {
+export interface GlobalSession extends Scenes.SceneSession<GlobalSceneSession> {
+    // available under `ctx.session`
     auth?: AuthState;
-
     rateLimits?: RateLimitsContainer;
-
     preferences?: {
         language?: string;
         notificationsEnabled?: boolean;
     };
-
     createdAt?: number;
     updatedAt?: number;
 }
 
-export interface GlobalContext extends Context {
-    session: GlobalSession;
-    scene: Scenes.SceneContextScene<GlobalContext, GlobalSessionData>;
+
+export interface GlobalContext<T extends Scenes.WizardSessionData = Scenes.WizardSessionData> extends Context {
+    session: GlobalSession & Scenes.WizardSession<T>;
+    scene: Scenes.SceneContextScene<GlobalContext<T>, T>;
+    wizard: WizardContextWizard<GlobalContext<T>>;
+}
+
+export interface AuthState {
+    accessToken?: string;
+    expiresAt?: number;
+    email?: string;
+    userId?: string;
+    organizationId?: string;
+    tempOtpSid?: string;
 }
 
 export interface RateLimitRecord {

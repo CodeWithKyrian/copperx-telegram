@@ -1,13 +1,38 @@
-import { Context } from 'telegraf';
+import { GlobalContext } from '../types';
 
-export const helpCommand = (ctx: Context) => {
-    ctx.reply('Here are the available commands:\n\n' +
-        '/start - Start the bot\n' +
-        '/help - Show this help message\n' +
-        '/about - About CopperX\n\n' +
-        '/login - Login to your CopperX account\n' +
-        'The following commands will be available after you authenticate:\n' +
-        '/me - Show your profile information\n' +
-        '/logout - Logout from your CopperX account\n\n' +
-        'More commands will be available after you authenticate.');
+/**
+ * Handles the /help command
+ */
+export const helpCommand = async (ctx: GlobalContext): Promise<void> => {
+    const message = `
+🤖 *CopperX Telegram Bot Help*
+
+*Basic Commands:*
+• /start - Start the bot and get welcome information
+• /help - Show this help message
+
+*Authentication:*
+• /login - Sign in with your CopperX account
+• /logout - Sign out from your account
+• /me - View your profile information
+
+*Wallet Management:*
+• /wallet - View your wallets and balances
+• /deposit - Start the deposit process
+
+*Coming Soon:*
+• /transfer - Send funds to another user or wallet
+• /withdraw - Withdraw funds to an external wallet
+• /history - View your transaction history
+
+*Support:*
+If you need further assistance, please contact [CopperX Support](https://t.me/copperxcommunity/2183).
+    `;
+
+    await ctx.reply(message, {
+        parse_mode: 'Markdown',
+        link_preview_options: {
+            is_disabled: true
+        }
+    });
 };

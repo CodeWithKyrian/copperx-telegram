@@ -20,7 +20,7 @@ export class WalletApi {
     }
 
     public async setDefaultWallet(walletId: string): Promise<Wallet> {
-        return apiClient.put<Wallet>('/api/wallets/default', { walletId });
+        return apiClient.post<Wallet>('/api/wallets/default', { walletId });
     }
 
     public async getBalance(): Promise<BalanceResponse> {

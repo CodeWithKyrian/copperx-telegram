@@ -8,6 +8,7 @@ import logger from '../utils/logger';
 export class WalletService {
     /**
      * Retrieves all wallets for the authenticated user
+     * @returns Array of wallets or null if error occurs
      */
     public async getWallets(): Promise<Wallet[] | null> {
         try {
@@ -20,7 +21,25 @@ export class WalletService {
     }
 
     /**
+     * Retrieves a specific wallet by ID
+     * @param walletId The ID of the wallet to retrieve
+     * @returns Wallet or null if not found or error occurs
+     */
+    public async getWalletById(walletId: string): Promise<Wallet | null> {
+        try {
+            const wallets = await this.getWallets();
+            if (!wallets) return null;
+
+            return wallets.find(wallet => wallet.id === walletId) || null;
+        } catch (error) {
+            logger.error('Failed to retrieve wallet by ID', { error, walletId });
+            return null;
+        }
+    }
+
+    /**
      * Retrieves the default wallet for the authenticated user
+     * @returns Default wallet or null if error occurs
      */
     public async getDefaultWallet(): Promise<Wallet | null> {
         try {

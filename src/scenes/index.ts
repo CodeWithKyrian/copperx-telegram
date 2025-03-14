@@ -5,7 +5,7 @@ import { walletCreateScene } from './wallet/create.scene';
 import { defaultWalletScene } from './wallet/default.scene';
 import { depositScene } from './transactions/deposit.scene';
 import { transactionDetailsScene } from './transactions/details.scene';
-
+import { transferScene } from './transfer.scene';
 
 /**
  * Configures scene manager for bot
@@ -22,7 +22,9 @@ export const configureScenes = (bot: Telegraf<GlobalContext>): void => {
 
         depositScene,
 
-        transactionDetailsScene
+        transactionDetailsScene,
+
+        transferScene
     ]);
 
     stage.use(async (ctx, next) => {

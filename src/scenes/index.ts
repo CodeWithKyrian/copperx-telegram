@@ -13,18 +13,15 @@ import { depositScene } from './transactions/deposit.scene';
 export const configureScenes = (bot: Telegraf<GlobalContext>): void => {
     const stage = new Scenes.Stage([
 
-        // Authentication scene
         createAuthScene(),
 
-        // Wallet management scenes
         walletCreateScene,
+
         defaultWalletScene,
 
-        // // Transaction scenes
         depositScene
     ]);
 
-    // Add scene middleware to handle scene entry/exit events
     stage.use(async (ctx, next) => {
         if (ctx.message && 'text' in ctx.message && ctx.message.text === '/cancel') {
             await ctx.reply('Operation cancelled.');

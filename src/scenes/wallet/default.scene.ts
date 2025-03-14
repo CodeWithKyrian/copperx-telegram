@@ -3,6 +3,7 @@ import { GlobalContext, GlobalSceneSession } from '../../types';
 import { walletService } from '../../services/wallet.service';
 import logger from '../../utils/logger';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
+import { formatNetworkName } from '../../utils/chain.utils';
 
 interface DefaultWalletSessionData extends GlobalSceneSession {
     walletId?: string;
@@ -44,7 +45,7 @@ const step1SelectWallet = async (ctx: DefaultWalletContext) => {
 
     // Create buttons for each non-default wallet
     const walletButtons = nonDefaultWallets.map(wallet => {
-        const network = wallet.network || 'Unknown Network';
+        const network = formatNetworkName(wallet.network);
         return Markup.button.callback(
             `${network} Wallet`,
             `select_default:${wallet.id}`
@@ -122,7 +123,7 @@ async function setDefaultWallet(ctx: GlobalContext, walletId: string): Promise<v
         }
 
         // Success!
-        const network = wallet.network || 'selected';
+        const network = formatNetworkName(wallet.network);
         await ctx.reply(
             `✅ *Default Wallet Updated*\n\n` +
             `Your ${network} wallet has been set as the default wallet.`,

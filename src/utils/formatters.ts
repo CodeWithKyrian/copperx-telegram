@@ -1,11 +1,14 @@
 import { Wallet, BalanceResponse } from '../types/api.types';
+import { formatNetworkName } from './chain.utils';
+
+
 
 /**
  * Formats wallet address for display (truncates middle)
  * @param address Wallet address to format
  * @returns Formatted wallet address
  */
-export function formatWalletAddress(address: string): string {
+export function formatWalletAddress(address: string | undefined): string {
     if (!address) return '';
     if (address.length <= 16) return address;
 
@@ -20,7 +23,7 @@ export function formatWalletAddress(address: string): string {
  * @param decimals Number of decimals to display
  * @returns Formatted currency string
  */
-export function formatCurrency(amount: string, decimals: number = 6): string {
+export function formatCurrency(amount: string | undefined, decimals: number = 6): string {
     if (!amount) return '0.00';
 
     // Convert string to number, ensuring it's properly parsed
@@ -39,7 +42,7 @@ export function formatCurrency(amount: string, decimals: number = 6): string {
  * @param balance Balance response from API
  * @returns Formatted balance string
  */
-export function formatBalance(balance: BalanceResponse): string {
+export function formatBalance(balance: BalanceResponse | undefined): string {
     if (!balance) return 'N/A';
 
     const amount = formatCurrency(balance.balance, balance.decimals);
@@ -51,7 +54,7 @@ export function formatBalance(balance: BalanceResponse): string {
  * @param dateString Date string
  * @returns Formatted date string
  */
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string | undefined): string {
     if (!dateString) return '';
 
     try {
@@ -73,7 +76,8 @@ export function formatDate(dateString: string): string {
  */
 export function formatWalletInfo(wallet: Wallet): string {
     const isDefault = wallet.isDefault ? '✓ Default' : '';
-    const network = wallet.network ? `Network: ${wallet.network}` : '';
+    const network = wallet.network ?
+        `Network: ${formatNetworkName(wallet.network)}` : '';
     const address = wallet.walletAddress ?
         `Address: \`${formatWalletAddress(wallet.walletAddress)}\`` : '';
 
@@ -82,7 +86,7 @@ export function formatWalletInfo(wallet: Wallet): string {
         network,
         `Type: ${wallet.walletType}`,
         address,
-        `Created: ${formatDate(wallet.createdAt || '')}`
+        `Created: ${formatDate(wallet.createdAt)}`
     ].filter(Boolean).join('\n');
 }
 

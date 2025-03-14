@@ -9,8 +9,16 @@ export interface ErrorResponse {
     error: string;
 }
 
-export interface ListResponse {
-    data: any[];
+export interface PaginatedResponse<D> {
+    data: D[];
+    page: number;
+    limit: number;
+    count: number;
+    hasMore: boolean;
+}
+
+export interface ListResponse<D> {
+    data: D[];
 }
 
 export interface LoginEmailOtpRequest {
@@ -67,15 +75,8 @@ export interface Web3AuthAuthenticateRequest {
 }
 
 
-
 export type UserFlag = 'intro' | 'disable_offramp' | 'only_31' | 'third_party' | 'virtual_account' | 'manual_submit_kyb';
 
-export interface Page {
-    page: number;
-    limit: number;
-    count: number;
-    hasMore: boolean;
-}
 
 export interface PersonalAccessToken {
     id: string;

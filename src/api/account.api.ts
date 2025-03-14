@@ -1,15 +1,10 @@
 import { Account, ListResponse, CreateAccountRequest, SuccessResponse, SubmitPermitRequest, SubmitPermitResponse, Wallet } from '../types/api.types';
 import apiClient from './client';
 
-export interface ListAccountResponse extends ListResponse {
-    properties: {
-        data: Account[];
-    };
-}
 
 export class AccountApi {
-    public async getAccounts(): Promise<ListAccountResponse> {
-        return apiClient.get<ListAccountResponse>('/api/accounts');
+    public async getAccounts(): Promise<ListResponse<Account>> {
+        return apiClient.get<ListResponse<Account>>('/api/accounts');
     }
 
     public async createAccount(params: CreateAccountRequest): Promise<Account> {

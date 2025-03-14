@@ -4,6 +4,7 @@ import logger from '../../utils/logger';
 import { formatWalletInfo } from '../../utils/formatters';
 import { GlobalContext, GlobalSceneSession } from '../../types/session.types';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
+import { formatNetworkName } from '../../utils/chain.utils';
 
 interface WalletCreateSessionData extends GlobalSceneSession {
     network?: string;
@@ -15,7 +16,7 @@ export type WalletCreateContext = GlobalContext<WalletCreateSessionData>;
 /**
  * Scene for creating a new wallet
  */
-export const walletCreateScene = new Scenes.WizardScene<WalletCreateContext>(
+const walletCreateScene = new Scenes.WizardScene<WalletCreateContext>(
     'wallet_create',
 
     // Step 1: Show network options
@@ -40,7 +41,7 @@ export const walletCreateScene = new Scenes.WizardScene<WalletCreateContext>(
 
         // Create buttons for each network
         const networkButtons = networks.map(network =>
-            Markup.button.callback(network, `select_network:${network}`)
+            Markup.button.callback(formatNetworkName(network), `select_network:${network}`)
         );
 
         // Group buttons into rows of 2
@@ -101,7 +102,7 @@ export const walletCreateScene = new Scenes.WizardScene<WalletCreateContext>(
  */
 async function createWallet(ctx: GlobalContext, network: string): Promise<void> {
     await ctx.reply(
-        `🔄 Creating your ${network} wallet...`
+        `🔄 Creating your ${formatNetworkName(network)} wallet...`
     );
 
     try {
@@ -142,24 +143,10 @@ async function createWallet(ctx: GlobalContext, network: string): Promise<void> 
     }
 }
 
-
-walletCreateScene.action(/deposit:(.+)/, async (ctx) => {
-    await ctx.answerCbQuery();
-    const walletId = ctx.match[1];
-    await ctx.scene.leave();
-    return await ctx.scene.enter('wallet_deposit', { walletId });
-});
-
-walletCreateScene.action(/set_default:(.+)/, async (ctx) => {
-    await ctx.answerCbQuery();
-    const walletId = ctx.match[1];
-    await ctx.scene.leave();
-    // Enter default wallet scene with pre-selected wallet
-    return await ctx.scene.enter('wallet_default', { walletId });
-});
-
 walletCreateScene.action('cancel', async (ctx) => {
     await ctx.answerCbQuery();
     await ctx.reply('Wallet creation cancelled.');
     return await ctx.scene.leave();
-}); 
+});
+
+export { walletCreateScene };

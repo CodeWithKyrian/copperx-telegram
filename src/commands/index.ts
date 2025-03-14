@@ -97,5 +97,20 @@ function registerWalletActionHandlers(bot: Telegraf<GlobalContext>): void {
         await ctx.answerCbQuery();
         await ctx.reply('Operation cancelled.');
     });
+
+    bot.action(/deposit:(.+)/, async (ctx) => {
+        await ctx.answerCbQuery();
+        const walletId = ctx.match[1];
+        await ctx.scene.leave();
+        return await ctx.scene.enter(SCENE_IDS.DEPOSIT, { walletId });
+    });
+
+    bot.action(/set_default:(.+)/, async (ctx) => {
+        await ctx.answerCbQuery();
+        const walletId = ctx.match[1];
+        await ctx.scene.leave();
+        return await ctx.scene.enter(SCENE_IDS.WALLET_DEFAULT, { walletId });
+    });
+
 }
 

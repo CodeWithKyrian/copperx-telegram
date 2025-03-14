@@ -4,6 +4,7 @@ import { walletService } from '../services/wallet.service';
 import logger from '../utils/logger';
 import { WalletBalance, Wallet } from '../types/api.types';
 import { formatBalance, formatWalletAddress } from '../utils/formatters';
+import { formatNetworkName } from '../utils/chain.utils';
 
 /**
  * Handles the /wallet command - shows wallet information and options
@@ -88,7 +89,7 @@ async function displayWalletSummary(
         if (!wallet) continue;
 
         const isDefault = wallet.isDefault ? '✓ ' : '';
-        const network = wallet.network || 'Unknown Network';
+        const network = formatNetworkName(wallet.network);
 
         message += `\n🔹 ${isDefault}*${network}* Wallet\n`;
         message += `ID: \`${truncateId(wallet.id)}\`\n`;

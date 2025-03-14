@@ -1,6 +1,5 @@
 import {
     TransferStatus,
-    Page,
     TransferWithTransactionsOnly,
     CreateOfframpTransferRequest,
     CreateOnrampTransferRequest,
@@ -15,6 +14,7 @@ import {
     Country,
     TransferType,
     TransferWithAccount,
+    PaginatedResponse,
 } from '../types/api.types';
 import apiClient from './client';
 
@@ -36,8 +36,8 @@ export class TransferApi {
         type?: TransferType[];
         startDate?: Date;
         endDate?: Date;
-    }): Promise<Page & { data: TransferWithTransactionsOnly[] }> {
-        return apiClient.get<Page & { data: TransferWithTransactionsOnly[] }>('/api/transfers', { params });
+    }): Promise<PaginatedResponse<TransferWithTransactionsOnly>> {
+        return apiClient.get<PaginatedResponse<TransferWithTransactionsOnly>>('/api/transfers', { params });
     }
 
     public async createOfframpTransfer(data: CreateOfframpTransferRequest): Promise<TransferWithAccount> {

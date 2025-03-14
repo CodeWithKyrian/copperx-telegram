@@ -1,5 +1,5 @@
 import {
-    Page,
+    PaginatedResponse,
     TransactionWithAccount,
 } from '../types/api.types';
 import apiClient from './client';
@@ -12,8 +12,8 @@ export interface GetTransactionsParams {
 }
 
 export class TransactionApi {
-    public async getTransactions(params: GetTransactionsParams): Promise<Page & { data: TransactionWithAccount[] }> {
-        return apiClient.get<Page & { data: TransactionWithAccount[] }>('/api/transactions', { params });
+    public async getTransactions(params: GetTransactionsParams): Promise<PaginatedResponse<TransactionWithAccount>> {
+        return apiClient.get<PaginatedResponse<TransactionWithAccount>>('/api/transactions', { params });
     }
 
     /**

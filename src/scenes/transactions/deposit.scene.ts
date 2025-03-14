@@ -2,6 +2,7 @@ import { Scenes, Markup } from 'telegraf';
 import { GlobalContext, GlobalSceneSession } from '../../types';
 import { walletService } from '../../services/wallet.service';
 import { formatWalletAddress } from '../../utils/formatters';
+import { formatNetworkName } from '../../utils/chain.utils';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
 
 interface DepositSceneSessionData extends GlobalSceneSession {
@@ -43,9 +44,9 @@ export const depositScene = new Scenes.WizardScene<GlobalContext<DepositSceneSes
         // Show wallets for selection
         const walletButtons = wallets.map(wallet => {
             const label = wallet.isDefault
-                ? `✓ ${wallet.network || 'Default'} Wallet`
-                : `${wallet.network || 'Wallet'} (${formatWalletAddress(wallet.walletAddress || '')})`;
-            return Markup.button.callback(label, `select_wallet:${wallet.id}`);
+                ? `✓ ${formatNetworkName(wallet.network)} Wallet`
+                : `${formatNetworkName(wallet.network)} (${formatWalletAddress(wallet.walletAddress || '')})`;
+            return Markup.button.callback(label, `deposit_to_wallet:${wallet.id}`);
         });
 
         await ctx.reply(
@@ -84,7 +85,7 @@ export const depositScene = new Scenes.WizardScene<GlobalContext<DepositSceneSes
             return await ctx.scene.enter('wallet_create');
         }
 
-        if (callbackData.startsWith('select_wallet:')) {
+        if (callbackData.startsWith('deposit_to_wallet:')) {
             const walletId = callbackData.split(':')[1];
             await ctx.answerCbQuery();
             await showDepositAddress(ctx, walletId);
@@ -118,7 +119,7 @@ async function showDepositAddress(ctx: GlobalContext, walletId: string): Promise
         return await ctx.scene.leave();
     }
 
-    const network = wallet.network || 'blockchain';
+    const network = formatNetworkName(wallet.network);
     const address = wallet.walletAddress;
 
     if (!address) {

@@ -23,7 +23,9 @@ import {
     transactionHistoryAction
 } from './transactions.command';
 import { depositAction, depositActionWithWallet, depositCommand } from "./deposit.command";
-import { transferAction, transferCommand } from "./transfer.command";
+import { transferAction, transferCommand, transferDetailsAction, transferHistoryAction } from "./transfer.command";
+import { transferHistoryCommand } from "./transfer-history.command";
+import { message } from "telegraf/filters";
 
 /**
  * Registers all command handlers with the bot
@@ -55,18 +57,20 @@ export const registerCommands = (bot: Telegraf<GlobalContext>): void => {
 
     // Transfer commands
     bot.command('transfer', transferCommand);
+    bot.command('history', transferHistoryCommand);
     bot.action('transfer_create', transferAction);
+    bot.action('transfer_details', transferDetailsAction);
+    bot.action('transfer_history', transferHistoryAction);
 
     // Transaction commands
     bot.command('transactions', transactionsCommand);
-    bot.command('history', transactionsCommand);
     bot.action('tx_history', transactionHistoryAction);
     bot.action('tx_next_page', transactionNextPageAction);
     bot.action('tx_prev_page', transactionPrevPageAction);
     bot.action('tx_view_details', transactionViewDetailsAction);
 
     // Catch all
-    bot.on('text', (ctx) => {
+    bot.on(message('text'), (ctx) => {
         if (ctx.message.text.startsWith('/')) {
             logger.debug(`Unknown command received`, { command: ctx.message.text });
             ctx.reply('Unknown command. Use /help to see available commands.');

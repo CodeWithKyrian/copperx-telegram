@@ -5,4 +5,9 @@ import { GlobalContext } from '../types';
  */
 export const withdrawCommand = async (ctx: GlobalContext): Promise<void> => {
     await ctx.scene.enter('withdraw');
-}; 
+};
+
+export async function withdrawAction(ctx: GlobalContext) {
+    await ctx.answerCbQuery();
+    await ctx.scene.enter('withdraw');
+}

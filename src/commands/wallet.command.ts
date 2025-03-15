@@ -152,7 +152,8 @@ async function displayWalletSummary(
     const keyboard = Markup.inlineKeyboard([
         [
             Markup.button.callback('💸 Deposit', 'deposit_create'),
-            Markup.button.callback('📤 Transfer', 'transfer_create')
+            Markup.button.callback('📤 Send', 'send_create'),
+            Markup.button.callback('💳 Withdraw', 'withdraw_create')
         ],
         [
             Markup.button.callback('➕ Create New Wallet', 'wallet_create'),
@@ -160,7 +161,7 @@ async function displayWalletSummary(
             Markup.button.callback('🔁 Set Default Wallet', 'wallet_set_default')
         ],
         [
-            Markup.button.callback('📋 Transaction History', 'tx_history')
+            Markup.button.callback('📋 Transaction History', 'history')
         ]
     ]);
 

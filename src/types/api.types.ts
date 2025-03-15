@@ -1021,9 +1021,7 @@ export interface Kyc {
     providerCode: ProviderCode;
     kycProviderCode: KycProviderCode;
     kycDetailId: string;
-    kybDetailId: string;
     kycDetail: KycDetail;
-    kybDetail: KybDetail;
     kycAdditionalDocuments: KycAdditionalDocument[];
     statusUpdates: string;
 }

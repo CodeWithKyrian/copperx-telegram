@@ -3,10 +3,10 @@ import { GlobalContext, UserStatus } from '../types';
 
 
 /**
- * Handler for the /me command
+ * Handler for the /profile command
  * @param ctx Telegraf context
  */
-export const meCommand = async (ctx: GlobalContext): Promise<void> => {
+export const profileCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
         const profile = await authService.getCurrentUser();
 

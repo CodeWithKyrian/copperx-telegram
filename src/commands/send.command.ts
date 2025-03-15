@@ -1,10 +1,10 @@
 import { GlobalContext } from "../types";
 
-export const transferCommand = async (ctx: GlobalContext) => {
+export const sendCommand = async (ctx: GlobalContext) => {
     await ctx.scene.enter('transfer');
 }
 
-export async function transferAction(ctx: GlobalContext) {
+export async function sendAction(ctx: GlobalContext) {
     await ctx.answerCbQuery();
     await ctx.scene.enter('transfer');
 }

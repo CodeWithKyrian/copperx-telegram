@@ -9,9 +9,8 @@ export const PROTECTED_COMMANDS = [
     // Wallet commands
     'wallet',
     'deposit',
-
-    // Coming soon
-    'transfer',
+    'send',
+    'kyc',
     'withdraw',
     'history'
 ];

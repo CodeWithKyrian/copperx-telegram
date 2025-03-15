@@ -39,6 +39,7 @@ export function createMockContext(overrides = {}): GlobalContext {
             sendMessage: jest.fn().mockResolvedValue({}),
             sendPhoto: jest.fn().mockResolvedValue({}),
             deleteMessage: jest.fn().mockResolvedValue(true),
+            setMyCommands: jest.fn().mockResolvedValue({}),
         },
     };
 

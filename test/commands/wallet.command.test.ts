@@ -122,7 +122,8 @@ describe('Wallet Command', () => {
         expect(keyboard).toHaveProperty('reply_markup.inline_keyboard');
         expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('➕ Create New Wallet');
         expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('💸 Deposit');
-        expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('📤 Transfer');
+        expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('📤 Send');
+        expect(keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text)).toContain('💳 Withdraw');
     });
 
     it('should handle case when user has no wallets', async () => {
@@ -152,7 +153,6 @@ describe('Wallet Command', () => {
         // Should have create buttons for each network plus cancel
         const buttons = keyboard.reply_markup.inline_keyboard.flat().map((btn: { text: string }) => btn.text);
         expect(buttons).toContain('➕ Create a Wallet');
-        expect(buttons).toContain('❌ Cancel');
     });
 
     it('should handle error when retrieving wallet balances', async () => {

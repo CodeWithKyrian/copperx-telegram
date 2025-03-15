@@ -26,8 +26,8 @@ const PURPOSE_CODES: PurposeCode[] = [
 
 
 // Create a wizard scene for the send transfer flow
-const transferScene = new Scenes.WizardScene<SendTransferContext>(
-    'transfer',
+const sendScene = new Scenes.WizardScene<SendTransferContext>(
+    'send',
 
     // Step 1: Choose recipient type (email or wallet address)
     async (ctx) => {
@@ -38,8 +38,8 @@ const transferScene = new Scenes.WizardScene<SendTransferContext>(
         ctx.scene.session.purposeCode = undefined;
 
         await ctx.reply(
-            '💸 *Transfer Funds*\n\n' +
-            'Please select how you would like to transfer funds:',
+            '💸 *Send Funds*\n\n' +
+            'Please select how you would like to send funds:',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([
@@ -78,13 +78,13 @@ const transferScene = new Scenes.WizardScene<SendTransferContext>(
                 if (recipientType === 'email') {
                     await ctx.reply(
                         '📧 *Enter Recipient Email*\n\n' +
-                        'Please enter the email address of the person you want to transfer funds to:',
+                        'Please enter the email address of the person you want to send funds to:',
                         { parse_mode: 'Markdown' }
                     );
                 } else {
                     await ctx.reply(
                         '📝 *Enter Wallet Address*\n\n' +
-                        'Please enter the wallet address you want to transfer funds to:',
+                        'Please enter the wallet address you want to send funds to:',
                         { parse_mode: 'Markdown' }
                     );
                 }
@@ -161,7 +161,9 @@ const transferScene = new Scenes.WizardScene<SendTransferContext>(
             await ctx.reply(
                 '❌ *Invalid Amount*\n\n' +
                 'Please enter a valid amount greater than 0:',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown'
+                }
             );
             return;
         }
@@ -274,11 +276,6 @@ const transferScene = new Scenes.WizardScene<SendTransferContext>(
             const callbackQuery = ctx.update.callback_query as CallbackQuery.DataQuery;
             const callbackData = callbackQuery.data;
 
-            if (callbackData === 'cancel') {
-                await ctx.answerCbQuery();
-                await ctx.reply('Transfer cancelled.');
-                return ctx.scene.leave();
-            }
 
             if (callbackData === 'confirm') {
                 await ctx.answerCbQuery();
@@ -320,7 +317,7 @@ const transferScene = new Scenes.WizardScene<SendTransferContext>(
                         {
                             parse_mode: 'Markdown',
                             ...Markup.inlineKeyboard([
-                                [Markup.button.callback('📋 View Transfer History', 'transfer_history')],
+                                [Markup.button.callback('📋 View Transfer History', 'history')],
                                 [Markup.button.callback('💼 Back to Wallet', 'view_wallets')]
                             ])
                         }
@@ -357,16 +354,16 @@ const transferScene = new Scenes.WizardScene<SendTransferContext>(
 );
 
 // Add action handlers for cancel operation
-transferScene.action('cancel', async (ctx) => {
+sendScene.action('cancel', async (ctx) => {
     await ctx.answerCbQuery();
     await ctx.reply('Transfer cancelled.');
     return ctx.scene.leave();
 });
 
 // Handle command to exit the scene
-transferScene.command('cancel', async (ctx) => {
+sendScene.command('cancel', async (ctx) => {
     await ctx.reply('Transfer cancelled.');
     return ctx.scene.leave();
 });
 
-export { transferScene }; 
+export { sendScene }; 

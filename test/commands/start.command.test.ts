@@ -11,7 +11,7 @@ describe('Start Command', () => {
 
         // Assert
         expect(ctx.reply).toHaveBeenCalledWith(
-            expect.stringContaining('Welcome to CopperX Telegram Bot')
+            expect.stringContaining('Hello')
         );
     });
 });

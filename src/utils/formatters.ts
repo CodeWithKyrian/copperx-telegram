@@ -1,7 +1,20 @@
-import { Wallet, BalanceResponse, PurposeCode, BankAccountType, Country, TransferType, TransferStatus } from '../types/api.types';
+import { Wallet, BalanceResponse, PurposeCode, BankAccountType, Country, TransferType, TransferStatus, UserStatus } from '../types/api.types';
 import { formatNetworkName } from './chain.utils';
 
 
+
+/**
+ * Capitalizes a string
+ * @param text String to capitalize
+ * @returns Capitalized string
+ */
+export function capitalize(text?: string): string {
+    if (!text) return 'Not set';
+
+    return text.split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
 
 /**
  * Formats wallet address for display (truncates middle)
@@ -174,3 +187,16 @@ export function formatTransferStatus(status: TransferStatus): string {
         case 'pending': return 'Pending';
     }
 }
+
+/**
+ * Formats a user status for display
+ */
+export function formatUserStatus(status: UserStatus): string {
+    const message: Record<UserStatus, string> = {
+        'pending': '⏳ Pending',
+        'active': '✅ Active',
+        'suspended': '❌ Suspended',
+    }
+
+    return message[status] || 'Unknown status';
+};

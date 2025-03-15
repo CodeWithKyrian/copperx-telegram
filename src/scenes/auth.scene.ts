@@ -21,43 +21,46 @@ export type AuthSceneContext = GlobalContext<AuthSceneSessionData>;
  * Creates and configures the authentication scene
  * @returns Configured authentication scene
  */
-export const createAuthScene = (): Scenes.BaseScene<AuthSceneContext> => {
-    const scene = new Scenes.BaseScene<AuthSceneContext>(AUTH_SCENE_ID);
+const authScene = new Scenes.BaseScene<AuthSceneContext>(AUTH_SCENE_ID);
 
-    scene.enter(handleSceneEnter);
+authScene.enter(handleSceneEnter);
 
-    scene.leave(handleSceneLeave);
+authScene.leave(handleSceneLeave);
 
-    scene.command('cancel', handleCancelCommand);
+authScene.command('cancel', handleCancelCommand);
 
-    scene.on(message('text'), async (ctx) => {
-        const text = ctx.message.text;
+authScene.action('cancel', handleCancelAction);
 
-        if (ctx.scene.session.waitingForOtp) {
-            await handleOtpVerification(ctx, text.trim());
-        } else {
-            await handleEmailInput(ctx, text.trim().toLowerCase());
-        }
-    });
+authScene.on(message('text'), async (ctx) => {
+    const text = ctx.message.text;
 
-    return scene;
-};
+    if (ctx.scene.session.waitingForOtp) {
+        await handleOtpVerification(ctx, text.trim());
+    } else {
+        await handleEmailInput(ctx, text.trim().toLowerCase());
+    }
+});
 
-const handleSceneEnter = async (ctx: GlobalContext & { scene: { session: AuthSceneSessionData } }) => {
+
+async function handleSceneEnter(ctx: GlobalContext & { scene: { session: AuthSceneSessionData } }) {
     // Reset scene session data
     ctx.scene.session.waitingForOtp = false;
     ctx.scene.session.email = undefined;
     ctx.scene.session.tempOtpSid = undefined;
 
     await ctx.reply(
-        '🔐 *Authentication Required*\n\n' +
-        'To access CopperX features, please login with your CopperX account.\n\n' +
-        'Please enter your email address:',
-        { parse_mode: 'Markdown' }
+        '🔑 *Login to Your CopperX Account*\n\n' +
+        'Please enter your email address to receive a verification code:',
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('❌ Cancel', 'cancel')]
+            ])
+        }
     );
 }
 
-const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
+async function handleEmailInput(ctx: AuthSceneContext, email: string) {
     // Simple email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -114,7 +117,7 @@ const handleEmailInput = async (ctx: AuthSceneContext, email: string) => {
     }
 };
 
-const handleOtpVerification = async (ctx: AuthSceneContext, otp: string) => {
+async function handleOtpVerification(ctx: AuthSceneContext, otp: string) {
     try {
         if (RateLimiterService.isLimited(ctx, RateLimits.OTP_VERIFY)) {
             const resetTime = RateLimiterService.availableInText(ctx, `${RateLimits.OTP_VERIFY.key}:${ctx.from?.id}`) || 'soon';
@@ -168,11 +171,11 @@ const handleOtpVerification = async (ctx: AuthSceneContext, otp: string) => {
     }
 };
 
-const handleSceneLeave = async (ctx: AuthSceneContext) => {
+async function handleSceneLeave(ctx: AuthSceneContext) {
     logger.info('Exited authentication scene', { scene: ctx.scene.current?.id });
 }
 
-const handleCancelCommand = async (ctx: AuthSceneContext) => {
+async function handleCancelCommand(ctx: AuthSceneContext) {
     await ctx.reply(
         '🚫 *Authentication Cancelled*\n\n' +
         'You can use /login to try again when you\'re ready.',
@@ -183,3 +186,10 @@ const handleCancelCommand = async (ctx: AuthSceneContext) => {
     );
     await ctx.scene.leave();
 }
+
+async function handleCancelAction(ctx: AuthSceneContext) {
+    await ctx.answerCbQuery('🚫 Authentication cancelled');
+    await ctx.scene.leave();
+}
+
+export { authScene };

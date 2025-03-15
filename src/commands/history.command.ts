@@ -6,7 +6,7 @@ import logger from '../utils/logger';
 /**
  * Handles the /history command to view transfer history
  */
-export const transferHistoryCommand = async (ctx: GlobalContext): Promise<void> => {
+export const historyCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
         await ctx.reply('🔍 Fetching your recent transfers...');
 
@@ -43,6 +43,11 @@ export const transferHistoryCommand = async (ctx: GlobalContext): Promise<void> 
     }
 };
 
+export async function historyAction(ctx: GlobalContext) {
+    await ctx.answerCbQuery();
+    await historyCommand(ctx);
+}
+
 /**
  * Formats a message showing the list of transfers
  */
@@ -55,3 +60,4 @@ function formatTransferListMessage(transfers: any[]): string {
 
     return message;
 }
+

@@ -33,3 +33,8 @@ export const loginCommand = async (ctx: GlobalContext): Promise<void> => {
 
     await ctx.scene.enter(AUTH_SCENE_ID);
 };
+
+export const loginAction = async (ctx: GlobalContext): Promise<void> => {
+    await ctx.answerCbQuery();
+    await loginCommand(ctx);
+};

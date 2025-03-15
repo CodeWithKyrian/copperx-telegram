@@ -22,8 +22,9 @@ export const helpCommand = async (ctx: GlobalContext): Promise<void> => {
 *Wallet Management:*
 • /wallet - View your wallets and balances
 • /deposit - Start the deposit process
+• /send - Send funds to an email or wallet address
 • /withdraw - Withdraw funds to a bank account
-• /history - View your transaction history
+• /history - View your transfer history
 
 
 *Support:*
@@ -36,4 +37,9 @@ If you need further assistance, please contact [CopperX Support](https://t.me/co
             is_disabled: true
         }
     });
+};
+
+export const helpAction = async (ctx: GlobalContext): Promise<void> => {
+    await ctx.answerCbQuery();
+    await helpCommand(ctx);
 };

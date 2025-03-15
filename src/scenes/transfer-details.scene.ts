@@ -72,7 +72,7 @@ async function showTransferDetails(ctx: TransferDetailsContext, transferId: stri
 
         // Create keyboard with actions
         const keyboard = Markup.inlineKeyboard([
-            [Markup.button.callback('🔙 Back to Transfer History', 'transfer_history')],
+            [Markup.button.callback('🔙 Back to Transfer History', 'history')],
             [Markup.button.callback('💼 View Wallets', 'view_wallets')]
         ]);
 
@@ -92,7 +92,7 @@ async function showTransferDetails(ctx: TransferDetailsContext, transferId: stri
 }
 
 // Handle back to list action
-transferDetailsScene.action('transfer_history', async (ctx) => {
+transferDetailsScene.action('history', async (ctx) => {
     await ctx.answerCbQuery();
     await ctx.reply('Returning to transfer history...');
     await ctx.reply('Use /history to view your transfer history again.');

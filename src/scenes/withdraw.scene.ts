@@ -405,7 +405,7 @@ const withdrawScene = new Scenes.WizardScene<WithdrawContext>(
                     {
                         parse_mode: 'Markdown',
                         ...Markup.inlineKeyboard([
-                            [Markup.button.callback('📋 View Transfer History', 'transfer_history')],
+                            [Markup.button.callback('📋 View Transfer History', 'history')],
                             [Markup.button.callback('💼 Back to Wallet', 'view_wallets')]
                         ])
                     }

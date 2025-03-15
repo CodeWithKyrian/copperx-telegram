@@ -79,13 +79,6 @@ export async function walletSetDefaultActionWithWallet(ctx: GlobalContext & { ma
     return await ctx.scene.enter(SCENE_IDS.WALLET_DEFAULT, { walletId });
 }
 
-/**
- * Handles the action to cancel a wallet operation
- */
-export async function walletCancelAction(ctx: GlobalContext) {
-    await ctx.answerCbQuery();
-    await ctx.reply('Operation cancelled.');
-}
 
 /**
  * Handles case when user has no wallets
@@ -97,8 +90,7 @@ async function handleNoWallets(ctx: GlobalContext): Promise<void> {
         {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
-                [Markup.button.callback('➕ Create a Wallet', 'wallet_create')],
-                [Markup.button.callback('❌ Cancel', 'wallet_cancel')]
+                [Markup.button.callback('➕ Create a Wallet', 'create_wallet')],
             ])
         }
     );
@@ -151,14 +143,14 @@ async function displayWalletSummary(
 
     const keyboard = Markup.inlineKeyboard([
         [
-            Markup.button.callback('💸 Deposit', 'deposit_create'),
-            Markup.button.callback('📤 Send', 'send_create'),
-            Markup.button.callback('💳 Withdraw', 'withdraw_create')
+            Markup.button.callback('💸 Deposit', 'deposit_funds'),
+            Markup.button.callback('📤 Send', 'send_funds'),
+            Markup.button.callback('💳 Withdraw', 'withdraw_funds')
         ],
         [
-            Markup.button.callback('➕ Create New Wallet', 'wallet_create'),
+            Markup.button.callback('➕ Create New Wallet', 'create_wallet'),
         ], [
-            Markup.button.callback('🔁 Set Default Wallet', 'wallet_set_default')
+            Markup.button.callback('🔁 Set Default Wallet', 'set_default_wallet')
         ],
         [
             Markup.button.callback('📋 Transaction History', 'history')

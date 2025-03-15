@@ -1,5 +1,8 @@
+import { Markup } from 'telegraf';
 import { authService } from '../services/auth.service';
-import { GlobalContext, UserStatus } from '../types';
+import { GlobalContext } from '../types';
+import { capitalize, formatUserStatus, formatWalletAddress } from '../utils/formatters';
+import logger from '../utils/logger';
 
 
 /**
@@ -10,31 +13,6 @@ export const profileCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
         const profile = await authService.getCurrentUser();
 
-        const formatAddress = (address?: string): string => {
-            if (!address) return 'Not set';
-
-            return address.length > 16 ?
-                `${address.substring(0, 8)}...${address.substring(address.length - 8)}` :
-                address;
-        };
-
-        const capitalize = (text?: string): string => {
-            if (!text) return 'Not set';
-
-            return text.split('_')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-        };
-
-        const formatStatus = (status: UserStatus): string => {
-            const message: Record<UserStatus, string> = {
-                'pending': '⏳ Pending',
-                'active': '✅ Active',
-                'suspended': '❌ Suspended',
-            }
-
-            return message[status] || 'Unknown status';
-        };
 
         await ctx.reply(
             '👤 *YOUR COPPERX PROFILE*\n\n' +
@@ -42,7 +20,7 @@ export const profileCommand = async (ctx: GlobalContext): Promise<void> => {
             '📝 *Account Info*\n' +
             `• Name: ${profile.firstName || 'Not set'}\n` +
             `• Email: ${profile.email || 'Not set'}\n` +
-            `• Status: ${formatStatus(profile.status)}\n` +
+            `• Status: ${formatUserStatus(profile.status)}\n` +
             `• Type: ${capitalize(profile.type)}\n\n` +
 
             '🏢 *Organization*\n' +
@@ -53,19 +31,45 @@ export const profileCommand = async (ctx: GlobalContext): Promise<void> => {
             '💼 *Wallet Details*\n' +
             `• Wallet ID: ${profile.walletId ? '`' + profile.walletId + '`' : 'Not set'}\n` +
             `• Type: ${capitalize(profile.walletAccountType)}\n` +
-            `• Address: ${formatAddress(profile.walletAddress)}\n\n` +
-
-            '🔄 *Relay Address*\n' +
-            `• ${formatAddress(profile.relayerAddress)}\n\n` +
+            `• Address: ${formatWalletAddress(profile.walletAddress)}\n\n` +
 
             '_Use /balance to check your wallet balance._',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [
+                        Markup.button.callback('💼 View Wallets', 'view_wallets'),
+                        Markup.button.callback('🔐 KYC Status', 'kyc_status')
+                    ],
+                    [
+                        Markup.button.callback('💳 Deposit Funds', 'deposit_funds'),
+                        Markup.button.callback('📤 Send Funds', 'send_funds'),
+                    ],
+                    [
+                        Markup.button.callback('📜 Transaction History', 'history'),
+                        Markup.button.callback('🔙 Back to Menu', 'main_menu')
+                    ],
+                    [Markup.button.callback('🚪 Logout', 'logout')]
+                ])
+            }
         );
     } catch (error) {
+        logger.error('Error fetching profile', { error });
         await ctx.reply(
             '❌ *Error Retrieving Profile*\n\n' +
             'There was a problem retrieving your profile. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔄 Try Again', 'profile')],
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
     }
+};
+
+export const profileAction = async (ctx: GlobalContext): Promise<void> => {
+    await ctx.answerCbQuery();
+    await profileCommand(ctx);
 };

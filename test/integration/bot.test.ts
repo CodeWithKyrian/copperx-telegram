@@ -22,6 +22,7 @@ jest.mock('telegraf', () => {
                 first_name: 'Test Bot',
                 username: 'test_bot',
             }),
+            setMyCommands: jest.fn(),
         },
     }));
 

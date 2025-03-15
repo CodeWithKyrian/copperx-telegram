@@ -33,3 +33,8 @@ export const logoutCommand = async (ctx: GlobalContext): Promise<void> => {
         );
     }
 };
+
+export const logoutAction = async (ctx: GlobalContext): Promise<void> => {
+    await ctx.answerCbQuery();
+    await logoutCommand(ctx);
+};

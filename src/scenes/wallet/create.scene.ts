@@ -129,8 +129,8 @@ async function createWallet(ctx: GlobalContext, network: string): Promise<void> 
             'What would you like to do next?',
             Markup.inlineKeyboard([
                 [Markup.button.callback('💼 View All Wallets', 'view_wallets')],
-                [Markup.button.callback('💸 Deposit to this Wallet', `deposit_create:${wallet.id}`)],
-                [Markup.button.callback('✓ Set as Default', `wallet_set_default:${wallet.id}`)]
+                [Markup.button.callback('💸 Deposit to this Wallet', `deposit_funds:${wallet.id}`)],
+                [Markup.button.callback('✓ Set as Default', `set_default_wallet:${wallet.id}`)]
             ])
         );
     } catch (error) {

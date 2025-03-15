@@ -5,6 +5,8 @@ import logger from '../utils/logger';
 import { PurposeCode } from '../types/api.types';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
 import { isValidEmail, isValidWalletAddress } from '../utils/validators';
+import { walletService } from '../services/wallet.service';
+import { formatPurposeCode } from '../utils/formatters';
 
 interface SendTransferSessionData extends GlobalSceneSession {
     recipientType?: 'email' | 'wallet';
@@ -22,20 +24,6 @@ const PURPOSE_CODES: PurposeCode[] = [
     'education_support', 'family', 'home_improvement', 'reimbursement'
 ];
 
-// Format a purpose code for display
-function formatPurposeCode(code: PurposeCode): string {
-    switch (code) {
-        case 'self': return 'Personal Use';
-        case 'salary': return 'Salary Payment';
-        case 'gift': return 'Gift';
-        case 'income': return 'Income';
-        case 'saving': return 'Savings';
-        case 'education_support': return 'Education Support';
-        case 'family': return 'Family Support';
-        case 'home_improvement': return 'Home Improvement';
-        case 'reimbursement': return 'Reimbursement';
-    }
-}
 
 // Create a wizard scene for the send transfer flow
 const transferScene = new Scenes.WizardScene<SendTransferContext>(
@@ -180,6 +168,25 @@ const transferScene = new Scenes.WizardScene<SendTransferContext>(
 
         // Store the amount
         ctx.scene.session.amount = input;
+
+        // Get balance to verify funds
+        const balance = await walletService.getTotalBalance();
+
+        if (balance && parseFloat(balance.balance) < amount) {
+            await ctx.reply(
+                '❌ *Insufficient Funds*\n\n' +
+                `Your current balance is ${balance.balance} ${balance.symbol}, ` +
+                `which is less than the requested withdrawal amount of ${amount} ${balance.symbol}. ` +
+                'Please enter a smaller amount or deposit more funds.',
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('❌ Cancel', 'cancel')]
+                    ])
+                }
+            );
+            return;
+        }
 
         // Create buttons for purpose codes (in rows of 2)
         const purposeButtons = PURPOSE_CODES.map(code =>

@@ -19,6 +19,7 @@ export const helpCommand = async (ctx: GlobalContext): Promise<void> => {
 *Wallet Management:*
 • /wallet - View your wallets and balances
 • /deposit - Start the deposit process
+• /withdraw - Withdraw funds to a bank account
 
 *Coming Soon:*
 • /transfer - Send funds to another user or wallet

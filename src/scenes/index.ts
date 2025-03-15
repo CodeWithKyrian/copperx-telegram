@@ -7,6 +7,8 @@ import { depositScene } from './transactions/deposit.scene';
 import { transactionDetailsScene } from './transactions/details.scene';
 import { transferScene } from './transfer.scene';
 import { transferDetailsScene } from './transfer-details.scene';
+import { withdrawScene } from './withdraw.scene';
+
 /**
  * Configures scene manager for bot
  * @param bot Telegraf instance
@@ -21,6 +23,8 @@ export const configureScenes = (bot: Telegraf<GlobalContext>): void => {
         defaultWalletScene,
 
         depositScene,
+
+        withdrawScene,
 
         transactionDetailsScene,
 
@@ -45,5 +49,9 @@ export const SCENE_IDS = {
     AUTH: 'auth',
     WALLET_CREATE: 'wallet_create',
     WALLET_DEFAULT: 'wallet_default',
-    DEPOSIT: 'wallet_deposit'
+    DEPOSIT: 'wallet_deposit',
+    WITHDRAW: 'withdraw',
+    TRANSACTION_DETAILS: 'transaction_details',
+    TRANSFER: 'transfer',
+    TRANSFER_DETAILS: 'transfer_details'
 };

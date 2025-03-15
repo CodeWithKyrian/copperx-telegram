@@ -729,7 +729,7 @@ export interface Payee {
     hasBankAccount: boolean;
 }
 
-export interface CreatePayeeBankAccount {
+export interface CreatePayeeBankAccountRequest {
     country: Country;
     bankName: string;
     bankAddress: string;
@@ -742,15 +742,15 @@ export interface CreatePayeeBankAccount {
     swiftCode: string;
 }
 
-export interface CreatePayee {
+export interface CreatePayeeRequest {
     nickName: string;
     firstName?: string;
     lastName?: string;
     email: string;
-    bankAccount?: CreatePayeeBankAccount;
+    bankAccount?: CreatePayeeBankAccountRequest;
 }
 
-export interface UpdatePayee {
+export interface UpdatePayeeRequest {
     nickName: string;
     firstName?: string;
     lastName?: string;

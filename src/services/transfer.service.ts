@@ -5,11 +5,12 @@ import {
     PaginatedResponse,
     PurposeCode,
     TransferWithAccount,
-    TransferWithTransactions
+    TransferWithTransactions,
+    CreateOfframpTransferRequest,
 } from '../types/api.types';
 import transferApi from '../api/transfer.api';
 import logger from '../utils/logger';
-import { formatDate, formatCurrency } from '../utils/formatters';
+import { formatDate, formatCurrency, formatTransferType, formatTransferStatus, formatPurposeCode } from '../utils/formatters';
 import { formatNetworkName } from '../utils/chain.utils';
 
 /**
@@ -87,6 +88,25 @@ export class TransferService {
             return result;
         } catch (error) {
             logger.error('Failed to withdraw funds to wallet', { error, walletAddress, amount });
+            return null;
+        }
+    }
+
+    /**
+     * Withdraw funds to a bank account
+     */
+    public async withdrawToBank(quotePayload: string, quoteSignature: string, purposeCode: PurposeCode): Promise<TransferWithAccount | null> {
+        try {
+            const withdrawRequest: CreateOfframpTransferRequest = {
+                quotePayload,
+                quoteSignature,
+                purposeCode
+            };
+
+            const result = await transferApi.createOfframpTransfer(withdrawRequest);
+            return result;
+        } catch (error) {
+            logger.error('Failed to withdraw funds to bank account', { error });
             return null;
         }
     }
@@ -175,14 +195,14 @@ export class TransferService {
 
         // Format purpose
         const purpose = transfer.purposeCode
-            ? `Purpose: ${this.formatPurposeCode(transfer.purposeCode)}`
+            ? `Purpose: ${formatPurposeCode(transfer.purposeCode)}`
             : '';
 
         // Combine all information
         return [
-            `${typeEmoji} *Transfer: ${this.formatTransferType(transfer.type)}*`,
+            `${typeEmoji} *Transfer: ${formatTransferType(transfer.type)}*`,
             `ID: \`${transfer.id}\``,
-            `Status: ${statusEmoji} ${this.formatTransferStatus(transfer.status)}`,
+            `Status: ${statusEmoji} ${formatTransferStatus(transfer.status)}`,
             `Amount: ${formattedAmount}`,
             feeText,
             `Date: ${date}`,
@@ -219,7 +239,7 @@ export class TransferService {
             }
 
             return [
-                `${index + 1}. ${typeEmoji} ${this.formatTransferType(transfer.type)} (${date})`,
+                `${index + 1}. ${typeEmoji} ${formatTransferType(transfer.type)} (${date})`,
                 `   ${statusEmoji} ${formatCurrency(transfer.amount)} ${transfer.currency} ${destination}`,
                 `   ID: \`${transfer.id}\``
             ].join('\n');
@@ -258,57 +278,6 @@ export class TransferService {
     }
 
     /**
-     * Formats a transfer type for display
-     */
-    private formatTransferType(type: string): string {
-        switch (type) {
-            case 'send': return 'Send';
-            case 'receive': return 'Receive';
-            case 'withdraw': return 'Withdrawal';
-            case 'deposit': return 'Deposit';
-            case 'bridge': return 'Bridge';
-            case 'bank_deposit': return 'Bank Deposit';
-            default: return type.charAt(0).toUpperCase() + type.slice(1);
-        }
-    }
-
-    /**
-     * Formats a transfer status for display
-     */
-    private formatTransferStatus(status: string): string {
-        switch (status) {
-            case 'initiated': return 'Initiated';
-            case 'processing': return 'Processing';
-            case 'success': return 'Completed';
-            case 'canceled': return 'Canceled';
-            case 'failed': return 'Failed';
-            case 'refunded': return 'Refunded';
-            case 'pending': return 'Pending';
-            default: return status.charAt(0).toUpperCase() + status.slice(1);
-        }
-    }
-
-    /**
-     * Formats a purpose code for display
-     */
-    private formatPurposeCode(purpose: string): string {
-        switch (purpose) {
-            case 'self': return 'Personal Use';
-            case 'salary': return 'Salary Payment';
-            case 'gift': return 'Gift';
-            case 'income': return 'Income';
-            case 'saving': return 'Savings';
-            case 'education_support': return 'Education Support';
-            case 'family': return 'Family Support';
-            case 'home_improvement': return 'Home Improvement';
-            case 'reimbursement': return 'Reimbursement';
-            default: return purpose.split('_').map(word =>
-                word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ');
-        }
-    }
-
-    /**
      * Formats an address for display
      */
     private formatAddress(address: string): string {
@@ -319,6 +288,8 @@ export class TransferService {
         const end = address.substring(address.length - 8);
         return `${start}...${end}`;
     }
+
+
 }
 
 // Export default instance

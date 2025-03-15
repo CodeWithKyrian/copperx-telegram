@@ -26,7 +26,7 @@ import { depositAction, depositActionWithWallet, depositCommand } from "./deposi
 import { transferAction, transferCommand, transferDetailsAction, transferHistoryAction } from "./transfer.command";
 import { transferHistoryCommand } from "./transfer-history.command";
 import { message } from "telegraf/filters";
-
+import { withdrawCommand } from "./withdraw.command";
 /**
  * Registers all command handlers with the bot
  * @param bot Telegraf bot instance
@@ -54,6 +54,9 @@ export const registerCommands = (bot: Telegraf<GlobalContext>): void => {
     bot.command('deposit', depositCommand);
     bot.action('deposit_create', depositAction);
     bot.action(/deposit_create:(.+)/, depositActionWithWallet);
+
+    // Withdraw commands
+    bot.command('withdraw', withdrawCommand);
 
     // Transfer commands
     bot.command('transfer', transferCommand);

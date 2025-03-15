@@ -1,4 +1,4 @@
-import { Wallet, BalanceResponse } from '../types/api.types';
+import { Wallet, BalanceResponse, PurposeCode, BankAccountType, Country, TransferType, TransferStatus } from '../types/api.types';
 import { formatNetworkName } from './chain.utils';
 
 
@@ -99,4 +99,78 @@ export function formatWalletInfo(wallet: Wallet): string {
 export function truncateText(text: string, maxLength: number = 30): string {
     if (!text || text.length <= maxLength) return text;
     return text.substring(0, maxLength - 3) + '...';
+}
+
+// Format a purpose code for display
+export function formatPurposeCode(code: PurposeCode): string {
+    switch (code) {
+        case 'self': return 'Personal Use';
+        case 'salary': return 'Salary Payment';
+        case 'gift': return 'Gift';
+        case 'income': return 'Income';
+        case 'saving': return 'Savings';
+        case 'education_support': return 'Education Support';
+        case 'family': return 'Family Support';
+        case 'home_improvement': return 'Home Improvement';
+        case 'reimbursement': return 'Reimbursement';
+    }
+}
+
+/**
+ * Format a bank account type for display
+ */
+export function formatBankAccountType(type: BankAccountType): string {
+    switch (type) {
+        case 'savings': return 'Savings';
+        case 'checking': return 'Checking';
+    }
+}
+
+/**
+ * Format a country code for display
+ */
+export function formatCountry(countryCode: Country): string {
+    const countryNames: { [key: string]: string } = {
+        'usa': 'United States',
+        'ind': 'India',
+        'are': 'United Arab Emirates',
+        'idn': 'Indonesia',
+        'pak': 'Pakistan',
+        'sgp': 'Singapore',
+        'esp': 'Spain',
+        'can': 'Canada',
+        'gbr': 'United Kingdom',
+        'aus': 'Australia',
+    };
+
+    return countryNames[countryCode] || countryCode.toUpperCase();
+}
+
+/**
+     * Formats a transfer type for display
+ */
+export function formatTransferType(type: TransferType): string {
+    switch (type) {
+        case 'send': return 'Send';
+        case 'receive': return 'Receive';
+        case 'withdraw': return 'Withdrawal';
+        case 'deposit': return 'Deposit';
+        case 'bridge': return 'Bridge';
+        case 'bank_deposit': return 'Bank Deposit';
+    }
+}
+
+/**
+ * Formats a transfer status for display
+ */
+export function formatTransferStatus(status: TransferStatus): string {
+    switch (status) {
+        case 'initiated': return 'Initiated';
+        case 'processing': return 'Processing';
+        case 'success': return 'Completed';
+        case 'canceled': return 'Canceled';
+        case 'failed': return 'Failed';
+        case 'refunded': return 'Refunded';
+        case 'pending': return 'Pending';
+    }
 }

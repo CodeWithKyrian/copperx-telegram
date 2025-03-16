@@ -75,7 +75,10 @@ export function formatDate(dateString: string | undefined): string {
         return date.toLocaleDateString(undefined, {
             year: 'numeric',
             month: 'short',
-            day: 'numeric'
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
         });
     } catch (e) {
         return dateString;

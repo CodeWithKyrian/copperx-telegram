@@ -5,6 +5,7 @@ import { authMiddleware } from "./auth.middleware";
 import { apiClientMiddleware } from "./api-client.middleware";
 import { rateLimitMiddleware } from "./rate-limit.middleware";
 import { GlobalContext } from "../types";
+import { notificationMiddleware } from "./notification.middleware";
 
 
 export const configureMiddlewares = (bot: Telegraf<GlobalContext>) => {
@@ -18,5 +19,8 @@ export const configureMiddlewares = (bot: Telegraf<GlobalContext>) => {
 
     bot.use(authMiddleware());
 
+    bot.use(notificationMiddleware());
+
     bot.use(apiClientMiddleware());
+
 };

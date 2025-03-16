@@ -20,6 +20,8 @@ import { historyCommand, historyAction } from "./history.command";
 import { message } from "telegraf/filters";
 import { withdrawAction, withdrawCommand } from "./withdraw.command";
 import { kycCommand, kycStatusAction } from "./kyc.command";
+import { testNotificationCommand } from "./notification.command";
+import { environment } from "../config";
 /**
  * Registers all command handlers with the bot
  * @param bot Telegraf bot instance
@@ -37,6 +39,10 @@ export const registerCommands = (bot: Telegraf<GlobalContext>): void => {
     bot.command('send', sendCommand);
     bot.command('withdraw', withdrawCommand);
     bot.command('history', historyCommand);
+
+    if (environment.isDevelopment) {
+        bot.command('test_notifications', testNotificationCommand);
+    }
 
     // Set up command descriptions in Telegram menu
     bot.telegram.setMyCommands([

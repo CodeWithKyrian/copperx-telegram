@@ -204,6 +204,42 @@ export function getExplorerAddressUrl(chainId: string, address: string): string 
 }
 
 /**
+ * Helper method to get chain ID from network name
+ */
+export function getChainIdFromNetworkName(networkName: string): string | undefined {
+    // Normalize network name
+    const normalizedName = networkName.toLowerCase().trim();
+
+    // Check for direct matches with chain info
+    for (const [chainId, info] of Object.entries(CHAIN_INFO)) {
+        if (
+            info.name.toLowerCase() === normalizedName ||
+            info.fullName.toLowerCase() === normalizedName
+        ) {
+            return chainId;
+        }
+    }
+
+    // Handle common variations
+    const networkMap: Record<string, string> = {
+        'polygon': '137',
+        'ethereum': '1',
+        'eth': '1',
+        'arbitrum': '42161',
+        'base': '8453',
+        'optimism': '10',
+        'binance': '56',
+        'bsc': '56',
+        'bnb': '56',
+        'solana': '1399811149',
+        'avalanche': '23434',
+        'avax': '23434'
+    };
+
+    return networkMap[normalizedName];
+}
+
+/**
  * Formats a network name for display, with optional testnet indicator
  * @param chainId Chain ID
  * @param showTestnet Whether to show testnet indicator

@@ -14,7 +14,7 @@ export const logoutCommand = async (ctx: GlobalContext): Promise<void> => {
 
     try {
         // Clear token on the API side
-        await authService.logout();
+        await authService.logout(ctx);
 
         // Clear session auth data
         authService.clearSessionAuth(ctx);

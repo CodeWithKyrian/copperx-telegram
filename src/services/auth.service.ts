@@ -5,6 +5,7 @@ import logger from '../utils/logger';
 import { GlobalContext } from '../types';
 import { Encryption } from '../utils/encryption.utils';
 import { AuthSceneContext } from '../scenes/auth.scene';
+import { notificationService } from './notification.service';
 
 /**
  * Authentication service for handling user authentication
@@ -67,6 +68,11 @@ export class AuthService {
 
             // Update user profile data in session
             this.updateSessionUserProfile(ctx, authResponse.user);
+
+            // After successful login, subscribe to notifications if user has ID and organization ID
+            if (ctx.from?.id && authResponse.user.organizationId) {
+                notificationService.subscribeToDeposits(ctx.from.id, authResponse.user.organizationId);
+            }
 
             logger.info('User authenticated successfully', {
                 userId: authResponse.user.id,
@@ -153,7 +159,18 @@ export class AuthService {
      * Logs out the current user
      * @returns Promise with logout result
      */
-    public async logout(): Promise<void> {
+    public async logout(ctx: GlobalContext): Promise<void> {
+        // Unsubscribe from notifications if user has ID
+        if (ctx.from?.id && ctx.session?.auth?.organizationId) {
+            notificationService.unsubscribeFromDeposits(
+                ctx.from.id,
+                ctx.session.auth?.organizationId
+            );
+        } else if (ctx.from?.id) {
+            // Fallback: unsubscribe from all channels if we don't have the org ID
+            notificationService.unsubscribeAllForUser(ctx.from.id);
+        }
+
         try {
             await authApi.logout();
             apiClient.setAccessToken(null);
@@ -207,6 +224,8 @@ export class AuthService {
             return Encryption.decrypt(ctx.session.auth.accessToken);
         } catch (error) {
             logger.error('Failed to decrypt token', { error });
+            this.handleAuthError(ctx);
+            this.clearSessionAuth(ctx);
             return null;
         }
     }
@@ -218,6 +237,17 @@ export class AuthService {
     public setupApiClientForRequest(ctx: GlobalContext): void {
         const token = this.getDecryptedToken(ctx);
         apiClient.setAccessToken(token);
+    }
+
+    /**
+     * Handles authentication errors
+     * @param ctx Telegraf context
+     */
+    public handleAuthError(ctx: GlobalContext): void {
+        // Clean up notification subscriptions
+        if (ctx.from?.id) {
+            notificationService.unsubscribeAllForUser(ctx.from.id);
+        }
     }
 }
 

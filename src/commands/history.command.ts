@@ -16,8 +16,14 @@ export const historyCommand = async (ctx: GlobalContext): Promise<void> => {
         if (!response || !response.data || response.data.length === 0) {
             await ctx.reply(
                 '📭 *No Transfers Found*\n\n' +
-                'You haven\'t made any transfers yet. Use /transfer to make your first transfer.',
-                { parse_mode: 'Markdown' }
+                'You haven\'t made any transfers yet. Use /send to send funds to another email or wallet or /withdraw to withdraw funds to a bank account.',
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        Markup.button.callback('💸 Send', 'send_funds'),
+                        Markup.button.callback('📤 Withdraw', 'withdraw_funds'),
+                    ])
+                }
             );
             return;
         }

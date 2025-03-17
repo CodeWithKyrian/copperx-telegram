@@ -2,7 +2,7 @@ import { Middleware } from 'telegraf';
 import { authService } from '../services/auth.service';
 import logger from '../utils/logger';
 import { GlobalContext } from '../types';
-import { isProtectedCommand } from '../config/protected-routes';
+import { isProtectedAction, isProtectedCommand } from '../config/protected-routes';
 
 
 /**
@@ -36,6 +36,36 @@ export const authMiddleware = (): Middleware<GlobalContext> => {
                 }
 
                 logger.debug('Authenticated access to protected command', { command });
+            }
+        }
+
+        // Handle callback queries (button clicks)
+        if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
+            const action = ctx.callbackQuery.data;
+
+            // Check if this action requires authentication
+            if (isProtectedAction(action)) {
+                if (!authService.isAuthenticated(ctx)) {
+                    logger.info('Unauthenticated access attempt to protected action', {
+                        action,
+                        userId: ctx.from?.id,
+                        username: ctx.from?.username,
+                    });
+
+                    // Answer the callback query to stop the loading indicator
+                    await ctx.answerCbQuery('Authentication required. Please log in first.');
+
+                    // Send a message about authentication requirement
+                    await ctx.reply(
+                        '🔒 *Authentication Required*\n\n' +
+                        'You need to be logged in to use this feature.\n\n' +
+                        'Please use /login to authenticate with your CopperX account.',
+                        { parse_mode: 'Markdown' }
+                    );
+                    return; // Stop middleware chain
+                }
+
+                logger.debug('Authenticated access to protected action', { action });
             }
         }
 

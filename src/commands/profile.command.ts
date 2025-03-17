@@ -10,6 +10,8 @@ import logger from '../utils/logger';
  * @param ctx Telegraf context
  */
 export const profileCommand = async (ctx: GlobalContext): Promise<void> => {
+    await ctx.reply('🔄 Loading profile...');
+
     try {
         const profile = await authService.getCurrentUser();
 
@@ -33,7 +35,7 @@ export const profileCommand = async (ctx: GlobalContext): Promise<void> => {
             `• Type: ${capitalize(profile.walletAccountType)}\n` +
             `• Address: ${formatWalletAddress(profile.walletAddress)}\n\n` +
 
-            '_Use /balance to check your wallet balance._',
+            '_Use /wallet to check your wallet balance._',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([

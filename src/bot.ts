@@ -37,4 +37,3 @@ const configureErrorHandler = (bot: Telegraf<GlobalContext>) => {
         ctx.reply('An error occurred while processing your request. Please try again later.');
     });
 };
-

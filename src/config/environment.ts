@@ -13,6 +13,13 @@ export const environment = {
         timeout: parseInt(process.env.API_TIMEOUT || '30000', 10),
     },
 
+    webhook: {
+        domain: process.env.WEBHOOK_DOMAIN || '',
+        port: parseInt(process.env.WEBHOOK_PORT || '3000', 10),
+        secretPath: process.env.WEBHOOK_SECRET_PATH || '',
+        secretToken: process.env.WEBHOOK_SECRET_TOKEN || undefined,
+    },
+
     session: {
         driver: process.env.SESSION_DRIVER || 'memory',
         ttl: parseInt(process.env.SESSION_TTL || '604800', 10), // 7days

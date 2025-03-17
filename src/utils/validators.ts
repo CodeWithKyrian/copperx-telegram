@@ -18,10 +18,6 @@ export const validateEnvironment = (): void => {
     }
 };
 
-export const validate = {
-    environment: validateEnvironment,
-};
-
 /**
  * Validator functions for various input types
  */

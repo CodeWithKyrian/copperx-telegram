@@ -46,7 +46,7 @@ export const mainMenuAction = async (ctx: GlobalContext): Promise<void> => {
     await showMainMenu(ctx);
 };
 
-const showMainMenu = async (ctx: GlobalContext): Promise<void> => {
+export const showMainMenu = async (ctx: GlobalContext): Promise<void> => {
     try {
         const isAuthenticated = !!ctx.session?.auth?.accessToken;
 

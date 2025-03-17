@@ -22,6 +22,7 @@ import { withdrawAction, withdrawCommand } from "./withdraw.command";
 import { kycCommand, kycStatusAction } from "./kyc.command";
 import { testNotificationCommand } from "./notification.command";
 import { addPayeeAction, listPayeesAction, noSavePayeeAction, payeesCommand, removePayeeAction, savePayeeAction } from "./payee.command";
+import { handleNaturalLanguage } from "./natural-language.command";
 
 import { environment } from "../config";
 
@@ -43,6 +44,8 @@ export const configureCommands = (bot: Telegraf<GlobalContext>): void => {
             logger.debug(`Unknown command received`, { command: ctx.message.text });
             ctx.reply('Unknown command. Use /help to see available commands.');
         }
+
+        handleNaturalLanguage(ctx);
     });
 };
 

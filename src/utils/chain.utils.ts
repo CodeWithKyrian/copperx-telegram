@@ -128,17 +128,17 @@ export const CHAIN_INFO: Record<ChainId, ChainInfo> = {
 
     // Avalanche
     '23434': {
-        name: 'Avalanche',
-        fullName: 'Avalanche C-Chain',
+        name: 'Starknet',
+        fullName: 'Starknet Mainnet',
         isTestnet: false,
-        explorerUrl: 'https://snowtrace.io',
-        logoUrl: 'https://www.avax.network/favicon.ico'
+        explorerUrl: 'https://starknet.io',
+        logoUrl: 'https://starknet.io/favicon.ico'
     },
     '39361': {
-        name: 'Avalanche Fuji',
-        fullName: 'Avalanche Fuji Testnet',
+        name: 'Starknet Sepolia',
+        fullName: 'Starknet Sepolia Testnet',
         isTestnet: true,
-        explorerUrl: 'https://testnet.snowtrace.io'
+        explorerUrl: 'https://testnet.starknet.io'
     }
 };
 
@@ -201,42 +201,6 @@ export function getExplorerAddressUrl(chainId: string, address: string): string 
     if (!chainInfo) return '';
 
     return `${chainInfo.explorerUrl}/address/${address}`;
-}
-
-/**
- * Helper method to get chain ID from network name
- */
-export function getChainIdFromNetworkName(networkName: string): string | undefined {
-    // Normalize network name
-    const normalizedName = networkName.toLowerCase().trim();
-
-    // Check for direct matches with chain info
-    for (const [chainId, info] of Object.entries(CHAIN_INFO)) {
-        if (
-            info.name.toLowerCase() === normalizedName ||
-            info.fullName.toLowerCase() === normalizedName
-        ) {
-            return chainId;
-        }
-    }
-
-    // Handle common variations
-    const networkMap: Record<string, string> = {
-        'polygon': '137',
-        'ethereum': '1',
-        'eth': '1',
-        'arbitrum': '42161',
-        'base': '8453',
-        'optimism': '10',
-        'binance': '56',
-        'bsc': '56',
-        'bnb': '56',
-        'solana': '1399811149',
-        'avalanche': '23434',
-        'avax': '23434'
-    };
-
-    return networkMap[normalizedName];
 }
 
 /**

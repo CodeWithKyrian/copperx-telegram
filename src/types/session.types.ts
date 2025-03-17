@@ -3,7 +3,7 @@ import { WizardContextWizard } from "telegraf/typings/scenes";
 
 
 export interface GlobalSceneSession extends Scenes.WizardSessionData {
-    // available under `ctx.scene.session`
+    currentStep?: string;
 }
 
 export interface GlobalSession extends Scenes.SceneSession<GlobalSceneSession> {

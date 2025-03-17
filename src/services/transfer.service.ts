@@ -7,10 +7,12 @@ import {
     TransferWithAccount,
     TransferWithTransactions,
     CreateOfframpTransferRequest,
+    CreateSendTransferBatchRequest,
+    CreateSendTransferBatchResponse,
 } from '../types/api.types';
 import transferApi from '../api/transfer.api';
 import logger from '../utils/logger';
-import { formatDate, formatCurrency, formatTransferType, formatTransferStatus, formatPurposeCode } from '../utils/formatters';
+import { formatDate, formatTransferType, formatTransferStatus, formatPurposeCode, formatRawAmount, toRawAmount } from '../utils/formatters';
 import { formatNetworkName } from '../utils/chain.utils';
 
 /**
@@ -27,9 +29,11 @@ export class TransferService {
         currency: Currency = 'USDC'
     ): Promise<TransferWithAccount | null> {
         try {
+            const rawAmount = toRawAmount(amount);
+
             const transferRequest: CreateSendTransferRequest = {
                 email,
-                amount,
+                amount: rawAmount,
                 purposeCode,
                 currency
             };
@@ -52,9 +56,11 @@ export class TransferService {
         currency: Currency = 'USDC'
     ): Promise<TransferWithAccount | null> {
         try {
+            const rawAmount = toRawAmount(amount);
+
             const transferRequest: CreateSendTransferRequest = {
                 walletAddress,
-                amount,
+                amount: rawAmount,
                 purposeCode,
                 currency
             };
@@ -63,6 +69,33 @@ export class TransferService {
             return result;
         } catch (error) {
             logger.error('Failed to send funds to wallet', { error, walletAddress, amount });
+            return null;
+        }
+    }
+
+    /**
+     * Send funds to a saved payee
+     */
+    public async sendToPayee(
+        payeeId: string,
+        amount: string,
+        purposeCode: PurposeCode,
+        currency: Currency = 'USDC'
+    ): Promise<TransferWithAccount | null> {
+        try {
+            const rawAmount = toRawAmount(amount);
+
+            const transferRequest: CreateSendTransferRequest = {
+                payeeId,
+                amount: rawAmount,
+                purposeCode,
+                currency
+            };
+
+            const result = await transferApi.createSend(transferRequest);
+            return result;
+        } catch (error) {
+            logger.error('Failed to send funds to payee', { error, payeeId, amount });
             return null;
         }
     }
@@ -77,9 +110,11 @@ export class TransferService {
         currency: Currency = 'USDC'
     ): Promise<TransferWithAccount | null> {
         try {
+            const rawAmount = toRawAmount(amount);
+
             const withdrawRequest: CreateWalletWithdrawTransferRequest = {
                 walletAddress,
-                amount,
+                amount: rawAmount,
                 purposeCode,
                 currency
             };
@@ -108,6 +143,20 @@ export class TransferService {
         } catch (error) {
             logger.error('Failed to withdraw funds to bank account', { error });
             return null;
+        }
+    }
+
+    /**
+     * Sends a batch of transfers
+     * @param batchRequest Request containing array of transfer requests
+     * @returns Response with results for each transfer
+     */
+    public async sendBatch(batchRequest: CreateSendTransferBatchRequest): Promise<CreateSendTransferBatchResponse> {
+        try {
+            return await transferApi.createSendBatch(batchRequest);
+        } catch (error) {
+            logger.error('Error sending batch transfer', { error, requestCount: batchRequest.requests.length });
+            throw error;
         }
     }
 
@@ -153,11 +202,11 @@ export class TransferService {
         const statusEmoji = this.getTransferStatusEmoji(transfer.status);
 
         // Format amount and currency
-        const formattedAmount = `${formatCurrency(transfer.amount)} ${transfer.currency}`;
+        const formattedAmount = formatRawAmount(transfer.amount, 8, 2) + ` ${transfer.currency}`;
 
         // Format fee if available
         const feeText = transfer.totalFee
-            ? `Fee: ${formatCurrency(transfer.totalFee)} ${transfer.feeCurrency || transfer.currency}`
+            ? `Fee: ${formatRawAmount(transfer.totalFee, 8, 2)} ${transfer.feeCurrency || transfer.currency}`
             : 'No fee';
 
         // Format date
@@ -200,7 +249,7 @@ export class TransferService {
 
         // Combine all information
         return [
-            `${typeEmoji} *Transfer: ${formatTransferType(transfer.type)}*`,
+            `${typeEmoji} *Transaction: ${formatTransferType(transfer.type)}*`,
             `ID: \`${transfer.id}\``,
             `Status: ${statusEmoji} ${formatTransferStatus(transfer.status)}`,
             `Amount: ${formattedAmount}`,
@@ -240,7 +289,7 @@ export class TransferService {
 
             return [
                 `${index + 1}. ${typeEmoji} ${formatTransferType(transfer.type)} (${date})`,
-                `   ${statusEmoji} ${formatCurrency(transfer.amount)} ${transfer.currency} ${destination}`,
+                `   ${statusEmoji} ${formatRawAmount(transfer.amount, 8, 2)} ${transfer.currency} ${destination}`,
                 `   ID: \`${transfer.id}\``
             ].join('\n');
         }).join('\n\n');
@@ -288,8 +337,6 @@ export class TransferService {
         const end = address.substring(address.length - 8);
         return `${start}...${end}`;
     }
-
-
 }
 
 // Export default instance

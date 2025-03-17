@@ -113,7 +113,7 @@ export class KycService {
             case 'review':
             case 'provider_manual_review':
             case 'manual_review':
-                message += 'Your verification is currently being reviewed. This process typically takes 24-48 hours.';
+                message += 'Your verification is currently being reviewed. Verification can take up to 3 business days after KYC of all UBO. If you haven\'t received a response after this time, Contact compliance@copperx.io';
                 break;
             case 'provider_on_hold':
             case 'on_hold':

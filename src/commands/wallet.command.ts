@@ -3,25 +3,35 @@ import { GlobalContext } from '../types';
 import { walletService } from '../services/wallet.service';
 import logger from '../utils/logger';
 import { WalletBalance, Wallet } from '../types/api.types';
-import { formatBalance, formatWalletAddress } from '../utils/formatters';
+import { formatWalletAddress, formatWalletBalance } from '../utils/formatters';
 import { formatNetworkName } from '../utils/chain.utils';
 import { SCENE_IDS } from '../scenes';
+import { showLoading } from '../utils/ui.utils';
 
 /**
  * Handles the /wallet command - shows wallet information and options
  */
 export const walletCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
-        // Check if user has any wallets
+        const loading = await showLoading(ctx, '💼 *Loading your wallets...*');
+
+
         const wallets = await walletService.getWallets();
 
         if (!wallets || wallets.length === 0) {
+            // Clean up loading message
+            await loading.complete();
+
             // No wallets found, offer to create one
             return await handleNoWallets(ctx);
         }
 
+        await loading.update('💼 *Loading your wallets...*\n💰 *Retrieving balances...*');
+
         // User has wallets, get and format balances
         const balances = await walletService.getWalletBalances();
+
+        await loading.complete();
 
         if (!balances) {
             await ctx.reply(
@@ -110,9 +120,11 @@ async function displayWalletSummary(
     // Format the summary message
     let message = '💼 *Your CopperX Wallet*\n\n';
 
+    logger.info('Total balance', { totalBalance });
+
     // Add total balance if available
     if (totalBalance) {
-        message += `*Total Balance:* ${formatBalance(totalBalance)}\n\n`;
+        message += `*Total Balance:* ${formatWalletBalance(totalBalance)}\n\n`;
     }
 
     // Format balances per wallet
@@ -134,7 +146,7 @@ async function displayWalletSummary(
 
         if (balance.balances && balance.balances.length > 0) {
             for (const coin of balance.balances) {
-                message += `${coin.symbol}: ${formatBalance(coin)}\n`;
+                message += `${coin.symbol}: ${formatWalletBalance(coin)}\n`;
             }
         } else {
             message += `No balances found\n`;

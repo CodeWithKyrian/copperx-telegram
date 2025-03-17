@@ -4,7 +4,7 @@ import { GlobalContext } from '../types';
 import notificationApi from '../api/notification.api';
 import logger from '../utils/logger';
 import { formatDate } from '../utils/formatters';
-import { getChainIdFromNetworkName, getExplorerTxUrl } from '../utils/chain.utils';
+import { formatNetworkName, getExplorerTxUrl } from '../utils/chain.utils';
 import { environment } from '../config/environment';
 
 interface DepositEvent {
@@ -211,16 +211,11 @@ export class NotificationService {
 
         // Add explorer link if transaction hash and network are available
         if (data.metadata?.txHash && data.metadata?.network) {
-            // Try to get chain ID from network name
-            const chainId = getChainIdFromNetworkName(data.metadata.network);
-
-            if (chainId) {
-                const explorerUrl = getExplorerTxUrl(chainId, data.metadata.txHash);
-                if (explorerUrl) {
-                    buttons.push([
-                        Markup.button.url('🔎 View on Explorer', explorerUrl)
-                    ]);
-                }
+            const explorerUrl = getExplorerTxUrl(data.metadata.network, data.metadata.txHash);
+            if (explorerUrl) {
+                buttons.push([
+                    Markup.button.url('🔎 View on Explorer', explorerUrl)
+                ]);
             }
         }
 
@@ -240,7 +235,7 @@ export class NotificationService {
 
         // Build the notification message
         let message = `💰 *${data.title || 'Deposit Received'}*\n\n`;
-        message += `You've received a deposit of *${amount} ${currency}* on ${network}.\n\n`;
+        message += `You've received a deposit of *${amount} ${currency}* on ${formatNetworkName(network)}.\n\n`;
 
         if (txHash) {
             message += `*Transaction Hash:* \`${txHash}\`\n`;

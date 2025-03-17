@@ -29,8 +29,10 @@ bot.launch(() => logger.info('Bot started successfully'))
 process.once('SIGINT', () => {
     logger.info('Received SIGINT signal, shutting down...');
     bot.stop('SIGINT');
+    process.exit(1);
 });
 process.once('SIGTERM', () => {
     logger.info('Received SIGTERM signal, shutting down...');
     bot.stop('SIGTERM');
+    process.exit(1);
 });

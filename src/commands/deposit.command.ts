@@ -26,7 +26,7 @@ export const depositCommand = async (ctx: GlobalContext) => {
 
         const walletButtons = wallets.map(wallet => {
             const label = wallet.isDefault
-                ? `✓ ${formatNetworkName(wallet.network)} Wallet`
+                ? `${formatNetworkName(wallet.network)} Wallet (Default)`
                 : `${formatNetworkName(wallet.network)} (${formatWalletAddress(wallet.walletAddress || '')})`;
             return Markup.button.callback(label, `deposit_funds:${wallet.id}`);
         });
@@ -72,7 +72,7 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
-                        [Markup.button.callback('🔙 Back to Wallets', 'view_wallets')],
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')],
                         [Markup.button.callback('🔄 Try Again', 'deposit_funds')]
                     ])
                 }
@@ -90,7 +90,7 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
-                        [Markup.button.callback('🔙 Back to Wallets', 'view_wallets')],
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')],
                         [Markup.button.callback('📞 Contact Support', 'support')]
                     ])
                 }
@@ -117,7 +117,7 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([
                     [Markup.button.callback('✅ I\'ve Completed My Deposit', 'deposit_done')],
-                    [Markup.button.callback('💼 View Wallets', 'view_wallets')],
+                    [Markup.button.callback('� Back to Menu', 'main_menu')],
                     [Markup.button.callback('📜 Transaction History', 'history')]
                 ])
             }

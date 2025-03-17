@@ -14,7 +14,7 @@ import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
 import { formatPurposeCode } from '../utils/formatters';
 
 interface WithdrawSessionData extends GlobalSceneSession {
-    step?: 'select_payee' | 'create_payee' | 'enter_amount' | 'select_purpose' | 'confirm';
+    currentStep?: string;
     payeeId?: string;
     amount?: string;
     purposeCode?: PurposeCode;
@@ -50,7 +50,7 @@ const withdrawScene = new Scenes.WizardScene<WithdrawContext>(
     // Step 1: Show payee list or create new payee
     async (ctx) => {
         // Reset scene session
-        ctx.scene.session.step = 'select_payee';
+        ctx.scene.session.currentStep = 'select_payee';
         ctx.scene.session.payeeId = undefined;
         ctx.scene.session.amount = undefined;
         ctx.scene.session.purposeCode = undefined;
@@ -151,7 +151,7 @@ const withdrawScene = new Scenes.WizardScene<WithdrawContext>(
             // User selected an existing payee
             const payeeId = callbackData.split(':')[1];
             ctx.scene.session.payeeId = payeeId;
-            ctx.scene.session.step = 'enter_amount';
+            ctx.scene.session.currentStep = 'enter_amount';
             await ctx.answerCbQuery();
 
             // Fetch payee details to show to the user
@@ -176,7 +176,7 @@ const withdrawScene = new Scenes.WizardScene<WithdrawContext>(
 
         if (callbackData === 'create_payee') {
             // User wants to create a new payee
-            ctx.scene.session.step = 'create_payee';
+            ctx.scene.session.currentStep = 'create_payee';
             await ctx.answerCbQuery();
 
             // Start collecting bank account information
@@ -198,7 +198,7 @@ const withdrawScene = new Scenes.WizardScene<WithdrawContext>(
     // Step 3: Handle amount input or bank account creation
     async (ctx) => {
         // Check what step we're on
-        if (ctx.scene.session.step === 'create_payee') {
+        if (ctx.scene.session.currentStep === 'create_payee') {
             // We're in the bank account creation flow
             return handleBankAccountCreation(ctx);
         }
@@ -224,7 +224,7 @@ const withdrawScene = new Scenes.WizardScene<WithdrawContext>(
 
         // Store the amount
         ctx.scene.session.amount = input;
-        ctx.scene.session.step = 'select_purpose';
+        ctx.scene.session.currentStep = 'select_purpose';
 
         // Get a quote for this withdrawal
         await ctx.reply('Getting quote for your withdrawal...');
@@ -307,7 +307,7 @@ const withdrawScene = new Scenes.WizardScene<WithdrawContext>(
         if (callbackData.startsWith('purpose:')) {
             const purposeCode = callbackData.split(':')[1] as PurposeCode;
             ctx.scene.session.purposeCode = purposeCode;
-            ctx.scene.session.step = 'confirm';
+            ctx.scene.session.currentStep = 'confirm';
             await ctx.answerCbQuery();
 
             // Fetch payee details
@@ -406,7 +406,7 @@ const withdrawScene = new Scenes.WizardScene<WithdrawContext>(
                         parse_mode: 'Markdown',
                         ...Markup.inlineKeyboard([
                             [Markup.button.callback('📋 View Transfer History', 'history')],
-                            [Markup.button.callback('💼 Back to Wallet', 'view_wallets')]
+                            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
                         ])
                     }
                 );
@@ -681,7 +681,7 @@ withdrawScene.action('confirm_bank_account', async (ctx) => {
 
         // Save payee ID and move to amount entry
         ctx.scene.session.payeeId = payee.id;
-        ctx.scene.session.step = 'enter_amount';
+        ctx.scene.session.currentStep = 'enter_amount';
 
         await ctx.reply(
             '✅ *Bank Account Created Successfully!*\n\n' +

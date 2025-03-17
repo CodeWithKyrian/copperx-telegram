@@ -81,6 +81,16 @@ export class WalletService {
         }
     }
 
+    public async getDefaultWalletBalance(): Promise<BalanceResponse | null> {
+        try {
+            const balance = await walletApi.getBalance();
+            return balance;
+        } catch (error) {
+            logger.error('Failed to retrieve default wallet balance', { error });
+            return null;
+        }
+    }
+
     /**
      * Retrieves all wallet balances for the authenticated user
      * @returns Array of wallet balances or null if error occurs

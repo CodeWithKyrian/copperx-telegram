@@ -114,19 +114,25 @@ export class PayeeService {
      * @returns Formatted payee list string
      */
     public formatPayeeList(payees: Payee[]): string {
-        if (payees.length === 0) {
-            return 'No payees found.';
+        if (!payees || payees.length === 0) {
+            return 'You don\'t have any saved recipients yet.';
         }
 
-        return payees.map((payee, index) => {
-            const displayName = payee.displayName ||
-                `${payee.firstName || ''} ${payee.lastName || ''}`.trim() ||
-                payee.nickName;
+        let message = '';
+        payees.forEach((payee, index) => {
+            const displayName = payee.displayName || payee.nickName;
+            message += `${index + 1}. *${displayName}*\n`;
+            message += `   📧 ${payee.email}\n`;
 
-            const hasBankAccount = payee.hasBankAccount ? '🏦 ' : '';
+            if (payee.firstName || payee.lastName) {
+                const name = [payee.firstName, payee.lastName].filter(Boolean).join(' ');
+                message += `   👤 ${name}\n`;
+            }
 
-            return `${index + 1}. ${hasBankAccount}*${displayName}* - ${payee.email}`;
-        }).join('\n\n');
+            message += '\n';
+        });
+
+        return message;
     }
 }
 

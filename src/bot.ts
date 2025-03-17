@@ -1,7 +1,7 @@
 import { Context, Telegraf } from 'telegraf';
 import { environment } from './config/environment';
 import { configureScenes } from './scenes';
-import { registerCommands } from './commands';
+import { configureCommands } from './commands';
 import { configureMiddlewares } from './middlewares';
 import { configureNotifications } from './services/notification.service';
 import { GlobalContext } from './types';
@@ -19,7 +19,7 @@ export const initBot = (): Telegraf<GlobalContext> => {
 
     configureScenes(bot);
 
-    registerCommands(bot);
+    configureCommands(bot);
 
     configureNotifications(bot);
 

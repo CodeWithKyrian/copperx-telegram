@@ -1,18 +1,22 @@
 import { Scenes, Telegraf } from 'telegraf';
 import { GlobalContext } from '../types';
 import { authScene } from './auth.scene';
-import { walletCreateScene } from './wallet/create.scene';
-import { defaultWalletScene } from './wallet/default.scene';
-import { sendScene } from './send.scene';
+import { walletCreateScene } from './create-wallet.scene';
+import { defaultWalletScene } from './set-default-wallet.scene';
+import { sendSingleScene } from './send-single.scene';
 import { transferDetailsScene } from './transfer-details.scene';
 import { withdrawScene } from './withdraw.scene';
+import { sendBatchScene } from './send-batch.scene';
+import { createPayeeScene } from './create-payee.scene';
+import { removePayeeScene } from './remove-payee.scene';
 
 export const SCENE_IDS = {
     AUTH: 'auth',
     WALLET_CREATE: 'wallet_create',
     WALLET_DEFAULT: 'wallet_default',
     WITHDRAW: 'withdraw',
-    SEND: 'send',
+    SEND_SINGLE: 'send_single',
+    SEND_BATCH: 'send_batch',
     TRANSFER_DETAILS: 'transfer_details'
 };
 
@@ -30,9 +34,17 @@ export const configureScenes = (bot: Telegraf<GlobalContext>): void => {
 
         withdrawScene,
 
-        sendScene,
+        sendSingleScene,
 
-        transferDetailsScene
+        // @ts-ignore
+        sendBatchScene,
+
+        transferDetailsScene,
+
+        // @ts-ignore
+        createPayeeScene,
+
+        removePayeeScene
     ]);
 
     stage.use(async (ctx, next) => {

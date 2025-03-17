@@ -1,9 +1,9 @@
 import { Scenes, Markup } from 'telegraf';
-import { GlobalContext, GlobalSceneSession } from '../../types';
-import { walletService } from '../../services/wallet.service';
-import logger from '../../utils/logger';
+import { GlobalContext, GlobalSceneSession } from '../types/session.types';
+import { walletService } from '../services/wallet.service';
+import logger from '../utils/logger';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
-import { formatNetworkName } from '../../utils/chain.utils';
+import { formatNetworkName } from '../utils/chain.utils';
 
 interface DefaultWalletSessionData extends GlobalSceneSession {
     walletId?: string;

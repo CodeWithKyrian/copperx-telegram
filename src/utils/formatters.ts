@@ -16,6 +16,15 @@ export function capitalize(text?: string): string {
         .join(' ');
 };
 
+export function formatWalletBalance(balance: BalanceResponse): string {
+    if (!balance) return '0.00 USDC';
+
+    // Balance is already human-readable, just format for display
+    const formattedAmount = formatHumanAmount(balance.balance, 2) + ` ${balance.symbol}`;
+
+    return formattedAmount;
+}
+
 /**
  * Formats wallet address for display (truncates middle)
  * @param address Wallet address to format
@@ -31,35 +40,68 @@ export function formatWalletAddress(address: string | undefined): string {
 }
 
 /**
- * Formats a currency amount with proper decimal places
- * @param amount String representation of amount
- * @param decimals Number of decimals to display
- * @returns Formatted currency string
+ * Converts a human-readable amount to raw blockchain format
+ * 
+ * @param amount Human-readable amount (e.g., "1.5")
+ * @param decimals Number of decimal places in raw format (default: 8 for USDC/USDT)
+ * @returns Raw amount as string
  */
-export function formatCurrency(amount: string | undefined, decimals: number = 6): string {
-    if (!amount) return '0.00';
+export function toRawAmount(amount: string | number, decimals: number = 8): string {
+    if (!amount) return "0";
 
-    // Convert string to number, ensuring it's properly parsed
-    const numValue = parseFloat(amount);
-    if (isNaN(numValue)) return '0.00';
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    const rawAmount = Math.round(numericAmount * Math.pow(10, decimals));
 
-    // Format with proper decimal places
-    return numValue.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: decimals
+    return rawAmount.toString();
+}
+
+/**
+ * Converts a raw blockchain amount to human-readable format
+ * 
+ * @param rawAmount Raw blockchain amount (e.g., "150000000")
+ * @param decimals Number of decimal places in raw format (default: 8 for USDC/USDT)
+ * @returns Human-readable amount as string
+ */
+export function fromRawAmount(rawAmount: string | number, decimals: number = 8): string {
+    if (!rawAmount) return "0";
+
+    const numeric = typeof rawAmount === 'string' ? parseInt(rawAmount) : rawAmount;
+    const humanReadable = numeric / Math.pow(10, decimals);
+
+    return humanReadable.toString();
+}
+
+/**
+ * Formats a currency amount for display
+ * Assumes the input is already in human-readable format
+ * 
+ * @param amount The human-readable amount to format
+ * @param displayDecimals Number of decimal places to display (default: 2)
+ * @returns Formatted amount string
+ */
+export function formatHumanAmount(amount: string | number, displayDecimals: number = 2): string {
+    if (!amount) return "0.00";
+
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+    return numericAmount.toLocaleString('en-US', {
+        minimumFractionDigits: displayDecimals,
+        maximumFractionDigits: displayDecimals
     });
 }
 
 /**
- * Formats wallet balance information for display
- * @param balance Balance response from API
- * @returns Formatted balance string
+ * Formats a raw blockchain amount for display
+ * Converts from raw to human-readable and then formats
+ * 
+ * @param rawAmount The raw blockchain amount
+ * @param decimals Number of decimal places in raw format (default: 8)
+ * @param displayDecimals Number of decimal places to display (default: 2)
+ * @returns Formatted amount string
  */
-export function formatBalance(balance: BalanceResponse | undefined): string {
-    if (!balance) return 'N/A';
-
-    const amount = formatCurrency(balance.balance, balance.decimals);
-    return `${amount} ${balance.symbol}`;
+export function formatRawAmount(rawAmount: string | number, decimals: number = 8, displayDecimals: number = 2): string {
+    const humanReadable = fromRawAmount(rawAmount, decimals);
+    return formatHumanAmount(humanReadable, displayDecimals);
 }
 
 /**

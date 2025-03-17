@@ -42,29 +42,35 @@ function getInlineKeyboard(status: KycStatus | null): InlineKeyboardButton[][] {
     switch (status) {
         case 'approved':
             return [
-                [Markup.button.callback('💼 View Wallet', 'view_wallets')]
+                [Markup.button.callback('💼 View Wallet', 'view_wallets')],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
             ];
         case 'pending':
             return [
-                [Markup.button.url('🔐 Start KYC Verification', KYC_APPLICATION_URL)]
+                [Markup.button.url('🔐 Start KYC Verification', KYC_APPLICATION_URL)],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
             ];
         case 'initiated':
             return [
-                [Markup.button.url('🔐 Complete KYC Verification', KYC_APPLICATION_URL)]
+                [Markup.button.url('🔐 Complete KYC Verification', KYC_APPLICATION_URL)],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
             ];
         case 'inprogress':
             return [
-                [Markup.button.url('🔐 View KYC Verification', KYC_APPLICATION_URL)]
+                [Markup.button.url('🔐 View KYC Verification', KYC_APPLICATION_URL)],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
             ];
         case 'expired':
         case 'rejected':
             return [
-                [Markup.button.url('🔐 Start KYC Verification', KYC_APPLICATION_URL)]
+                [Markup.button.url('🔐 Start KYC Verification', KYC_APPLICATION_URL)],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
             ];
         case 'review_pending':
         case 'review':
             return [
-                [Markup.button.url('🔐 View KYC Verification', KYC_APPLICATION_URL)]
+                [Markup.button.url('🔐 View KYC Verification', KYC_APPLICATION_URL)],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
             ];
         default:
             return [];

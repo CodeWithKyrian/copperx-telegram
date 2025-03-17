@@ -4,6 +4,7 @@ import { GlobalContext } from "../types";
 import { formatNetworkName } from "../utils/chain.utils";
 import { formatWalletAddress } from "../utils/formatters";
 import logger from "../utils/logger";
+import { generateQRCodeWithLogo } from "../utils/qrcode.utils";
 
 export const depositCommand = async (ctx: GlobalContext) => {
     try {
@@ -98,6 +99,7 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
             return;
         }
 
+        // Send the main deposit information message first
         await ctx.reply(
             `📥 *Deposit to CopperX Wallet*\n\n` +
             `*Step-by-Step Instructions:*\n\n` +
@@ -111,17 +113,32 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
             `• Only send USDC to this address\n` +
             `• Triple-check the network before sending\n` +
             `• Small test transactions are recommended\n` +
-            `• Funds will appear after network confirmation\n\n` +
-            `Use /history to check your deposit status.`,
+            `• Funds will appear after network confirmation`,
             {
-                parse_mode: 'Markdown',
-                ...Markup.inlineKeyboard([
-                    [Markup.button.callback('✅ I\'ve Completed My Deposit', 'deposit_done')],
-                    [Markup.button.callback('� Back to Menu', 'main_menu')],
-                    [Markup.button.callback('📜 Transaction History', 'history')]
-                ])
+                parse_mode: 'Markdown'
             }
         );
+
+        // Send loading message
+        const loadingMsg = await ctx.reply('🔄 *Generating QR code for your deposit address...*', {
+            parse_mode: 'Markdown'
+        });
+
+        const qrCodeImagePath = await generateQRCodeWithLogo(address, wallet.network!);
+
+        await ctx.replyWithPhoto({ source: qrCodeImagePath }, {
+            caption: `📱 *Scan QR Code to Deposit*\n\nNetwork: *${network}*\n\nUse /history to check your deposit status.`,
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('✅ I\'ve Completed My Deposit', 'deposit_done')],
+                [Markup.button.callback('📜 Transaction History', 'history')],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+            ])
+        });
+
+        // Delete the loading message
+        await ctx.telegram.deleteMessage(ctx.chat!.id, loadingMsg.message_id);
+
     } catch (error) {
         logger.error('Error in deposit action with wallet', { error, walletId });
         await ctx.reply(

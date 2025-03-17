@@ -21,18 +21,20 @@ export const CHAIN_INFO: Record<ChainId, ChainInfo> = {
         fullName: 'Ethereum Mainnet',
         isTestnet: false,
         explorerUrl: 'https://etherscan.io',
-        logoUrl: 'https://ethereum.org/static/6b935ac0e6194247347855dc3d328e83/13c43/eth-diamond-black.png'
+        logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg'
     },
     '5': {
         name: 'Goerli',
         fullName: 'Goerli Testnet',
         isTestnet: true,
-        explorerUrl: 'https://goerli.etherscan.io'
+        explorerUrl: 'https://goerli.etherscan.io',
+        logoUrl: 'https://chainlist.org/unknown-logo.png',
     },
     '11155111': {
         name: 'Sepolia',
         fullName: 'Sepolia Testnet',
         isTestnet: true,
+        logoUrl: 'https://chainlist.org/unknown-logo.png',
         explorerUrl: 'https://sepolia.etherscan.io'
     },
 
@@ -42,12 +44,13 @@ export const CHAIN_INFO: Record<ChainId, ChainInfo> = {
         fullName: 'Polygon Mainnet',
         isTestnet: false,
         explorerUrl: 'https://polygonscan.com',
-        logoUrl: 'https://polygon.technology/favicon.ico'
+        logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_polygon.jpg'
     },
     '80002': {
         name: 'Polygon Amoy',
         fullName: 'Polygon Amoy Testnet',
         isTestnet: true,
+        logoUrl: 'https://chainlist.org/unknown-logo.png',
         explorerUrl: 'https://amoy.polygonscan.com'
     },
 
@@ -57,12 +60,13 @@ export const CHAIN_INFO: Record<ChainId, ChainInfo> = {
         fullName: 'Arbitrum One',
         isTestnet: false,
         explorerUrl: 'https://arbiscan.io',
-        logoUrl: 'https://arbitrum.io/favicon.ico'
+        logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_arbitrum.jpg'
     },
     '421614': {
         name: 'Arbitrum Sepolia',
         fullName: 'Arbitrum Sepolia Testnet',
         isTestnet: true,
+        logoUrl: 'https://chainlist.org/unknown-logo.png',
         explorerUrl: 'https://sepolia.arbiscan.io'
     },
 
@@ -72,12 +76,13 @@ export const CHAIN_INFO: Record<ChainId, ChainInfo> = {
         fullName: 'Base Mainnet',
         isTestnet: false,
         explorerUrl: 'https://basescan.org',
-        logoUrl: 'https://base.org/favicon.ico'
+        logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_base.jpg'
     },
     '84532': {
         name: 'Base Sepolia',
         fullName: 'Base Sepolia Testnet',
         isTestnet: true,
+        logoUrl: 'https://chainlist.org/unknown-logo.png',
         explorerUrl: 'https://sepolia.basescan.org'
     },
 
@@ -87,12 +92,13 @@ export const CHAIN_INFO: Record<ChainId, ChainInfo> = {
         fullName: 'Optimism Mainnet',
         isTestnet: false,
         explorerUrl: 'https://optimistic.etherscan.io',
-        logoUrl: 'https://optimism.io/favicon.ico'
+        logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_optimism.jpg'
     },
     '11155420': {
         name: 'Optimism Sepolia',
         fullName: 'Optimism Sepolia Testnet',
         isTestnet: true,
+        logoUrl: 'https://chainlist.org/unknown-logo.png',
         explorerUrl: 'https://sepolia-optimism.etherscan.io'
     },
 
@@ -102,12 +108,13 @@ export const CHAIN_INFO: Record<ChainId, ChainInfo> = {
         fullName: 'BNB Smart Chain',
         isTestnet: false,
         explorerUrl: 'https://bscscan.com',
-        logoUrl: 'https://bscscan.com/favicon.ico'
+        logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_binance.jpg'
     },
     '97': {
         name: 'BSC Testnet',
         fullName: 'BNB Smart Chain Testnet',
         isTestnet: true,
+        logoUrl: 'https://chainlist.org/unknown-logo.png',
         explorerUrl: 'https://testnet.bscscan.com'
     },
 
@@ -126,18 +133,19 @@ export const CHAIN_INFO: Record<ChainId, ChainInfo> = {
         explorerUrl: 'https://explorer.solana.com/?cluster=testnet'
     },
 
-    // Avalanche
+    // Starknet
     '23434': {
         name: 'Starknet',
         fullName: 'Starknet Mainnet',
         isTestnet: false,
         explorerUrl: 'https://starknet.io',
-        logoUrl: 'https://starknet.io/favicon.ico'
+        logoUrl: 'https://www.starknet.io/wp-content/themes/Starknet/assets/img/starknet-log-sm.svg'
     },
     '39361': {
         name: 'Starknet Sepolia',
         fullName: 'Starknet Sepolia Testnet',
         isTestnet: true,
+        logoUrl: 'https://chainlist.org/unknown-logo.png',
         explorerUrl: 'https://testnet.starknet.io'
     }
 };

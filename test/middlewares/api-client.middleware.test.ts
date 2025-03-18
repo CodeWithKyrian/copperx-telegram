@@ -1,92 +1,129 @@
 import { apiClientMiddleware } from '../../src/middlewares/api-client.middleware';
+import { createMockContext } from '../__mocks__/context.mock';
 import { authService } from '../../src/services/auth.service';
-import { callMiddleware } from '../utils/mock-context';
+import { callMiddleware } from '../__mocks__/context.mock';
 
 // Mock dependencies
 jest.mock('../../src/services/auth.service');
-jest.mock('../../src/utils/logger');
+jest.mock('../../src/utils/logger.utils');
 
 describe('API Client Middleware', () => {
-    // Mock next function
-    const mockNext = jest.fn();
+    // Create middleware instance once
+    const middleware = apiClientMiddleware();
+    let ctx: ReturnType<typeof createMockContext>;
+    const mockNext = jest.fn().mockResolvedValue(undefined);
 
     beforeEach(() => {
         jest.clearAllMocks();
+        ctx = createMockContext();
     });
 
-    it('should set up API client for authenticated users', async () => {
-        // Setup mocks
-        const mockCtx = { /* mock context */ };
-        const mockToken = 'decrypted-token-123';
+    describe('authenticated users', () => {
+        beforeEach(() => {
+            // Default behavior for authenticated users
+            (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
+        });
 
-        // Mock authentication check to return true
-        (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
-        // Mock token retrieval
-        (authService.getDecryptedToken as jest.Mock).mockReturnValue(mockToken);
+        it('should set up API client when token is available', async () => {
+            // Arrange
+            const mockToken = 'valid-token-123';
+            (authService.getDecryptedToken as jest.Mock).mockReturnValue(mockToken);
+            (authService.setupApiClientForRequest as jest.Mock).mockReturnValue(undefined);
 
-        // Create middleware function
-        const middleware = apiClientMiddleware();
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
 
-        // Call middleware with context and next
-        await callMiddleware(middleware, mockCtx as any, mockNext);
+            // Assert
+            expect(authService.isAuthenticated).toHaveBeenCalledWith(ctx);
+            expect(authService.getDecryptedToken).toHaveBeenCalledWith(ctx);
+            expect(authService.setupApiClientForRequest).toHaveBeenCalledWith(ctx);
+            expect(mockNext).toHaveBeenCalled();
+        });
 
-        // Verify authentication was checked
-        expect(authService.isAuthenticated).toHaveBeenCalledWith(mockCtx);
+        it('should not set up API client when token is null', async () => {
+            // Arrange
+            (authService.getDecryptedToken as jest.Mock).mockReturnValue(null);
 
-        // Verify token was retrieved and API client set up
-        expect(authService.getDecryptedToken).toHaveBeenCalledWith(mockCtx);
-        expect(authService.setupApiClientForRequest).toHaveBeenCalledWith(mockCtx);
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
 
-        // Verify next was called
-        expect(mockNext).toHaveBeenCalled();
+            // Assert
+            expect(authService.isAuthenticated).toHaveBeenCalledWith(ctx);
+            expect(authService.getDecryptedToken).toHaveBeenCalledWith(ctx);
+            expect(authService.setupApiClientForRequest).not.toHaveBeenCalled();
+            expect(mockNext).toHaveBeenCalled();
+        });
+
+        it('should not set up API client when token is undefined', async () => {
+            // Arrange
+            (authService.getDecryptedToken as jest.Mock).mockReturnValue(undefined);
+
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
+
+            // Assert
+            expect(authService.isAuthenticated).toHaveBeenCalledWith(ctx);
+            expect(authService.getDecryptedToken).toHaveBeenCalledWith(ctx);
+            expect(authService.setupApiClientForRequest).not.toHaveBeenCalled();
+            expect(mockNext).toHaveBeenCalled();
+        });
+
+        it('should not set up API client when token is empty string', async () => {
+            // Arrange
+            (authService.getDecryptedToken as jest.Mock).mockReturnValue('');
+
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
+
+            // Assert
+            expect(authService.isAuthenticated).toHaveBeenCalledWith(ctx);
+            expect(authService.getDecryptedToken).toHaveBeenCalledWith(ctx);
+            expect(authService.setupApiClientForRequest).not.toHaveBeenCalled();
+            expect(mockNext).toHaveBeenCalled();
+        });
     });
 
-    it('should not set up API client for unauthenticated users', async () => {
-        // Setup mocks
-        const mockCtx = { /* mock context */ };
+    describe('unauthenticated users', () => {
+        beforeEach(() => {
+            // Default behavior for unauthenticated users
+            (authService.isAuthenticated as jest.Mock).mockReturnValue(false);
+        });
 
-        // Mock authentication check to return false
-        (authService.isAuthenticated as jest.Mock).mockReturnValue(false);
+        it('should not attempt to get token or set up API client', async () => {
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
 
-        // Create middleware function
-        const middleware = apiClientMiddleware();
-
-        // Call middleware with context and next
-        await callMiddleware(middleware, mockCtx as any, mockNext);
-
-        // Verify authentication was checked
-        expect(authService.isAuthenticated).toHaveBeenCalledWith(mockCtx);
-
-        // Verify token was not retrieved and API client not set up
-        expect(authService.getDecryptedToken).not.toHaveBeenCalled();
-        expect(authService.setupApiClientForRequest).not.toHaveBeenCalled();
-
-        // Verify next was still called
-        expect(mockNext).toHaveBeenCalled();
+            // Assert
+            expect(authService.isAuthenticated).toHaveBeenCalledWith(ctx);
+            expect(authService.getDecryptedToken).not.toHaveBeenCalled();
+            expect(authService.setupApiClientForRequest).not.toHaveBeenCalled();
+            expect(mockNext).toHaveBeenCalled();
+        });
     });
 
-    it('should not set up API client when token is null', async () => {
-        // Setup mocks
-        const mockCtx = { /* mock context */ };
+    describe('middleware behavior', () => {
+        it('should always call next() regardless of authentication status', async () => {
+            // Arrange - unauthenticated user
+            (authService.isAuthenticated as jest.Mock).mockReturnValue(false);
 
-        // Mock authentication check to return true but null token
-        (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
-        (authService.getDecryptedToken as jest.Mock).mockReturnValue(null);
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
 
-        // Create middleware function
-        const middleware = apiClientMiddleware();
+            // Assert
+            expect(mockNext).toHaveBeenCalled();
 
-        // Call middleware with context and next
-        await callMiddleware(middleware, mockCtx as any, mockNext);
+            // Reset mocks
+            jest.clearAllMocks();
 
-        // Verify authentication was checked and token retrieved
-        expect(authService.isAuthenticated).toHaveBeenCalledWith(mockCtx);
-        expect(authService.getDecryptedToken).toHaveBeenCalledWith(mockCtx);
+            // Arrange - authenticated user with valid token
+            (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
+            (authService.getDecryptedToken as jest.Mock).mockReturnValue('token');
 
-        // Verify API client was not set up since token is null
-        expect(authService.setupApiClientForRequest).not.toHaveBeenCalled();
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
 
-        // Verify next was called
-        expect(mockNext).toHaveBeenCalled();
+            // Assert
+            expect(mockNext).toHaveBeenCalled();
+        });
     });
 }); 

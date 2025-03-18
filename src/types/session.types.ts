@@ -23,6 +23,8 @@ export interface GlobalSession extends Scenes.SceneSession<GlobalSceneSession> {
     };
 }
 
+export type GlobalContextWithMatch = GlobalContext & { match: RegExpExecArray };
+
 
 export interface GlobalContext<T extends Scenes.WizardSessionData = Scenes.WizardSessionData> extends Context {
     session: GlobalSession & Scenes.WizardSession<T>;

@@ -2,9 +2,10 @@ import { Markup } from "telegraf";
 import { walletService } from "../services/wallet.service";
 import { GlobalContext } from "../types";
 import { formatNetworkName } from "../utils/chain.utils";
-import { formatWalletAddress } from "../utils/formatters";
-import logger from "../utils/logger";
+import { formatWalletAddress } from "../utils/formatters.utils";
+import logger from "../utils/logger.utils";
 import { generateQRCodeWithLogo } from "../utils/qrcode.utils";
+import { showLoading } from "../utils/ui.utils";
 
 export const depositCommand = async (ctx: GlobalContext) => {
     try {
@@ -119,12 +120,11 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
             }
         );
 
-        // Send loading message
-        const loadingMsg = await ctx.reply('🔄 *Generating QR code for your deposit address...*', {
-            parse_mode: 'Markdown'
-        });
+        const loadingMsg = await showLoading(ctx, '🔄 *Generating QR code for your deposit address...*');
 
         const qrCodeImagePath = await generateQRCodeWithLogo(address, wallet.network!);
+
+        await loadingMsg.complete();
 
         await ctx.replyWithPhoto({ source: qrCodeImagePath }, {
             caption: `📱 *Scan QR Code to Deposit*\n\nNetwork: *${network}*\n\nUse /history to check your deposit status.`,
@@ -135,9 +135,6 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
                 [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
             ])
         });
-
-        // Delete the loading message
-        await ctx.telegram.deleteMessage(ctx.chat!.id, loadingMsg.message_id);
 
     } catch (error) {
         logger.error('Error in deposit action with wallet', { error, walletId });

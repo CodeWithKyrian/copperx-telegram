@@ -1,7 +1,7 @@
 import { Scenes, Markup } from 'telegraf';
 import { authService } from '../services/auth.service';
 import { message } from 'telegraf/filters';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { GlobalContext, GlobalSceneSession } from '../types/session.types';
 import { RateLimits } from '../middlewares/rate-limit.middleware';
 import { RateLimiterService } from '../services/rate-limiter.service';

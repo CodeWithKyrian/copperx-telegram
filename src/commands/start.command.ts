@@ -1,6 +1,6 @@
 import { Markup } from 'telegraf';
 import { GlobalContext } from '../types/session.types';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 export const startCommand = async (ctx: GlobalContext): Promise<void> => {
     try {

@@ -1,7 +1,7 @@
 import { Scenes, Markup } from 'telegraf';
 import { GlobalContext, GlobalSceneSession } from '../types/session.types';
 import { transferService } from '../services/transfer.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { message } from 'telegraf/filters';
 
 interface TransferDetailsSessionData extends GlobalSceneSession {

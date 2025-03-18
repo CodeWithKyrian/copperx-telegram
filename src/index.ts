@@ -1,7 +1,7 @@
 import { initBot } from './bot';
 import { config } from './config';
 import { validateEnvironment } from './utils/validators';
-import logger from './utils/logger';
+import logger from './utils/logger.utils';
 
 try {
     validateEnvironment();

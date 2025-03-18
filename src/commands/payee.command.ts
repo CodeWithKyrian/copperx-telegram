@@ -1,7 +1,7 @@
 import { Markup } from 'telegraf';
 import { GlobalContext } from '../types';
 import { payeeService } from '../services/payee.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 /**
  * Handles the /payees command to list saved recipients
@@ -141,10 +141,15 @@ export async function savePayeeAction(ctx: GlobalContext & { match: RegExpExecAr
 
     if (!email) {
         await ctx.reply('❌ Error: No email address provided.');
+        return;
     }
 
-    // @ts-ignore
-    ctx.scene.state.email = email;
+    // Initialize scene state if it doesn't exist
+    if (!ctx.scene.state) {
+        ctx.scene.state = {};
+    }
+
+    (ctx.scene.state as { email: string }).email = email;
     await ctx.scene.enter('create_payee');
 }
 

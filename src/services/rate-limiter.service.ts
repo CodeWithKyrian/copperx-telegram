@@ -1,5 +1,5 @@
 import { GlobalContext } from '../types';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 export interface RateLimitConfig {
     key: string;           // Unique key for this limit

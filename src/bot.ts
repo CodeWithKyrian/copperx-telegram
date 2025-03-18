@@ -5,7 +5,7 @@ import { configureCommands } from './commands';
 import { configureMiddlewares } from './middlewares';
 import { configureNotifications } from './services/notification.service';
 import { GlobalContext } from './types';
-import logger from './utils/logger';
+import logger from './utils/logger.utils';
 
 /**
  * Initializes the Telegram bot

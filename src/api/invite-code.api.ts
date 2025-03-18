@@ -9,8 +9,8 @@ export class InviteCodeApi {
         return apiClient.post<InviteCode>('/api/invite-codes/validate');
     }
 
-    public async listCodes(): Promise<ListResponse & { data: InviteCode[] }> {
-        return apiClient.get<ListResponse & { data: InviteCode[] }>('/api/invite-codes');
+    public async listCodes(): Promise<ListResponse<InviteCode>> {
+        return apiClient.get<ListResponse<InviteCode>>('/api/invite-codes');
     }
 }
 

@@ -2,8 +2,8 @@ import Pusher from 'pusher-js';
 import { Markup, Telegraf } from 'telegraf';
 import { GlobalContext } from '../types';
 import notificationApi from '../api/notification.api';
-import logger from '../utils/logger';
-import { formatDate } from '../utils/formatters';
+import logger from '../utils/logger.utils';
+import { formatDate } from '../utils/formatters.utils';
 import { formatNetworkName, getExplorerTxUrl } from '../utils/chain.utils';
 import { environment } from '../config/environment';
 

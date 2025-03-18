@@ -1,9 +1,9 @@
 import { Markup } from 'telegraf';
-import { GlobalContext } from '../types';
+import { GlobalContext, GlobalContextWithMatch } from '../types';
 import { walletService } from '../services/wallet.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { WalletBalance, Wallet } from '../types/api.types';
-import { formatWalletAddress, formatWalletBalance } from '../utils/formatters';
+import { formatWalletAddress, formatWalletBalance } from '../utils/formatters.utils';
 import { formatNetworkName } from '../utils/chain.utils';
 import { SCENE_IDS } from '../scenes';
 import { showLoading } from '../utils/ui.utils';
@@ -82,7 +82,7 @@ export async function walletSetDefaultAction(ctx: GlobalContext) {
 /**
  * Handles the action to set a default wallet with a specific wallet ID
  */
-export async function walletSetDefaultActionWithWallet(ctx: GlobalContext & { match: RegExpExecArray }) {
+export async function walletSetDefaultActionWithWallet(ctx: GlobalContextWithMatch) {
     await ctx.answerCbQuery();
     const walletId = ctx.match[1];
     await ctx.scene.leave();

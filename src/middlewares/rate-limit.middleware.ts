@@ -1,7 +1,7 @@
 import { Middleware } from 'telegraf';
 import { GlobalContext } from '../types';
 import { RateLimiterService, RateLimitConfig } from '../services/rate-limiter.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 /**
  * Creates a middleware for rate limiting
@@ -22,13 +22,13 @@ export const rateLimitMiddleware = (config: RateLimitConfig = RateLimits.API): M
         // Get current rate limit info
         const limitInfo = RateLimiterService.getRateLimitInfo(ctx, limitConfig);
 
-        // Log rate limit status
+        // Log rate limit status with safe handling of resetAt
         logger.debug('Rate limit check', {
             key: userKey,
             attempts: limitInfo.attempts,
             remaining: limitInfo.remaining,
             exceeds: limitInfo.exceeds,
-            resetAt: new Date(limitInfo.resetAt).toISOString()
+            resetAt: limitInfo.resetAt ? new Date(limitInfo.resetAt).toISOString() : 'unknown'
         });
 
         // If rate limit exceeded, send message and stop

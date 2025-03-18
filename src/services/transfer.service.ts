@@ -11,8 +11,8 @@ import {
     CreateSendTransferBatchResponse,
 } from '../types/api.types';
 import transferApi from '../api/transfer.api';
-import logger from '../utils/logger';
-import { formatDate, formatTransferType, formatTransferStatus, formatPurposeCode, formatRawAmount, toRawAmount } from '../utils/formatters';
+import logger from '../utils/logger.utils';
+import { formatDate, formatTransferType, formatTransferStatus, formatPurposeCode, formatRawAmount, toRawAmount, formatWalletAddress } from '../utils/formatters.utils';
 import { formatNetworkName } from '../utils/chain.utils';
 
 /**
@@ -222,7 +222,7 @@ export class TransferService {
                 : '';
 
             if (transfer.sourceAccount.walletAddress) {
-                sourceInfo = `From: ${network ? `${network} - ` : ''}${this.formatAddress(transfer.sourceAccount.walletAddress)}`;
+                sourceInfo = `From: ${network ? `${network} - ` : ''}${formatWalletAddress(transfer.sourceAccount.walletAddress)}`;
             } else if (transfer.sourceAccount.payeeEmail) {
                 sourceInfo = `From: ${transfer.sourceAccount.payeeEmail}`;
             }
@@ -234,7 +234,7 @@ export class TransferService {
                 : '';
 
             if (transfer.destinationAccount.walletAddress) {
-                destinationInfo = `To: ${network ? `${network} - ` : ''}${this.formatAddress(transfer.destinationAccount.walletAddress)}`;
+                destinationInfo = `To: ${network ? `${network} - ` : ''}${formatWalletAddress(transfer.destinationAccount.walletAddress)}`;
             } else if (transfer.destinationAccount.payeeEmail) {
                 destinationInfo = `To: ${transfer.destinationAccount.payeeEmail}`;
             } else if (transfer.destinationAccount.bankName) {
@@ -281,7 +281,7 @@ export class TransferService {
                 if (transfer.destinationAccount.payeeEmail) {
                     destination = `to ${transfer.destinationAccount.payeeEmail}`;
                 } else if (transfer.destinationAccount.walletAddress) {
-                    destination = `to wallet ${this.formatAddress(transfer.destinationAccount.walletAddress)}`;
+                    destination = `to wallet ${formatWalletAddress(transfer.destinationAccount.walletAddress)}`;
                 } else if (transfer.destinationAccount.bankName) {
                     destination = `to bank account (${transfer.destinationAccount.bankName})`;
                 }
@@ -324,18 +324,6 @@ export class TransferService {
             case 'refunded': return '↩️';
             default: return '❓';
         }
-    }
-
-    /**
-     * Formats an address for display
-     */
-    private formatAddress(address: string): string {
-        if (!address) return '';
-        if (address.length <= 16) return address;
-
-        const start = address.substring(0, 8);
-        const end = address.substring(address.length - 8);
-        return `${start}...${end}`;
     }
 }
 

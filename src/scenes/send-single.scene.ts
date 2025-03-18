@@ -1,11 +1,11 @@
 import { Scenes, Markup } from 'telegraf';
 import { GlobalContext, GlobalSceneSession } from '../types/session.types';
 import { transferService } from '../services/transfer.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { PurposeCode } from '../types/api.types';
 import { isValidEmail, isValidWalletAddress } from '../utils/validators';
 import { walletService } from '../services/wallet.service';
-import { formatHumanAmount, formatPurposeCode, formatWalletBalance } from '../utils/formatters';
+import { formatHumanAmount, formatPurposeCode, formatWalletBalance } from '../utils/formatters.utils';
 import { payeeService } from '../services/payee.service';
 import { message } from 'telegraf/filters';
 

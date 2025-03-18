@@ -1,7 +1,7 @@
 import { Scenes, Markup } from 'telegraf';
 import { GlobalContext } from '../types';
 import { payeeService } from '../services/payee.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { message } from 'telegraf/filters';
 
 // Create a base scene for payee removal

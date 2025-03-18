@@ -1,6 +1,41 @@
 import { Middleware } from 'telegraf';
 import { initBot } from '../../src/bot';
 import { GlobalContext } from '../../src/types';
+import { configureScenes } from '../../src/scenes';
+import { configureCommands } from '../../src/commands';
+import { configureMiddlewares } from '../../src/middlewares';
+import { configureNotifications } from '../../src/services/notification.service';
+import logger from '../../src/utils/logger.utils';
+
+// Mock dependencies
+jest.mock('telegraf');
+jest.mock('../../src/scenes', () => ({
+    configureScenes: jest.fn()
+}));
+jest.mock('../../src/commands', () => ({
+    configureCommands: jest.fn()
+}));
+jest.mock('../../src/middlewares', () => ({
+    configureMiddlewares: jest.fn()
+}));
+jest.mock('../../src/services/notification.service', () => ({
+    configureNotifications: jest.fn()
+}));
+jest.mock('../../src/utils/logger.utils', () => ({
+    error: jest.fn(),
+    info: jest.fn(),
+    default: {
+        error: jest.fn(),
+        info: jest.fn()
+    }
+}));
+jest.mock('../../src/config/environment', () => ({
+    environment: {
+        bot: {
+            token: 'test-token'
+        }
+    }
+}));
 
 // Mock telegraf and session
 jest.mock('telegraf', () => {
@@ -96,29 +131,25 @@ jest.mock('../../src/middlewares/logger.middleware', () => ({
 const { Telegraf } = jest.requireMock('telegraf');
 
 describe('Bot Integration', () => {
+    let mockBotInstance: any;
+
     beforeEach(() => {
         jest.clearAllMocks();
-    });
 
-    it('should create bot instance successfully', () => {
-        // Act
-        const bot = initBot();
-
-        // Assert
-        expect(bot).toBeDefined();
-        expect(Telegraf).toHaveBeenCalled();
-    });
-
-    it('should register command handlers', () => {
-        // Arrange - create a fresh mock instance for this test
-        const mockBotInstance = {
+        // Create a fresh mock instance for each test
+        mockBotInstance = {
             use: jest.fn(),
             start: jest.fn(),
             help: jest.fn(),
             command: jest.fn(),
             on: jest.fn(),
-            catch: jest.fn(),
+            catch: jest.fn().mockImplementation((fn) => {
+                // Save the error handler function for testing
+                mockBotInstance.errorHandler = fn;
+            }),
             action: jest.fn(),
+            launch: jest.fn().mockResolvedValue(undefined),
+            stop: jest.fn(),
             telegram: {
                 getMe: jest.fn().mockResolvedValue({
                     id: 123456789,
@@ -126,19 +157,105 @@ describe('Bot Integration', () => {
                     first_name: 'Test Bot',
                     username: 'test_bot',
                 }),
+                setMyCommands: jest.fn(),
             },
         };
 
         // Make the Telegraf constructor return our mock instance
         (Telegraf as jest.Mock).mockReturnValue(mockBotInstance);
+    });
 
+    it('should create bot instance with the correct token', () => {
+        // Act
+        const bot = initBot();
+
+        // Assert
+        expect(bot).toBeDefined();
+        expect(Telegraf).toHaveBeenCalledWith('test-token');
+    });
+
+    it('should configure all required components', () => {
         // Act
         initBot();
 
-        expect(mockBotInstance.command).toHaveBeenCalledWith(
-            expect.any(String),
-            expect.any(Function)
+        // Assert
+        expect(configureMiddlewares).toHaveBeenCalledWith(mockBotInstance);
+        expect(configureScenes).toHaveBeenCalledWith(mockBotInstance);
+        expect(configureCommands).toHaveBeenCalledWith(mockBotInstance);
+        expect(configureNotifications).toHaveBeenCalledWith(mockBotInstance);
+    });
+
+    it('should configure error handler', () => {
+        // Act
+        initBot();
+
+        // Assert
+        expect(mockBotInstance.catch).toHaveBeenCalled();
+
+        // Get the error handler function that was registered
+        const errorHandler = mockBotInstance.errorHandler;
+        expect(errorHandler).toBeDefined();
+
+        // Test the error handler
+        const mockError = new Error('Test error');
+        const mockContext = {
+            updateType: 'message',
+            from: { id: 12345 },
+            reply: jest.fn()
+        };
+
+        // Call the error handler
+        errorHandler(mockError, mockContext);
+
+        // Verify logger was called with the correct parameters
+        expect(logger.error).toHaveBeenCalledWith('Error processing update', {
+            error: 'Test error',
+            stack: mockError.stack,
+            updateType: 'message',
+            userId: 12345,
+        });
+
+        // Verify that the context's reply method was called
+        expect(mockContext.reply).toHaveBeenCalledWith(
+            'An error occurred while processing your request. Please try again later.'
         );
+    });
+
+    it('should return the configured bot instance', () => {
+        // Act
+        const bot = initBot();
+
+        // Assert
+        expect(bot).toBe(mockBotInstance);
+    });
+
+    it('should handle missing user ID in error handler', () => {
+        // Act
+        initBot();
+
+        // Get the error handler function
+        const errorHandler = mockBotInstance.errorHandler;
+
+        // Create a context without a user ID
+        const mockContext = {
+            updateType: 'callback_query',
+            from: undefined, // No user information
+            reply: jest.fn()
+        };
+
+        // Call the error handler with this context
+        errorHandler(new Error('No user error'), mockContext);
+
+        // Verify that the logger was still called correctly
+        expect(logger.error).toHaveBeenCalledWith('Error processing update', {
+            error: 'No user error',
+            stack: expect.any(String),
+            updateType: 'callback_query',
+            userId: undefined,
+        });
+
+        // Verify the reply was still sent
+        expect(mockContext.reply).toHaveBeenCalled();
     });
 });
 

@@ -1,7 +1,7 @@
 import { Scenes, Markup } from 'telegraf';
 import { GlobalContext, GlobalSceneSession } from '../types/session.types';
 import { walletService } from '../services/wallet.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
 import { formatNetworkName } from '../utils/chain.utils';
 

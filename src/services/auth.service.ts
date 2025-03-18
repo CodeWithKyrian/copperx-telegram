@@ -1,7 +1,7 @@
 import { authApi } from '../api/auth.api';
 import { AuthenticateResponse, AuthUser, LoginEmailOtpResponse } from '../types/api.types';
 import apiClient from '../api/client';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { GlobalContext } from '../types';
 import { Encryption } from '../utils/encryption.utils';
 import { AuthSceneContext } from '../scenes/auth.scene';

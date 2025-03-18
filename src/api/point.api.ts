@@ -16,12 +16,12 @@ export class PointApi {
         return apiClient.get<AllPoints>('/api/points/all');
     }
 
-    public async getOfframpTransferPoints(): Promise<ListResponse & { data: TransactionPoint[] }> {
-        return apiClient.get<ListResponse & { data: TransactionPoint[] }>('/api/points/offramp-transfer-points');
+    public async getOfframpTransferPoints(): Promise<ListResponse<TransactionPoint>> {
+        return apiClient.get<ListResponse<TransactionPoint>>('/api/points/offramp-transfer-points');
     }
 
-    public async getReferrerPoints(): Promise<ListResponse & { data: ReferrerPoint[] }> {
-        return apiClient.get<ListResponse & { data: ReferrerPoint[] }>('/api/points/referrer-points');
+    public async getReferrerPoints(): Promise<ListResponse<ReferrerPoint>> {
+        return apiClient.get<ListResponse<ReferrerPoint>>('/api/points/referrer-points');
     }
 }
 

@@ -1,7 +1,7 @@
 import transactionApi, { GetTransactionsParams } from '../api/transaction.api';
 import { PaginatedResponse, TransactionWithAccount } from '../types/api.types';
-import logger from '../utils/logger';
-import { formatDate } from '../utils/formatters';
+import logger from '../utils/logger.utils';
+import { formatDate } from '../utils/formatters.utils';
 import { formatNetworkName } from '../utils/chain.utils';
 
 /**

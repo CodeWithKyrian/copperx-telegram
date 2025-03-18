@@ -3,7 +3,7 @@ import { GlobalContext, GlobalSceneSession } from '../types/session.types';
 import { transferService } from '../services/transfer.service';
 import { payeeService } from '../services/payee.service';
 import { quoteService } from '../services/quote.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import {
     Country,
     CreatePayeeRequest,
@@ -11,7 +11,7 @@ import {
     PurposeCode
 } from '../types/api.types';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
-import { formatPurposeCode } from '../utils/formatters';
+import { formatPurposeCode } from '../utils/formatters.utils';
 
 interface WithdrawSessionData extends GlobalSceneSession {
     currentStep?: string;

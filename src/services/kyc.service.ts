@@ -1,6 +1,6 @@
 import kycApi from '../api/kyc.api';
 import { Kyc, KycStatus } from '../types/api.types';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { GlobalContext } from '../types/session.types';
 import { authService } from './auth.service';
 

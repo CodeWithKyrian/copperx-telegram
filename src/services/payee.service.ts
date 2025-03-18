@@ -1,8 +1,8 @@
 import { CreatePayeeRequest, Payee, PaginatedResponse, UpdatePayeeRequest } from '../types/api.types';
 import payeeApi from '../api/payeee.api';
-import logger from '../utils/logger';
-import { formatCountry } from '../utils/formatters';
-import { formatBankAccountType } from '../utils/formatters';
+import logger from '../utils/logger.utils';
+import { formatCountry } from '../utils/formatters.utils';
+import { formatBankAccountType } from '../utils/formatters.utils';
 
 /**
  * Service for managing payees

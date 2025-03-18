@@ -1,6 +1,6 @@
 import { Markup } from 'telegraf';
 import kycService from '../services/kyc.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { GlobalContext } from '../types/session.types';
 import { KycStatus } from '../types/api.types';
 import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';

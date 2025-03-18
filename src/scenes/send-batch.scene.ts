@@ -1,8 +1,8 @@
 import { Markup, Scenes } from 'telegraf';
 import { CreateSendTransferBatchSingleRequest, PurposeCode } from '../types/api.types';
 import { GlobalContext, GlobalSceneSession } from '../types/session.types';
-import { formatHumanAmount, formatPurposeCode, formatWalletBalance } from '../utils/formatters';
-import logger from '../utils/logger';
+import { formatHumanAmount, formatPurposeCode, formatWalletBalance } from '../utils/formatters.utils';
+import logger from '../utils/logger.utils';
 import { walletService } from '../services/wallet.service';
 import { transferService } from '../services/transfer.service';
 import { isValidEmail, isValidWalletAddress } from '../utils/validators';

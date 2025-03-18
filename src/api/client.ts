@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { environment } from '../config/environment';
 import { ErrorResponse } from '../types/api.types';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 /**
  * API request configuration

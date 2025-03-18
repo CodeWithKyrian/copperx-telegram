@@ -5,7 +5,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { CHAIN_INFO } from './chain.utils';
-import logger from './logger';
+import logger from './logger.utils';
 import * as fs from 'fs';
 
 /**

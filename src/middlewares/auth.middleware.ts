@@ -1,6 +1,6 @@
 import { Middleware } from 'telegraf';
 import { authService } from '../services/auth.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { GlobalContext } from '../types';
 import { isProtectedAction, isProtectedCommand } from '../config/protected-routes';
 

@@ -1,8 +1,8 @@
 import { Markup } from 'telegraf';
 import { authService } from '../services/auth.service';
 import { GlobalContext } from '../types';
-import { capitalize, formatUserStatus, formatWalletAddress } from '../utils/formatters';
-import logger from '../utils/logger';
+import { capitalize, formatUserStatus, formatWalletAddress } from '../utils/formatters.utils';
+import logger from '../utils/logger.utils';
 
 
 /**

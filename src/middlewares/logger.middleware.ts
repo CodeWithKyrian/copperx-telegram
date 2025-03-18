@@ -1,5 +1,5 @@
 import { Context, Middleware } from 'telegraf';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 /**
  * Middleware for logging bot interactions

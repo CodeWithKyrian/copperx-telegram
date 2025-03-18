@@ -1,7 +1,7 @@
 import { Scenes, Markup } from 'telegraf';
 import { GlobalContext, GlobalSceneSession } from '../types';
 import { payeeService } from '../services/payee.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { isValidEmail } from '../utils/validators';
 import { message } from 'telegraf/filters';
 

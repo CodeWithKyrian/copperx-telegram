@@ -1,6 +1,6 @@
 import { walletApi } from '../api/wallet.api';
 import { Wallet, WalletBalance, BalanceResponse, GenerateWalletRequest } from '../types/api.types';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 /**
  * Service for managing wallet operations

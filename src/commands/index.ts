@@ -1,5 +1,5 @@
 import { Telegraf } from "telegraf";
-import logger from "../utils/logger";
+import logger from "../utils/logger.utils";
 import { GlobalContext } from "../types";
 import { mainMenuAction, startCommand } from "./start.command";
 import { helpCommand, helpAction } from "./help.command";

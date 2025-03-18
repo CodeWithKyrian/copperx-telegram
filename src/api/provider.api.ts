@@ -1,5 +1,5 @@
 import {
-    Page,
+    PaginatedResponse,
     ProviderData,
     CreateProviderRequest,
     Kyc,
@@ -15,8 +15,8 @@ export class ProviderApi {
         limit?: number;
         providerCode?: ProviderCode;
         sync?: boolean;
-    }): Promise<Page & { data: Provider[] }> {
-        return apiClient.get<Page & { data: Provider[] }>('/api/providers', { params });
+    }): Promise<PaginatedResponse<Provider>> {
+        return apiClient.get<PaginatedResponse<Provider>>('/api/providers', { params });
     }
 
     public async createProvider(data: CreateProviderRequest): Promise<ProviderData> {

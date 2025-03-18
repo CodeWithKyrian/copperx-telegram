@@ -1,7 +1,7 @@
 import { GlobalContext } from '../types/session.types';
 import { depositCommand } from '../commands/deposit.command';
 import { showMainMenu } from '../commands/start.command';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 import { Message } from 'telegraf/typings/core/types/typegram';
 import { walletCommand } from './wallet.command';
 import { withdrawCommand } from './withdraw.command';

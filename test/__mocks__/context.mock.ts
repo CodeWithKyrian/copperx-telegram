@@ -1,5 +1,6 @@
 import { Middleware } from 'telegraf';
 import { GlobalContext } from '../../src/types';
+
 /**
  * Creates a mock Telegraf context for testing
  */
@@ -35,11 +36,18 @@ export function createMockContext(overrides = {}): GlobalContext {
         replyWithHTML: jest.fn().mockResolvedValue({}),
         replyWithPhoto: jest.fn().mockResolvedValue({}),
         deleteMessage: jest.fn().mockResolvedValue(true),
+        answerCbQuery: jest.fn().mockResolvedValue(true),
         telegram: {
             sendMessage: jest.fn().mockResolvedValue({}),
             sendPhoto: jest.fn().mockResolvedValue({}),
             deleteMessage: jest.fn().mockResolvedValue(true),
             setMyCommands: jest.fn().mockResolvedValue({}),
+        },
+        scene: {
+            enter: jest.fn().mockResolvedValue({}),
+            leave: jest.fn().mockResolvedValue({}),
+            reenter: jest.fn().mockResolvedValue({}),
+            state: {}
         },
     };
 
@@ -54,7 +62,7 @@ export function createMockContext(overrides = {}): GlobalContext {
  */
 export const callMiddleware = async (
     middleware: Middleware<GlobalContext>,
-    ctx: any,
+    ctx: GlobalContext,
     next: () => Promise<void>
 ): Promise<void> => {
     if (typeof middleware === 'function') {
@@ -65,4 +73,4 @@ export const callMiddleware = async (
     } else {
         throw new Error('Invalid middleware type');
     }
-};
+}; 

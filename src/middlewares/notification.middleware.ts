@@ -1,7 +1,7 @@
 import { Middleware } from 'telegraf';
 import { GlobalContext } from '../types/session.types';
 import { notificationService } from '../services/notification.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 /**
  * Middleware that handles notification subscriptions

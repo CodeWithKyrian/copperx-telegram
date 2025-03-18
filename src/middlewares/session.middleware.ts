@@ -5,7 +5,7 @@ import { Postgres } from '@telegraf/session/pg';
 import { SQLite } from "@telegraf/session/sqlite";
 import { GlobalContext, GlobalSession } from '../types/session.types';
 import { environment } from '../config/environment';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 
 /**

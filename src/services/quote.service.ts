@@ -5,7 +5,7 @@ import {
     OnrampQuoteResponse
 } from '../types/api.types';
 import quoteApi from '../api/quote.api';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 /**
  * Service for managing quotes

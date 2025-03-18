@@ -1,7 +1,7 @@
 import { Markup } from 'telegraf';
 import { GlobalContext, TransferWithAccount } from '../types';
 import { transferService } from '../services/transfer.service';
-import logger from '../utils/logger';
+import logger from '../utils/logger.utils';
 
 /**
  * Handles the /history command to view transfer history

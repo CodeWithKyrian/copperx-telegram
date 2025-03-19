@@ -17,7 +17,41 @@ jest.mock('../../src/config/environment', () => ({
     environment: {
         bot: {
             token: 'mock-token' // Default to valid
-        }
+        },
+        api: {
+            baseUrl: 'https://api.example.com'
+        },
+        security: {
+            appKey: 'mock-app-key'
+        },
+        webhook: {
+            domain: 'https://example.com',
+            port: 443
+        },
+        session: {
+            driver: 'memory'
+        },
+        redis: {
+            url: 'redis://localhost:6379'
+        },
+        mongo: {
+            uri: 'mongodb://localhost:27017',
+            database: 'copperx_bot'
+        },
+        postgres: {
+            host: 'localhost',
+            port: 5432,
+            database: 'copperx_bot',
+            user: 'postgres'
+        },
+        sqlite: {
+            filename: '.sessions.db'
+        },
+        pusher: {
+            key: '',
+            cluster: ''
+        },
+        nodeEnv: 'development'
     }
 }));
 
@@ -26,6 +60,12 @@ describe('Validators', () => {
         afterEach(() => {
             // Reset the environment after each test
             (environment.bot as any).token = 'mock-token';
+            (environment.api as any).baseUrl = 'https://api.example.com';
+            (environment.security as any).appKey = 'mock-app-key';
+            (environment.webhook as any).domain = 'https://example.com';
+            (environment.webhook as any).port = 443;
+            (environment.session as any).driver = 'memory';
+            (environment.nodeEnv as any) = 'development';
         });
 
         it('should not throw error when all required env vars are present', () => {
@@ -36,14 +76,59 @@ describe('Validators', () => {
             // Modify the mocked environment
             (environment.bot as any).token = '';
 
-            expect(() => validateEnvironment()).toThrow('Missing required environment variables: BOT_TOKEN');
+            expect(() => validateEnvironment()).toThrow(/BOT_TOKEN is required/);
         });
 
-        it('should throw error with the correct message listing all missing vars', () => {
-            // Modify the mocked environment to simulate multiple missing variables
-            (environment.bot as any).token = '';
+        it('should throw error when APP_KEY is missing', () => {
+            // Modify the mocked environment
+            (environment.security as any).appKey = '';
 
-            expect(() => validateEnvironment()).toThrow('Missing required environment variables: BOT_TOKEN');
+            expect(() => validateEnvironment()).toThrow(/APP_KEY is required/);
+        });
+
+        it('should throw error when API_BASE_URL is missing', () => {
+            // Modify the mocked environment
+            (environment.api as any).baseUrl = '';
+
+            expect(() => validateEnvironment()).toThrow(/API_BASE_URL is required/);
+        });
+
+        it('should check for WEBHOOK_DOMAIN in production mode', () => {
+            // Set to production
+            (environment.nodeEnv as any) = 'production';
+            (environment.webhook as any).domain = '';
+
+            expect(() => validateEnvironment()).toThrow(/WEBHOOK_DOMAIN is required in production mode/);
+        });
+
+        it('should check for valid WEBHOOK_PORT in production mode', () => {
+            // Set to production with invalid port
+            (environment.nodeEnv as any) = 'production';
+            (environment.webhook as any).port = 1234; // Invalid port
+
+            expect(() => validateEnvironment()).toThrow(/WEBHOOK_PORT must be one of/);
+        });
+
+        it('should check for Redis URL when using Redis session driver', () => {
+            (environment.session as any).driver = 'redis';
+            (environment.redis as any) = { url: '' };
+
+            expect(() => validateEnvironment()).toThrow(/REDIS_URL is required/);
+        });
+
+        it('should check for MongoDB URI and database when using MongoDB session driver', () => {
+            (environment.session as any).driver = 'mongo';
+            (environment.mongo as any) = { uri: '', database: '' };
+
+            expect(() => validateEnvironment()).toThrow(/MONGO_URI is required/);
+            expect(() => validateEnvironment()).toThrow(/MONGO_DB is required/);
+        });
+
+        it('should check for Pusher configuration when Pusher is partially configured', () => {
+            (environment.pusher as any).key = 'some-key';
+            (environment.pusher as any).cluster = '';
+
+            expect(() => validateEnvironment()).toThrow(/PUSHER_CLUSTER is required/);
         });
     });
 

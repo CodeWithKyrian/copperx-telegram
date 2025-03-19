@@ -14,5 +14,3 @@ This directory contains all the source code for the CopperX Telegram Bot.
 - `api/`: CopperX API integration
 - `types/`: Type definitions
 - `utils/`: Utility functions
-- `locales/`: Localization files
-- `media/`: Media generation utilities

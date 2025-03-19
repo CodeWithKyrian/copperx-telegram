@@ -6,3 +6,8 @@ export const aboutCommand = (ctx: Context) => {
         'For support, please visit: https://t.me/copperxcommunity/2183');
 };
 
+export const aboutAction = (ctx: Context) => {
+    ctx.answerCbQuery();
+    aboutCommand(ctx);
+};
+

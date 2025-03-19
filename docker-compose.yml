@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  bot:
+    build: .
+    restart: always
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - BOT_USERNAME=${BOT_USERNAME}
+      - API_BASE_URL=${API_BASE_URL:-https://income-api.copperx.io}
+      - APP_KEY=${APP_KEY}
+      - NODE_ENV=production
+      - SESSION_DRIVER=${SESSION_DRIVER:-redis}
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      # Webhook config (if using webhook mode)
+      - WEBHOOK_DOMAIN=${WEBHOOK_DOMAIN:-}
+      - WEBHOOK_PORT=${WEBHOOK_PORT:-}
+      - WEBHOOK_SECRET_PATH=${WEBHOOK_SECRET_PATH:-}
+      - WEBHOOK_SECRET_TOKEN=${WEBHOOK_SECRET_TOKEN:-}
+      # Pusher config (if using notifications)
+      - PUSHER_APP_ID=${PUSHER_APP_ID:-}
+      - PUSHER_KEY=${PUSHER_KEY:-}
+      - PUSHER_SECRET=${PUSHER_SECRET:-}
+      - PUSHER_CLUSTER=${PUSHER_CLUSTER:-}
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  redis-data:

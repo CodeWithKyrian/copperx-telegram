@@ -54,3 +54,4 @@ temp/
 .sessions.db
 sessions.db
 *.db
+.vercel

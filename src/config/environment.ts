@@ -15,7 +15,7 @@ export const environment = {
 
     webhook: {
         domain: process.env.WEBHOOK_DOMAIN || '',
-        port: parseInt(process.env.WEBHOOK_PORT || '3000', 10),
+        port: parseInt(process.env.WEBHOOK_PORT || '443', 10),
         secretPath: process.env.WEBHOOK_SECRET_PATH || '',
         secretToken: process.env.WEBHOOK_SECRET_TOKEN || undefined,
     },
@@ -60,6 +60,11 @@ export const environment = {
 
     logging: {
         level: process.env.LOG_LEVEL || 'info',
+    },
+
+    vercel: {
+        url: process.env.VERCEL_URL || '',
+        deployed: !!process.env.VERCEL || false
     },
 
     nodeEnv: process.env.NODE_ENV || 'development',

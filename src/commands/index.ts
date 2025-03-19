@@ -3,7 +3,7 @@ import logger from "../utils/logger.utils";
 import { GlobalContext } from "../types";
 import { mainMenuAction, startCommand } from "./start.command";
 import { helpCommand, helpAction } from "./help.command";
-import { aboutCommand } from "./about.command";
+import { aboutAction, aboutCommand } from "./about.command";
 import { loginAction, loginCommand } from "./login.command";
 import { logoutAction, logoutCommand } from "./logout.command";
 import { profileAction, profileCommand } from "./profile.command";
@@ -93,6 +93,7 @@ const registerActionHandlers = (bot: Telegraf<GlobalContext>): void => {
     bot.action('logout', logoutAction);
     bot.action('login', loginAction);
     bot.action('help', helpAction);
+    bot.action('about', aboutAction);
 
     bot.action('view_wallets', viewWalletsAction);
     bot.action('create_wallet', walletCreateAction);

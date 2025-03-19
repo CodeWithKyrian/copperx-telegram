@@ -5,6 +5,7 @@ import logger from '../utils/logger.utils';
 import { GlobalContext, GlobalSceneSession } from '../types/session.types';
 import { RateLimits } from '../middlewares/rate-limit.middleware';
 import { RateLimiterService } from '../services/rate-limiter.service';
+import { showMainMenu } from '../commands/start.command';
 
 export const AUTH_SCENE_ID = 'auth';
 
@@ -152,6 +153,8 @@ async function handleOtpVerification(ctx: AuthSceneContext, otp: string) {
 
         // Exit scene
         await ctx.scene.leave();
+
+        await showMainMenu(ctx);
 
         // Clear rate limits on successful authentication
         if (user) {

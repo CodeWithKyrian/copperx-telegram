@@ -5,6 +5,7 @@ import logger from './utils/logger.utils';
 
 try {
     validateEnvironment();
+
     logger.info('Environment validation passed');
 
     logger.info('CopperX Telegram Bot starting', {

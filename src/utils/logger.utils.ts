@@ -21,18 +21,18 @@ export const logger = createLogger({
 });
 
 // Add file transport in production
-if (environment.isProduction) {
-    logger.add(
-        new transports.File({
-            filename: 'logs/error.log',
-            level: 'error'
-        })
-    );
-    logger.add(
-        new transports.File({
-            filename: 'logs/combined.log'
-        })
-    );
-}
+// if (environment.isProduction) {
+//     logger.add(
+//         new transports.File({
+//             filename: 'logs/error.log',
+//             level: 'error'
+//         })
+//     );
+//     logger.add(
+//         new transports.File({
+//             filename: 'logs/combined.log'
+//         })
+//     );
+// }
 
 export default logger;

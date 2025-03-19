@@ -6,15 +6,90 @@ import { ChainId } from '../types/api.types';
  * @throws Error if any required environment variable is missing
  */
 export const validateEnvironment = (): void => {
-    const requiredVars = [
-        { name: 'BOT_TOKEN', value: environment.bot.token },
-    ];
+    const errors: string[] = [];
 
-    const missingVars = requiredVars.filter(v => !v.value);
+    // Check mandatory variables
+    if (!environment.bot.token) {
+        errors.push('BOT_TOKEN is required');
+    }
 
-    if (missingVars.length > 0) {
-        const missingVarNames = missingVars.map(v => v.name).join(', ');
-        throw new Error(`Missing required environment variables: ${missingVarNames}`);
+    if (!environment.api.baseUrl) {
+        errors.push('API_BASE_URL is required');
+    }
+
+    if (!environment.security.appKey) {
+        errors.push('APP_KEY is required for secure session storage');
+    }
+
+    // Check production-specific requirements
+    if (environment.nodeEnv === 'production') {
+        if (!environment.webhook.domain) {
+            errors.push('WEBHOOK_DOMAIN is required in production mode');
+        }
+
+        const validPorts = [80, 88, 443, 8443];
+        if (!validPorts.includes(environment.webhook.port)) {
+            errors.push(`WEBHOOK_PORT must be one of: ${validPorts.join(', ')} (got ${environment.webhook.port})`);
+        }
+    }
+
+    // Check session storage-specific requirements
+    const sessionDriver = environment.session.driver;
+    switch (sessionDriver) {
+        case 'redis':
+            if (!environment.redis.url) {
+                errors.push('REDIS_URL is required when SESSION_DRIVER is set to "redis"');
+            }
+            break;
+        case 'mongo':
+            if (!environment.mongo.uri) {
+                errors.push('MONGO_URI is required when SESSION_DRIVER is set to "mongo"');
+            }
+            if (!environment.mongo.database) {
+                errors.push('MONGO_DB is required when SESSION_DRIVER is set to "mongo"');
+            }
+            break;
+        case 'postgres':
+            if (!environment.postgres.host) {
+                errors.push('POSTGRES_HOST is required when SESSION_DRIVER is set to "postgres"');
+            }
+            if (!environment.postgres.port) {
+                errors.push('POSTGRES_PORT is required when SESSION_DRIVER is set to "postgres"');
+            }
+            if (!environment.postgres.database) {
+                errors.push('POSTGRES_DB is required when SESSION_DRIVER is set to "postgres"');
+            }
+            if (!environment.postgres.user) {
+                errors.push('POSTGRES_USER is required when SESSION_DRIVER is set to "postgres"');
+            }
+            break;
+        case 'sqlite':
+            if (!environment.sqlite.filename) {
+                errors.push('SQLITE_FILENAME is required when SESSION_DRIVER is set to "sqlite"');
+            }
+            break;
+        case 'memory':
+            // Memory storage doesn't require additional config
+            break;
+        default:
+            errors.push(`Unknown SESSION_DRIVER: "${sessionDriver}". Valid options are: memory, redis, mongo, postgres, sqlite`);
+    }
+
+    // Check Pusher configuration if any Pusher variables are set
+    const hasPusherConfig = environment.pusher.key || environment.pusher.cluster;
+
+    if (hasPusherConfig) {
+        if (!environment.pusher.key) {
+            errors.push('PUSHER_KEY is required when using Pusher');
+        }
+        if (!environment.pusher.cluster) {
+            errors.push('PUSHER_CLUSTER is required when using Pusher');
+        }
+    }
+
+    // If there are any validation errors, throw an exception
+    if (errors.length > 0) {
+        throw new Error(`Environment validation failed:\n- ${errors.join('\n- ')}`);
     }
 };
 

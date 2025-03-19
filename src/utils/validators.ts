@@ -17,7 +17,7 @@ export const validateEnvironment = (): void => {
         errors.push('API_BASE_URL is required');
     }
 
-    if (!environment.security.appKey) {
+    if (!environment.app.key) {
         errors.push('APP_KEY is required for secure session storage');
     }
 

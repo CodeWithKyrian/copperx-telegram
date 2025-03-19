@@ -281,10 +281,6 @@ The bot can be deployed to Vercel's serverless platform:
    vercel --prod
    ```
 
-6. **Set up your Telegram bot webhook**
-
-   The application will automatically set up the webhook using your app's domain. You can also verify the webhook status by visiting the `/webhook-info` endpoint in development mode.
-
 7. **Note about Pusher in serverless environments**
 
    Pusher real-time notifications may not work immediately in serverless environments like Vercel due to the ephemeral nature of serverless functions. Since serverless functions don't maintain persistent connections, they can't directly receive continuous Pusher events.
@@ -409,7 +405,7 @@ If you encounter issues during setup:
 3. Ensure your bot token is valid
 4. Confirm you're using a supported Node.js version
 5. Try accessing the health check endpoint to verify the server is running
-6. Use the `/webhook-info` endpoint in development mode to check your webhook status
+6. Run the `npm run webhook-info` command to check your webhook status
 7. See [troubleshooting.md](troubleshooting.md) for common issues and solutions
 
 ## Next Steps

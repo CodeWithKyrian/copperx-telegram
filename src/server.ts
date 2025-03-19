@@ -55,9 +55,12 @@ const configureWebhook = async (app: FastifyInstance, bot: Telegraf<GlobalContex
         // Get app domain from config
         const appDomain = config.env.app.domain;
 
+        const hasProtocol = appDomain.startsWith('https://') || appDomain.startsWith('http://');
+        const cleanDomain = hasProtocol ? new URL(appDomain).host : appDomain;
+
         // Create webhook URL
         const webhookPath = config.env.webhook.secretPath || `/telegraf/${bot.secretPathComponent()}`;
-        const webhookUrl = `https://${appDomain}${webhookPath}`;
+        const webhookUrl = `https://${cleanDomain}${webhookPath}`;
 
         // Delete any existing webhook first
         await bot.telegram.deleteWebhook({ drop_pending_updates: true });

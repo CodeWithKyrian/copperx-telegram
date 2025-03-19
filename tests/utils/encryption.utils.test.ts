@@ -3,8 +3,8 @@ import { Encryption } from '../../src/utils/encryption.utils';
 // Mock environment
 jest.mock('../../src/config/environment', () => ({
     environment: {
-        security: {
-            appKey: 'test-app-key-for-encryption-that-is-32-chars',
+        app: {
+            key: 'test-app-key-for-encryption-that-is-32-chars',
         },
     },
 }));

@@ -18,6 +18,7 @@ export const environment = {
         port: parseInt(process.env.APP_PORT || process.env.PORT || '3000', 10),
         host: process.env.APP_HOST || '0.0.0.0',
         domain: process.env.APP_DOMAIN || process.env.VERCEL_URL || '',
+        key: process.env.APP_KEY || '',
     },
 
     webhook: {
@@ -28,10 +29,6 @@ export const environment = {
     session: {
         driver: process.env.SESSION_DRIVER || 'memory',
         ttl: parseInt(process.env.SESSION_TTL || '604800', 10), // 7days
-    },
-
-    security: {
-        appKey: process.env.APP_KEY || '',
     },
 
     redis: {

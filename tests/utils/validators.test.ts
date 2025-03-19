@@ -21,12 +21,10 @@ jest.mock('../../src/config/environment', () => ({
         api: {
             baseUrl: 'https://api.example.com'
         },
-        security: {
-            appKey: 'mock-app-key'
-        },
         app: {
             domain: 'https://example.com',
-            port: 443
+            port: 443,
+            key: 'mock-app-key'
         },
         webhook: {
             domain: 'https://example.com',
@@ -65,7 +63,7 @@ describe('Validators', () => {
             // Reset the environment after each test
             (environment.bot as any).token = 'mock-token';
             (environment.api as any).baseUrl = 'https://api.example.com';
-            (environment.security as any).appKey = 'mock-app-key';
+            (environment.app as any).key = 'mock-app-key';
             (environment.webhook as any).domain = 'https://example.com';
             (environment.webhook as any).port = 443;
             (environment.session as any).driver = 'memory';
@@ -85,7 +83,7 @@ describe('Validators', () => {
 
         it('should throw error when APP_KEY is missing', () => {
             // Modify the mocked environment
-            (environment.security as any).appKey = '';
+            (environment.app as any).key = '';
 
             expect(() => validateEnvironment()).toThrow(/APP_KEY is required/);
         });

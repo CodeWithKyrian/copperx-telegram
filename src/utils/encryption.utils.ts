@@ -16,12 +16,12 @@ export class Encryption {
      * @returns Encrypted data with IV prepended
      */
     public static encrypt(value: string): string {
-        if (!environment.security.appKey) {
+        if (!environment.app.key) {
             throw new Error('APP_KEY is not set in environment variables');
         }
 
         // Derive a key from the APP_KEY
-        const key = this.deriveKeyFromAppKey(environment.security.appKey);
+        const key = this.deriveKeyFromAppKey(environment.app.key);
 
         // Generate a random IV
         const iv = crypto.randomBytes(this.IV_SIZE);
@@ -46,12 +46,12 @@ export class Encryption {
      * @returns The original decrypted data
      */
     public static decrypt(encryptedValue: string): string {
-        if (!environment.security.appKey) {
+        if (!environment.app.key) {
             throw new Error('APP_KEY is not set in environment variables');
         }
 
         // Derive the key from APP_KEY
-        const key = this.deriveKeyFromAppKey(environment.security.appKey);
+        const key = this.deriveKeyFromAppKey(environment.app.key);
 
         // Split the IV and encrypted data
         const [ivHex, encryptedData] = encryptedValue.split(':');

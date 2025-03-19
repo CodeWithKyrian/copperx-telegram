@@ -71,16 +71,8 @@ const configureWebhook = async (app: FastifyInstance, bot: Telegraf<GlobalContex
         });
 
         // Register the webhook route with Fastify
-        app.post(webhookPath, (request, reply) => {
-            // Use the raw request and reply objects
-            webhookCallback(request.raw, reply.raw).catch(err => {
-                logger.error('Error in webhook handler', { error: err });
-                reply.code(500).send('Webhook Error');
-            });
-
-            // Return early since webhookCallback handles the response
-            return reply;
-        });
+        // @ts-ignore
+        app.post(webhookPath, webhookCallback);
 
         // Set the webhook on Telegram's side
         await bot.telegram.setWebhook(webhookUrl, {
@@ -129,13 +121,6 @@ export const initServer = async (bot: Telegraf<GlobalContext>): Promise<FastifyI
     // Setup health check routes
     setupHealthRoutes(app);
 
-    // Add webhook info endpoint for debugging (only in development)
-    if (config.env.isDevelopment) {
-        app.get('/webhook-info', async () => {
-            const webhookInfo = await getWebhookInfo(bot);
-            return { webhookInfo };
-        });
-    }
 
     // Configure bot mode based on environment
     if (config.env.isProduction) {

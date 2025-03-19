@@ -233,7 +233,7 @@ async function createPayee(ctx: CreatePayeeContext): Promise<void> {
             '✅ *Recipient Created Successfully*\n\n' +
             `*Nickname:* ${result.nickName}\n` +
             `*Email:* ${result.email}\n\n` +
-            'You can now quickly send funds to this recipient using the /payees command.',
+            'You can now quickly send funds to this recipient using the /send command.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([

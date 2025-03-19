@@ -54,7 +54,7 @@ transferDetailsScene.command('cancel', async (ctx) => {
  */
 async function showTransferDetails(ctx: TransferDetailsContext, transferId: string): Promise<void> {
     try {
-        await ctx.reply('Fetching transfer details...');
+        await ctx.reply('Fetching transaction details...');
 
         const transfer = await transferService.getTransferDetails(transferId);
 

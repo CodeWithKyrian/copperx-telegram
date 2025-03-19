@@ -120,8 +120,6 @@ async function displayWalletSummary(
     // Format the summary message
     let message = '💼 *Your CopperX Wallet*\n\n';
 
-    logger.info('Total balance', { totalBalance });
-
     // Add total balance if available
     if (totalBalance) {
         message += `*Total Balance:* ${formatWalletBalance(totalBalance)}\n\n`;

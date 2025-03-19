@@ -247,6 +247,17 @@ The bot can be deployed to Vercel's serverless platform:
 
    You can also navigate to your deployment URL to see the webhook status.
 
+7. **Note about Pusher in serverless environments**
+
+   Pusher real-time notifications may not work immediately in serverless environments like Vercel due to the ephemeral nature of serverless functions. Since serverless functions don't maintain persistent connections, they can't directly receive continuous Pusher events.
+
+   **Workaround solution:**
+   - Create a separate serverless function that receives webhooks from Pusher Channels
+   - Configure Pusher to send webhook events to this function
+   - The function can then process the webhook payload and trigger the appropriate action
+
+   For more details on implementing Pusher with serverless architectures, see [Pusher's guide on webhooks](https://pusher.com/docs/channels/server_api/webhooks/).
+
 
 ### Docker Deployment
 

@@ -3,6 +3,16 @@ import { config } from './config';
 import { validateEnvironment } from './utils/validators';
 import logger from './utils/logger.utils';
 
+
+const getWebhookInfo = async () => {
+    const bot = initBot();
+    const webhookInfo = await bot.telegram.getWebhookInfo();
+    logger.info('Webhook info', { webhookInfo });
+    process.exit(0);
+}
+
+getWebhookInfo();
+
 try {
     validateEnvironment();
 

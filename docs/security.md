@@ -239,8 +239,7 @@ The bot is designed with consideration for:
 
 - [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
 - [Node.js Security Best Practices](https://nodejs.org/en/docs/guides/security)
-- [Telegraf Security Documentation](https://github.com/telegraf/telegraf/tree/develop/docs)
-- [CopperX API Security Guidelines](https://income-api.copperx.io/api/doc)
+- [CopperX API Documentation](https://income-api.copperx.io/api/doc)
 
 ## Conclusion
 

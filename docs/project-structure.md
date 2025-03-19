@@ -20,7 +20,7 @@ copperx-telegram/
 │   ├── bot.ts             # Bot configuration
 │   └── index.ts           # Application entry point
 ├── scripts/               # Helper scripts
-├── test/                  # Test files
+├── tests/                  # Test files
 └── docs/                  # Documentation
 ```
 
@@ -216,6 +216,8 @@ bot.telegram.setMyCommands([
     { command: 'mycommand', description: 'My new command' }
 ]);
 ```
+
+For a complete list of available commands and their usage, see the [Command Reference](commands.md).
 
 ## Scene System
 
@@ -678,6 +680,8 @@ export const createApiClient = (token?: string): ApiModules => {
 };
 ```
 
+For detailed information about the API endpoints, request/response formats, and authentication flow, see the [API Integration](api.md) documentation.
+
 ## Services
 
 The `src/services/` directory contains business logic that coordinates between the bot interface and the API:
@@ -715,6 +719,8 @@ Security is implemented at multiple levels:
    - HTTPS-only communication
    - Error handling
 
+For a comprehensive overview of security features and best practices implemented in the bot, refer to the [Security](security.md) documentation.
+
 ## Adding New Features
 
 When adding new features, follow these steps:
@@ -739,7 +745,7 @@ When adding new features, follow these steps:
 
 ## Testing
 
-The project includes tests in the `test/` directory:
+The project includes tests in the `tests/` directory:
 
 - Unit tests for individual components
 - Integration tests for API interactions
@@ -766,4 +772,15 @@ The CopperX Telegram Bot follows a modular, well-structured architecture that se
 9. **utils/** - Helper functions
 10. **types/** - TypeScript type definitions
 
-This architecture ensures the code is maintainable, testable, and extensible as new features are added. 
+This architecture ensures the code is maintainable, testable, and extensible as new features are added.
+
+## Next Steps
+
+Now that you understand the project structure and code flow, you might want to explore these documentation pages:
+
+- [Command Reference](commands.md) - Learn about all available bot commands and their usage
+- [API Integration](api.md) - Detailed information about how the bot interacts with the CopperX API
+- [Troubleshooting](troubleshooting.md) - Common issues and their solutions
+- [Security](security.md) - Security features and best practices implemented in the bot
+
+If you're planning to deploy the bot, refer to the [Setup Guide](setup.md) for detailed deployment instructions. 

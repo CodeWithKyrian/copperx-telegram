@@ -29,7 +29,7 @@ const config: Config = {
     testTimeout: 10000,
     clearMocks: true,
     restoreMocks: true,
-    setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
+    setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
 };
 
 export default config;

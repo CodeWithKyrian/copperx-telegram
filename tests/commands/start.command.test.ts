@@ -3,7 +3,7 @@ import { createMockContext } from '../__mocks__/context.mock';
 
 describe('Start Command', () => {
     describe('startCommand', () => {
-        it('should show welcome message and login options for unauthenticated user', async () => {
+        it('should show welcome message for any user regardless of authentication', async () => {
             // Arrange
             const ctx = createMockContext({
                 session: { auth: { accessToken: null } }
@@ -21,7 +21,7 @@ describe('Start Command', () => {
             );
         });
 
-        it('should show welcome message and main menu for authenticated user', async () => {
+        it('should show the same welcome message for authenticated users', async () => {
             // Arrange
             const ctx = createMockContext({
                 session: { auth: { accessToken: 'valid-token' } }
@@ -32,7 +32,7 @@ describe('Start Command', () => {
 
             // Assert
             expect(ctx.reply).toHaveBeenCalledWith(
-                expect.stringContaining('Welcome to the *CopperX Bot*, testuser!'),
+                expect.stringContaining('Hello, *testuser*!'),
                 expect.objectContaining({
                     parse_mode: 'Markdown'
                 })

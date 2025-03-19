@@ -37,6 +37,7 @@ export interface AuthState {
     expiresAt?: number;
     email?: string;
     userId?: string;
+    firstName?: string;
     organizationId?: string;
     tempOtpSid?: string;
 }

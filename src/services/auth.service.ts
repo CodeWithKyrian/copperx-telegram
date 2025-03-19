@@ -151,6 +151,7 @@ export class AuthService {
         if (ctx.session?.auth) {
             ctx.session.auth.userId = userProfile.id;
             ctx.session.auth.organizationId = userProfile.organizationId;
+            ctx.session.auth.firstName = userProfile.firstName;
             ctx.session.auth.email = userProfile.email;
         }
     }

@@ -32,6 +32,11 @@ A Telegram bot built with TypeScript and Node.js that integrates with CopperX Pa
 - **Natural Language Processing**
   - Basic support for natural language queries
 
+- **Deployment and Health Monitoring**
+  - Health check endpoints for monitoring
+  - Easy deployment on various platforms
+  - Support for webhook and long polling modes
+
 ## 🔒 Security Features
 
 - Strong type safety throughout the codebase
@@ -45,6 +50,7 @@ A Telegram bot built with TypeScript and Node.js that integrates with CopperX Pa
 
 - **TypeScript/Node.js** - Strongly typed JavaScript
 - **Telegraf** - Modern Telegram Bot API framework
+- **Fastify** - High-performance web framework
 - **Axios** - Promise-based HTTP client
 - **Pusher** - Real-time notifications
 - **Multiple session storage options** - Redis, SQLite, MongoDB, PostgreSQL
@@ -89,6 +95,8 @@ A Telegram bot built with TypeScript and Node.js that integrates with CopperX Pa
    BOT_USERNAME=your_bot_username
    API_BASE_URL=https://income-api.copperx.io
    APP_KEY=your_generated_app_key
+   APP_PORT=3000
+   APP_HOST=0.0.0.0
    ```
 
 ### Running the Bot
@@ -102,6 +110,11 @@ npm run dev
 ```bash
 npm run build
 npm start
+```
+
+Once the bot is running, you can verify it's working by accessing the health check endpoint:
+```
+http://localhost:3000/health
 ```
 
 For a more comprehensive documentation on deployment, see the [Setup Guide](docs/setup.md#docker-deployment).

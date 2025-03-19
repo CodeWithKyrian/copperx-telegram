@@ -14,9 +14,13 @@ export const environment = {
         timeout: parseInt(process.env.API_TIMEOUT || '30000', 10),
     },
 
+    app: {
+        port: parseInt(process.env.APP_PORT || process.env.PORT || '3000', 10),
+        host: process.env.APP_HOST || '0.0.0.0',
+        domain: process.env.APP_DOMAIN || process.env.VERCEL_URL || '',
+    },
+
     webhook: {
-        domain: process.env.WEBHOOK_DOMAIN || '',
-        port: parseInt(process.env.WEBHOOK_PORT || '443', 10),
         secretPath: ensureLeadingSlash(process.env.WEBHOOK_SECRET_PATH),
         secretToken: process.env.WEBHOOK_SECRET_TOKEN || undefined,
     },

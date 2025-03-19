@@ -1,6 +1,6 @@
 # CopperX Telegram Bot - Setup Guide
 
-This guide provides comprehensive instructions for setting up and configuring the CopperX Telegram bot.
+This document provides comprehensive instructions for setting up and configuring the CopperX Telegram bot.
 
 ## Prerequisites
 
@@ -61,8 +61,17 @@ Before you begin, ensure you have the following:
    API_BASE_URL=https://income-api.copperx.io
    API_TIMEOUT=30000
 
+   # App server configuration
+   APP_PORT=3000
+   APP_HOST=0.0.0.0
+   APP_DOMAIN=your-app-domain.com
+
    # Application key (from generate:key command)
    APP_KEY=your_generated_app_key
+
+   # Webhook configuration (optional)
+   WEBHOOK_SECRET_PATH=  # Optional path for webhook endpoint
+   WEBHOOK_SECRET_TOKEN=your_secret_token  # For additional security
 
    # Session configuration
    SESSION_DRIVER=memory  # Options: memory, redis, mongo, sqlite, postgres
@@ -145,6 +154,35 @@ PUSHER_CLUSTER=your_pusher_cluster
 
 These credentials are used for client-side connection to receive notifications in real time.
 
+## Fastify Server Configuration
+
+The bot uses Fastify, a high-performance web framework, to handle both Telegram webhook requests and provide additional endpoints:
+
+### Health Check Endpoint
+
+A health check endpoint is available at `/health` or the root path (`/`). This endpoint returns a simple JSON response indicating the server status, which is useful for:
+
+- Keep-alive pings to prevent idle timeouts on platforms like Render
+- Health checks for container orchestration systems
+- Monitoring service status
+
+### Environment Variables
+
+Configure the server with these environment variables:
+
+- `APP_PORT`: The port the server will listen on (defaults to 3000 or the value of `PORT`)
+- `APP_HOST`: The host to bind to (defaults to `0.0.0.0` to listen on all network interfaces)
+- `APP_DOMAIN`: Your application's domain name (used for webhook configuration)
+
+For Render and similar platforms, binding to `0.0.0.0` is essential to properly expose the server port.
+
+### Development and Production Modes
+
+The application automatically handles both development and production modes:
+
+- **Development Mode**: Uses long polling to receive updates from Telegram
+- **Production Mode**: Uses webhook to receive updates, which is more efficient for production environments
+
 ## Running in Development Mode
 
 For local development:
@@ -176,11 +214,13 @@ For production environments, it's recommended to use webhooks instead of long po
 
 ```env
 NODE_ENV=production
-WEBHOOK_DOMAIN=https://your-domain.com
-WEBHOOK_PORT=8443  # Must be one of 443, 80, 88, or 8443
+APP_DOMAIN=your-domain.com  # Without https:// prefix, it will be added automatically
+APP_PORT=3000  # Your application port
 WEBHOOK_SECRET_PATH=  # Optional, generated automatically if empty
 WEBHOOK_SECRET_TOKEN=your_secret_token  # For additional security
 ```
+
+The application will automatically set up the webhook URL as `https://{APP_DOMAIN}{WEBHOOK_SECRET_PATH}`.
 
 ## Deployment Options
 
@@ -194,7 +234,11 @@ You can deploy the bot on [Render](https://render.com/) for free:
 4. Configure build command: `npm install && npm run build`
 5. Configure start command: `npm start`
 6. Add all environment variables from your `.env` file
-7. Deploy the service
+7. Set `APP_HOST=0.0.0.0` to ensure the server binds correctly on Render
+8. Set `APP_PORT=$PORT` to use the port assigned by Render
+9. Set `APP_DOMAIN` to your Render app's URL (e.g., `your-app-name.onrender.com`)
+
+This configuration ensures that Render can detect your application's open port, which is crucial for keeping the service alive.
 
 
 ### Vercel Deployment
@@ -229,7 +273,7 @@ The bot can be deployed to Vercel's serverless platform:
    - `APP_KEY` - Your generated application key
    - `SESSION_DRIVER` - Memory, Redis, MongoDB, etc.
 
-   > **Note:** You don't need to set `WEBHOOK_DOMAIN` or `WEBHOOK_PORT` for Vercel deployments, as the system automatically handles these using the `VERCEL_URL` environment variable.
+   > **Note:** You don't need to explicitly set `APP_DOMAIN` for Vercel deployments, as the system automatically uses the `VERCEL_URL` environment variable.
 
 5. **Production deployment**
 
@@ -239,13 +283,7 @@ The bot can be deployed to Vercel's serverless platform:
 
 6. **Set up your Telegram bot webhook**
 
-   Vercel automatically provides the domain, so you just need to set the webhook with Telegram:
-
-   ```
-   https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://your-vercel-project.vercel.app/api/webhook
-   ```
-
-   You can also navigate to your deployment URL to see the webhook status.
+   The application will automatically set up the webhook using your app's domain. You can also verify the webhook status by visiting the `/webhook-info` endpoint in development mode.
 
 7. **Note about Pusher in serverless environments**
 
@@ -282,10 +320,12 @@ The bot can be easily deployed using Docker:
      -e BOT_USERNAME=your_bot_username \
      -e APP_KEY=your_generated_app_key \
      -e NODE_ENV=production \
-     -e WEBHOOK_DOMAIN=https://your-domain.com \
-     -e WEBHOOK_PORT=8443 \
+     -e APP_PORT=3000 \
+     -e APP_HOST=0.0.0.0 \
+     -e APP_DOMAIN=your-domain.com \
      -e PUSHER_KEY=your_pusher_key \
      -e PUSHER_CLUSTER=your_pusher_cluster \
+     -p 3000:3000 \
      copperx-telegram-bot
    ```
 
@@ -299,12 +339,17 @@ The bot can be easily deployed using Docker:
      bot:
        build: .
        restart: always
+       ports:
+         - "3000:3000"
        environment:
          - BOT_TOKEN=your_telegram_bot_token
          - BOT_USERNAME=your_bot_username
          - API_BASE_URL=https://income-api.copperx.io
          - APP_KEY=your_generated_app_key
          - NODE_ENV=production
+         - APP_PORT=3000
+         - APP_HOST=0.0.0.0
+         - APP_DOMAIN=your-domain.com
          - SESSION_DRIVER=redis
          - REDIS_URL=redis://redis:6379
    ```
@@ -323,12 +368,17 @@ The bot can be easily deployed using Docker:
      bot:
        build: .
        restart: always
+       ports:
+         - "3000:3000"
        environment:
          - BOT_TOKEN=your_telegram_bot_token
          - BOT_USERNAME=your_bot_username
          - API_BASE_URL=https://income-api.copperx.io
          - APP_KEY=your_generated_app_key
          - NODE_ENV=production
+         - APP_PORT=3000
+         - APP_HOST=0.0.0.0
+         - APP_DOMAIN=your-domain.com
          - SESSION_DRIVER=redis
          - REDIS_URL=redis://redis-host:6379
    ```
@@ -343,6 +393,13 @@ The bot can be easily deployed using Docker:
 
 After deployment, send a `/start` command to your bot on Telegram. You should receive the welcome message and main menu.
 
+You can also verify the server is running by accessing the health check endpoint:
+```
+https://your-domain.com/health
+```
+
+This should return a JSON response with status "ok" and the current timestamp.
+
 ## Troubleshooting
 
 If you encounter issues during setup:
@@ -351,7 +408,9 @@ If you encounter issues during setup:
 2. Verify all environment variables are set correctly
 3. Ensure your bot token is valid
 4. Confirm you're using a supported Node.js version
-5. See [troubleshooting.md](troubleshooting.md) for common issues and solutions
+5. Try accessing the health check endpoint to verify the server is running
+6. Use the `/webhook-info` endpoint in development mode to check your webhook status
+7. See [troubleshooting.md](troubleshooting.md) for common issues and solutions
 
 ## Next Steps
 

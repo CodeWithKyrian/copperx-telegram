@@ -1,67 +1,71 @@
+import { FastifyInstance } from 'fastify';
+import { Telegraf } from 'telegraf';
 import { initBot } from './bot';
-import { config } from './config';
+import { initServer } from './server';
+import { environment } from './config/environment';
 import { validateEnvironment } from './utils/validators';
 import logger from './utils/logger.utils';
+import { GlobalContext } from './types';
 
+/**
+ * Bootstrap the application
+ */
+const bootstrap = async () => {
+    try {
+        validateEnvironment();
 
-const getWebhookInfo = async () => {
-    const bot = initBot();
-    const webhookInfo = await bot.telegram.getWebhookInfo();
-    logger.info('Webhook info', { webhookInfo });
-    process.exit(0);
-}
+        logger.info('Environment validation passed');
 
-getWebhookInfo();
-
-try {
-    validateEnvironment();
-
-    logger.info('Environment validation passed');
-
-    logger.info('CopperX Telegram Bot starting', {
-        environment: config.env.nodeEnv,
-        logLevel: config.env.logging.level,
-        sessionDriver: config.env.session.driver,
-    });
-
-    const bot = initBot();
-
-    if (config.env.nodeEnv === 'production') {
-        bot.launch({
-            webhook: {
-                domain: config.env.webhook.domain,
-                port: config.env.webhook.port,
-                path: config.env.webhook.secretPath,
-                secretToken: config.env.webhook.secretToken
-            }
+        logger.info('CopperX Telegram Bot starting', {
+            environment: environment.nodeEnv,
+            logLevel: environment.logging.level,
+            sessionDriver: environment.session.driver,
         });
 
-        logger.info('Bot started successfully in webhook mode', {
-            domain: config.env.webhook.domain,
-            port: config.env.webhook.port,
+        const bot = initBot();
+
+        const app = await initServer(bot);
+
+        const host = environment.app.host;
+        const port = environment.app.port;
+
+        await app.listen({ host, port });
+
+        logger.info(`Server started on ${host}:${port}`);
+
+        setupGracefulShutdown(app, bot);
+    } catch (error: any) {
+        logger.error('Failed to start bot', {
+            error: error.message,
+            stack: error.stack
         });
-    } else {
-        bot.launch(() => {
-            logger.info('Bot started successfully in long-polling mode');
-        });
+        process.exit(1);
     }
+};
 
-    // Enable graceful stop
-    process.once('SIGINT', () => {
-        logger.info('Received SIGINT signal, shutting down...');
-        bot.stop('SIGINT');
-        process.exit(0);
-    });
+/**
+ * Setup graceful shutdown handlers
+ */
+const setupGracefulShutdown = (app: FastifyInstance, bot: Telegraf<GlobalContext>) => {
+    const gracefulShutdown = async () => {
+        logger.info('Shutting down...');
 
-    process.once('SIGTERM', () => {
-        logger.info('Received SIGTERM signal, shutting down...');
-        bot.stop('SIGTERM');
-        process.exit(0);
-    });
-} catch (error: any) {
-    logger.error('Failed to start bot', {
-        error: error.message,
-        stack: error.stack
-    });
-    process.exit(1);
-}
+        try {
+            await app.close();
+            logger.info('Fastify server closed');
+
+            bot.stop();
+            logger.info('Bot stopped');
+
+            process.exit(0);
+        } catch (err) {
+            logger.error('Error during shutdown', { error: err });
+            process.exit(1);
+        }
+    };
+
+    process.once('SIGINT', gracefulShutdown);
+    process.once('SIGTERM', gracefulShutdown);
+};
+
+bootstrap();

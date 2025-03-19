@@ -24,6 +24,10 @@ jest.mock('../../src/config/environment', () => ({
         security: {
             appKey: 'mock-app-key'
         },
+        app: {
+            domain: 'https://example.com',
+            port: 443
+        },
         webhook: {
             domain: 'https://example.com',
             port: 443
@@ -93,20 +97,12 @@ describe('Validators', () => {
             expect(() => validateEnvironment()).toThrow(/API_BASE_URL is required/);
         });
 
-        it('should check for WEBHOOK_DOMAIN in production mode', () => {
+        it('should check for APP_DOMAIN in production mode', () => {
             // Set to production
             (environment.nodeEnv as any) = 'production';
-            (environment.webhook as any).domain = '';
+            (environment.app as any).domain = '';
 
-            expect(() => validateEnvironment()).toThrow(/WEBHOOK_DOMAIN is required in production mode/);
-        });
-
-        it('should check for valid WEBHOOK_PORT in production mode', () => {
-            // Set to production with invalid port
-            (environment.nodeEnv as any) = 'production';
-            (environment.webhook as any).port = 1234; // Invalid port
-
-            expect(() => validateEnvironment()).toThrow(/WEBHOOK_PORT must be one of/);
+            expect(() => validateEnvironment()).toThrow(/APP_DOMAIN is required in production mode for webhook configuration/);
         });
 
         it('should check for Redis URL when using Redis session driver', () => {

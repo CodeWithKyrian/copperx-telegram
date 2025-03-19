@@ -10,7 +10,7 @@ const setupWebhookConfig = () => {
     if (isOnVercel && vercelUrl) {
         logger.info(`Using Vercel URL for webhook: ${vercelUrl}`);
 
-        environment.webhook.domain = `https://${vercelUrl}`;
+        environment.app.domain = `https://${vercelUrl}`;
 
         if (!environment.webhook.secretPath) {
             environment.webhook.secretPath = 'api/webhook';
@@ -31,10 +31,6 @@ try {
         environment: environment.nodeEnv,
         logLevel: environment.logging.level,
         sessionDriver: environment.session.driver,
-        webhook: {
-            domain: environment.webhook.domain,
-            path: environment.webhook.secretPath
-        }
     });
 
     bot = initBot();

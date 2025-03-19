@@ -31,7 +31,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Copy built application from the builder stage
-COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/dist/src ./dist
 
 # Copy scripts folder for app key generation if needed
 COPY scripts ./scripts

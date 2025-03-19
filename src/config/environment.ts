@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import { ensureLeadingSlash } from '../utils/formatters.utils';
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ export const environment = {
     webhook: {
         domain: process.env.WEBHOOK_DOMAIN || '',
         port: parseInt(process.env.WEBHOOK_PORT || '443', 10),
-        secretPath: process.env.WEBHOOK_SECRET_PATH || '',
+        secretPath: ensureLeadingSlash(process.env.WEBHOOK_SECRET_PATH),
         secretToken: process.env.WEBHOOK_SECRET_TOKEN || undefined,
     },
 

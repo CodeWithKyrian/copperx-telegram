@@ -21,7 +21,7 @@ try {
             webhook: {
                 domain: config.env.webhook.domain,
                 port: config.env.webhook.port,
-                path: config.env.webhook.secretPath || bot.secretPathComponent(),
+                path: config.env.webhook.secretPath,
                 secretToken: config.env.webhook.secretToken
             }
         });

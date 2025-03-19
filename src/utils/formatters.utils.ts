@@ -245,3 +245,13 @@ export function formatUserStatus(status: UserStatus): string {
 
     return message[status] || 'Unknown status';
 };
+
+/**
+ * Ensures a path has a leading slash if provided
+ * @param path Path string to normalize
+ * @returns Path with leading slash or undefined if not provided
+ */
+export function ensureLeadingSlash(path?: string): string | undefined {
+    if (!path) return undefined;
+    return path.startsWith('/') ? path : `/${path}`;
+}

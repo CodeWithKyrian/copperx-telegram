@@ -27,10 +27,10 @@ export const validateEnvironment = (): void => {
             errors.push('WEBHOOK_DOMAIN is required in production mode');
         }
 
-        const validPorts = [80, 88, 443, 8443];
-        if (!validPorts.includes(environment.webhook.port)) {
-            errors.push(`WEBHOOK_PORT must be one of: ${validPorts.join(', ')} (got ${environment.webhook.port})`);
-        }
+        // const validPorts = [80, 88, 443, 8443];
+        // if (!validPorts.includes(environment.webhook.port)) {
+        //     errors.push(`WEBHOOK_PORT must be one of: ${validPorts.join(', ')} (got ${environment.webhook.port})`);
+        // }
     }
 
     // Check session storage-specific requirements

@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             throw new Error('Bot is not initialized');
         }
 
-        const secretToken = config.env.webhook.secretToken;
+        const secretToken = config.webhook.secretToken;
         if (secretToken) {
             if (req.headers['x-telegram-bot-api-secret-token'] !== secretToken) {
                 logger.warn('Invalid webhook secret token');

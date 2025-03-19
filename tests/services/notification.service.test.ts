@@ -3,7 +3,7 @@ import Pusher from 'pusher-js';
 import { notificationService, configureNotifications } from '../../src/services/notification.service';
 import notificationApi from '../../src/api/notification.api';
 import logger from '../../src/utils/logger.utils';
-import { environment } from '../../src/config/environment';
+import { config } from '../../src/config';
 import { createMockContext } from '../__mocks__/context.mock';
 import { formatNetworkName, getExplorerTxUrl } from '../../src/utils/chain.utils';
 import { formatDate } from '../../src/utils/formatters.utils';
@@ -15,8 +15,8 @@ jest.mock('../../src/api/notification.api');
 jest.mock('../../src/utils/logger.utils');
 jest.mock('../../src/utils/chain.utils');
 jest.mock('../../src/utils/formatters.utils');
-jest.mock('../../src/config/environment', () => ({
-    environment: {
+jest.mock('../../src/config', () => ({
+    config: {
         pusher: {
             key: 'test-pusher-key',
             cluster: 'test-cluster'
@@ -115,12 +115,12 @@ describe('Notification Service', () => {
 
         it('should handle missing Pusher configuration', () => {
             // Arrange - modify environment for this test
-            const originalKey = environment.pusher.key;
-            const originalCluster = environment.pusher.cluster;
+            const originalKey = config.pusher.key;
+            const originalCluster = config.pusher.cluster;
 
             // Modify environment directly instead of using jest.doMock
-            environment.pusher.key = '';
-            environment.pusher.cluster = '';
+            config.pusher.key = '';
+            config.pusher.cluster = '';
 
             // We need to reset the service's state
             notificationService['pusher'] = null;
@@ -133,8 +133,8 @@ describe('Notification Service', () => {
             expect(logger.warn).toHaveBeenCalledWith('Pusher keys not configured, real-time notifications disabled');
 
             // Restore environment
-            environment.pusher.key = originalKey;
-            environment.pusher.cluster = originalCluster;
+            config.pusher.key = originalKey;
+            config.pusher.cluster = originalCluster;
         });
 
         it('should handle Pusher initialization errors', () => {

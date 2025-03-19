@@ -45,6 +45,7 @@ A Telegram bot built with TypeScript and Node.js that integrates with CopperX Pa
 - Protected routes and commands
 - Rate limiting to prevent abuse
 - Comprehensive error handling
+- Automatic session expiration based on configurable TTL
 
 ## 🧩 Technical Stack
 
@@ -70,7 +71,7 @@ A Telegram bot built with TypeScript and Node.js that integrates with CopperX Pa
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/copperx-telegram.git
+   git clone https://github.com/CodeWithKyrian/copperx-telegram.git
    cd copperx-telegram
    ```
 

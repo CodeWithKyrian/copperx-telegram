@@ -24,7 +24,7 @@ import { testNotificationCommand } from "./notification.command";
 import { addPayeeAction, listPayeesAction, noSavePayeeAction, payeesCommand, removePayeeAction, savePayeeAction } from "./payee.command";
 import { handleNaturalLanguage } from "./natural-language.command";
 
-import { environment } from "../config";
+import { config } from '../config';
 
 /**
  * Configure the bot commands and handlers
@@ -81,7 +81,7 @@ const registerCommandHandlers = (bot: Telegraf<GlobalContext>): void => {
     bot.command('payees', payeesCommand);
     bot.command('history', historyCommand);
 
-    if (environment.isDevelopment) {
+    if (config.env.isDevelopment) {
         bot.command('test_notifications', testNotificationCommand);
     }
 }

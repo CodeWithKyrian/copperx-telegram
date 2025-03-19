@@ -1,8 +1,8 @@
 import { Encryption } from '../../src/utils/encryption.utils';
 
-// Mock environment
-jest.mock('../../src/config/environment', () => ({
-    environment: {
+// Mock config
+jest.mock('../../src/config', () => ({
+    config: {
         app: {
             key: 'test-app-key-for-encryption-that-is-32-chars',
         },

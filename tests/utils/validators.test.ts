@@ -9,12 +9,18 @@ import {
     isValidAmount,
     isSafeInput
 } from '../../src/utils/validators';
-import { environment } from '../../src/config/environment';
+import { config } from '../../src/config';
 import { ChainId } from '../../src/types/api.types';
 
-// Only mock the environment
-jest.mock('../../src/config/environment', () => ({
-    environment: {
+// Only mock the config
+jest.mock('../../src/config', () => ({
+    config: {
+        env: {
+            isDevelopment: true,
+            isProduction: false,
+            isTest: false
+        },
+        nodeEnv: 'development',
         bot: {
             token: 'mock-token' // Default to valid
         },
@@ -28,7 +34,9 @@ jest.mock('../../src/config/environment', () => ({
         },
         webhook: {
             domain: 'https://example.com',
-            port: 443
+            port: 443,
+            secretPath: '',
+            secretToken: ''
         },
         session: {
             driver: 'memory'
@@ -44,7 +52,8 @@ jest.mock('../../src/config/environment', () => ({
             host: 'localhost',
             port: 5432,
             database: 'copperx_bot',
-            user: 'postgres'
+            user: 'postgres',
+            password: ''
         },
         sqlite: {
             filename: '.sessions.db'
@@ -52,22 +61,22 @@ jest.mock('../../src/config/environment', () => ({
         pusher: {
             key: '',
             cluster: ''
-        },
-        nodeEnv: 'development'
+        }
     }
 }));
 
 describe('Validators', () => {
     describe('validateEnvironment', () => {
         afterEach(() => {
-            // Reset the environment after each test
-            (environment.bot as any).token = 'mock-token';
-            (environment.api as any).baseUrl = 'https://api.example.com';
-            (environment.app as any).key = 'mock-app-key';
-            (environment.webhook as any).domain = 'https://example.com';
-            (environment.webhook as any).port = 443;
-            (environment.session as any).driver = 'memory';
-            (environment.nodeEnv as any) = 'development';
+            // Reset the config after each test
+            (config.bot as any).token = 'mock-token';
+            (config.api as any).baseUrl = 'https://api.example.com';
+            (config.app as any).key = 'mock-app-key';
+            (config.webhook as any).domain = 'https://example.com';
+            (config.webhook as any).port = 443;
+            (config.session as any).driver = 'memory';
+            (config.env as any).isProduction = false;
+            (config.nodeEnv as any) = 'development';
         });
 
         it('should not throw error when all required env vars are present', () => {
@@ -75,52 +84,52 @@ describe('Validators', () => {
         });
 
         it('should throw error when BOT_TOKEN is missing', () => {
-            // Modify the mocked environment
-            (environment.bot as any).token = '';
+            // Modify the mocked config
+            (config.bot as any).token = '';
 
             expect(() => validateEnvironment()).toThrow(/BOT_TOKEN is required/);
         });
 
         it('should throw error when APP_KEY is missing', () => {
-            // Modify the mocked environment
-            (environment.app as any).key = '';
+            // Modify the mocked config
+            (config.app as any).key = '';
 
             expect(() => validateEnvironment()).toThrow(/APP_KEY is required/);
         });
 
         it('should throw error when API_BASE_URL is missing', () => {
-            // Modify the mocked environment
-            (environment.api as any).baseUrl = '';
+            // Modify the mocked config
+            (config.api as any).baseUrl = '';
 
             expect(() => validateEnvironment()).toThrow(/API_BASE_URL is required/);
         });
 
         it('should check for APP_DOMAIN in production mode', () => {
             // Set to production
-            (environment.nodeEnv as any) = 'production';
-            (environment.app as any).domain = '';
+            (config.env as any).isProduction = true;
+            (config.app as any).domain = '';
 
             expect(() => validateEnvironment()).toThrow(/APP_DOMAIN is required in production mode for webhook configuration/);
         });
 
         it('should check for Redis URL when using Redis session driver', () => {
-            (environment.session as any).driver = 'redis';
-            (environment.redis as any) = { url: '' };
+            (config.session as any).driver = 'redis';
+            (config.redis as any) = { url: '' };
 
             expect(() => validateEnvironment()).toThrow(/REDIS_URL is required/);
         });
 
         it('should check for MongoDB URI and database when using MongoDB session driver', () => {
-            (environment.session as any).driver = 'mongo';
-            (environment.mongo as any) = { uri: '', database: '' };
+            (config.session as any).driver = 'mongo';
+            (config.mongo as any) = { uri: '', database: '' };
 
             expect(() => validateEnvironment()).toThrow(/MONGO_URI is required/);
             expect(() => validateEnvironment()).toThrow(/MONGO_DB is required/);
         });
 
         it('should check for Pusher configuration when Pusher is partially configured', () => {
-            (environment.pusher as any).key = 'some-key';
-            (environment.pusher as any).cluster = '';
+            (config.pusher as any).key = 'some-key';
+            (config.pusher as any).cluster = '';
 
             expect(() => validateEnvironment()).toThrow(/PUSHER_CLUSTER is required/);
         });

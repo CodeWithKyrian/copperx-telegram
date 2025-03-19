@@ -29,10 +29,18 @@ jest.mock('../../src/utils/logger.utils', () => ({
         info: jest.fn()
     }
 }));
-jest.mock('../../src/config/environment', () => ({
-    environment: {
+jest.mock('../../src/config', () => ({
+    config: {
         bot: {
             token: 'test-token'
+        },
+        env: {
+            isDevelopment: false,
+            isProduction: false,
+            isTest: true
+        },
+        session: {
+            driver: 'memory'
         }
     }
 }));

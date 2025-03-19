@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { environment } from '../config/environment';
+import { config } from '../config';
 
 /**
  * Provides encryption and decryption functionality for sensitive data
@@ -16,12 +16,12 @@ export class Encryption {
      * @returns Encrypted data with IV prepended
      */
     public static encrypt(value: string): string {
-        if (!environment.app.key) {
+        if (!config.app.key) {
             throw new Error('APP_KEY is not set in environment variables');
         }
 
         // Derive a key from the APP_KEY
-        const key = this.deriveKeyFromAppKey(environment.app.key);
+        const key = this.deriveKeyFromAppKey(config.app.key);
 
         // Generate a random IV
         const iv = crypto.randomBytes(this.IV_SIZE);
@@ -46,12 +46,12 @@ export class Encryption {
      * @returns The original decrypted data
      */
     public static decrypt(encryptedValue: string): string {
-        if (!environment.app.key) {
+        if (!config.app.key) {
             throw new Error('APP_KEY is not set in environment variables');
         }
 
         // Derive the key from APP_KEY
-        const key = this.deriveKeyFromAppKey(environment.app.key);
+        const key = this.deriveKeyFromAppKey(config.app.key);
 
         // Split the IV and encrypted data
         const [ivHex, encryptedData] = encryptedValue.split(':');

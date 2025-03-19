@@ -1,7 +1,7 @@
 import { Telegraf } from "telegraf";
 import { GlobalContext } from "../src/types";
 import { logger, validateEnvironment } from "../src/utils";
-import { environment } from "../src/config";
+import { config } from "../src/config";
 import { initBot } from "../src/bot";
 
 const setupWebhookConfig = () => {
@@ -10,10 +10,10 @@ const setupWebhookConfig = () => {
     if (isOnVercel && vercelUrl) {
         logger.info(`Using Vercel URL for webhook: ${vercelUrl}`);
 
-        environment.app.domain = `https://${vercelUrl}`;
+        config.app.domain = `https://${vercelUrl}`;
 
-        if (!environment.webhook.secretPath) {
-            environment.webhook.secretPath = 'api/webhook';
+        if (!config.webhook.secretPath) {
+            config.webhook.secretPath = 'api/webhook';
         }
     }
 };
@@ -28,9 +28,9 @@ try {
     logger.info('Environment validation passed');
 
     logger.info('CopperX Telegram Bot initializing for Vercel', {
-        environment: environment.nodeEnv,
-        logLevel: environment.logging.level,
-        sessionDriver: environment.session.driver,
+        environment: config.nodeEnv,
+        logLevel: config.logging.level,
+        sessionDriver: config.session.driver,
     });
 
     bot = initBot();

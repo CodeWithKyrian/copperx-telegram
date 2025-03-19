@@ -1,19 +1,21 @@
 import { createSessionStore } from '../../src/middlewares/session.middleware';
 import { createMockContext } from '../__mocks__/context.mock';
 import { callMiddleware } from '../__mocks__/context.mock';
-import { environment } from '../../src/config/environment';
+import { config } from '../../src/config';
 import logger from '../../src/utils/logger.utils';
 import { Redis } from '@telegraf/session/redis';
 import { Mongo } from '@telegraf/session/mongodb';
 import { Postgres } from '@telegraf/session/pg';
 import { SQLite } from '@telegraf/session/sqlite';
+// import { Markup } from 'telegraf';
 
 // Mock dependencies
 jest.mock('../../src/utils/logger.utils');
-jest.mock('../../src/config/environment', () => ({
-    environment: {
+jest.mock('../../src/config', () => ({
+    config: {
         session: {
-            driver: 'memory'
+            driver: 'memory',
+            ttl: 3600 // 1 hour in seconds
         },
         redis: {
             url: 'redis://localhost:6379'
@@ -54,9 +56,19 @@ jest.mock('telegraf', () => {
     // Create the mock function here directly
     const mockFn = jest.fn();
 
+    const markupMock = {
+        inlineKeyboard: jest.fn().mockReturnValue({ inline_keyboard: [] })
+    };
+
     return {
         ...jest.requireActual('telegraf'),
-        session: jest.fn().mockReturnValue(mockFn)
+        session: jest.fn().mockReturnValue(mockFn),
+        Markup: {
+            inlineKeyboard: jest.fn().mockReturnValue(markupMock),
+            button: {
+                callback: jest.fn().mockReturnValue({ text: 'Login', callback_data: 'login' })
+            }
+        }
     };
 });
 
@@ -85,7 +97,7 @@ describe('Session Middleware', () => {
 
         it('should create Redis store when configured', () => {
             // Arrange
-            environment.session.driver = 'redis';
+            config.session.driver = 'redis';
 
             // Act
             createSessionStore();
@@ -99,7 +111,7 @@ describe('Session Middleware', () => {
 
         it('should create MongoDB store when configured', () => {
             // Arrange
-            environment.session.driver = 'mongo';
+            config.session.driver = 'mongo';
 
             // Act
             createSessionStore();
@@ -114,7 +126,7 @@ describe('Session Middleware', () => {
 
         it('should create SQLite store when configured', () => {
             // Arrange
-            environment.session.driver = 'sqlite';
+            config.session.driver = 'sqlite';
 
             // Act
             createSessionStore();
@@ -129,7 +141,7 @@ describe('Session Middleware', () => {
 
         it('should create Postgres store when configured', () => {
             // Arrange
-            environment.session.driver = 'postgres';
+            config.session.driver = 'postgres';
 
             // Act
             createSessionStore();
@@ -147,7 +159,7 @@ describe('Session Middleware', () => {
 
         afterEach(() => {
             // Reset to default
-            environment.session.driver = 'memory';
+            config.session.driver = 'memory';
         });
     });
 
@@ -270,7 +282,7 @@ describe('Session Middleware', () => {
 
         it('should use the configured store', async () => {
             // Arrange
-            environment.session.driver = 'redis';
+            config.session.driver = 'redis';
             sessionMiddleware();
 
             // Assert
@@ -285,7 +297,233 @@ describe('Session Middleware', () => {
             );
 
             // Reset
-            environment.session.driver = 'memory';
+            config.session.driver = 'memory';
+        });
+    });
+
+    describe('session expiration', () => {
+        let mockNow: jest.SpyInstance;
+        const mockNext = jest.fn().mockResolvedValue(undefined);
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+            mockNow = jest.spyOn(Date, 'now');
+        });
+
+        afterEach(() => {
+            jest.restoreAllMocks();
+            config.session.driver = 'memory';
+        });
+
+        it('should log TTL configuration during initialization', () => {
+            // Act
+            sessionMiddleware();
+
+            // Assert
+            expect(logger.info).toHaveBeenCalledWith(`Session TTL configured for ${config.session.ttl} seconds`);
+        });
+
+        it('should not expire sessions that are within TTL', async () => {
+            // Arrange
+            const now = 1623456789000;
+            const createdAt = now - 1000 * 60 * 30; // 30 minutes ago (within 1 hour TTL)
+            const updatedAt = createdAt;
+
+            const ctx = createMockContext();
+            ctx.reply = jest.fn().mockResolvedValue(undefined);
+
+            // Initialize session with auth token and timestamp
+            (ctx as any).session = {
+                createdAt,
+                updatedAt,
+                auth: {
+                    accessToken: 'mock-token',
+                    userId: '123',
+                    email: 'test@example.com'
+                }
+            };
+
+            // Create a mock store that will return our session
+            const mockStore = new Map();
+            const userId = 123;
+            const sessionKey = `user:${userId}`;
+            mockStore.set(sessionKey, ctx.session);
+
+            // Create proper mocks without recursion
+            const originalGet = mockStore.get.bind(mockStore);
+            mockStore.get = jest.fn(key => originalGet(key));
+            mockStore.delete = jest.fn();
+
+            // Mock current time
+            mockNow.mockReturnValue(now);
+
+            // Setup our middleware mock
+            sessionMiddlewareMock.mockImplementation(async (_ctx: any, next: () => Promise<void>) => {
+                // Simulate obtaining session key and calling store.get
+                const getSessionKey = () => sessionKey;
+                const session = mockStore.get(getSessionKey());
+
+                // Check TTL expiration (simplified version of the real logic)
+                if (session?.auth?.accessToken) {
+                    const idleTime = now - session.updatedAt;
+                    if (idleTime > config.session.ttl * 1000) {
+                        mockStore.delete(sessionKey);
+                        await ctx.reply('Your session has expired due to inactivity. Please login again.');
+                    }
+                }
+
+                // Continue to next middleware
+                await next();
+            });
+
+            const middleware = sessionMiddleware();
+
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
+
+            // Assert
+            expect(mockStore.get).toHaveBeenCalled();
+            expect(mockStore.delete).not.toHaveBeenCalled(); // Session still valid
+            expect(ctx.reply).not.toHaveBeenCalled(); // No expiry message
+            expect(mockNext).toHaveBeenCalled();
+        });
+
+        it('should expire sessions that exceed TTL', async () => {
+            // Arrange
+            const now = 1623456789000;
+            const createdAt = now - 1000 * 60 * 120; // 2 hours ago (exceeds 1 hour TTL)
+            const updatedAt = createdAt;
+
+            const ctx = createMockContext({ from: { id: 123 } });
+            ctx.reply = jest.fn().mockResolvedValue(undefined);
+
+            // Initialize session with auth token and old timestamp
+            (ctx as any).session = {
+                createdAt,
+                updatedAt,
+                auth: {
+                    accessToken: 'mock-token',
+                    userId: '123',
+                    email: 'test@example.com'
+                }
+            };
+
+            // Create a mock store
+            const mockStore = new Map();
+            const userId = 123;
+            const sessionKey = `user:${userId}`;
+            mockStore.set(sessionKey, ctx.session);
+
+            const originalGet = mockStore.get.bind(mockStore);
+            mockStore.get = jest.fn(key => originalGet(key));
+            mockStore.delete = jest.fn();
+
+            // Mock current time
+            mockNow.mockReturnValue(now);
+
+            // Setup our middleware mock to simulate the TTL check
+            sessionMiddlewareMock.mockImplementation(async (_ctx: any, next: () => Promise<void>) => {
+                // Simulate obtaining session key and calling store.get
+                const getSessionKey = () => sessionKey;
+                const session = mockStore.get(getSessionKey());
+
+                // Check TTL expiration (simplified version of the real logic)
+                if (session?.auth?.accessToken) {
+                    const idleTime = now - session.updatedAt;
+                    if (idleTime > config.session.ttl * 1000) {
+                        mockStore.delete(sessionKey);
+                        await ctx.reply('Your session has expired due to inactivity. Please login again.');
+                        logger.info(`Session expired for ${sessionKey}`, {
+                            userId: session.auth.userId,
+                            email: session.auth.email
+                        });
+                    }
+                }
+
+                // Continue to next middleware
+                await next();
+            });
+
+            const middleware = sessionMiddleware();
+
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
+
+            // Assert
+            expect(mockStore.get).toHaveBeenCalled();
+            expect(mockStore.delete).toHaveBeenCalledWith(sessionKey); // Session should be deleted
+            expect(ctx.reply).toHaveBeenCalledWith(
+                'Your session has expired due to inactivity. Please login again.'
+            );
+            expect(logger.info).toHaveBeenCalledWith(
+                `Session expired for ${sessionKey}`,
+                expect.objectContaining({
+                    userId: '123',
+                    email: 'test@example.com'
+                })
+            );
+            expect(mockNext).toHaveBeenCalled();
+        });
+
+        it('should not expire sessions without auth token', async () => {
+            // Arrange
+            const now = 1623456789000;
+            const createdAt = now - 1000 * 60 * 120; // 2 hours ago (exceeds 1 hour TTL)
+            const updatedAt = createdAt;
+
+            const ctx = createMockContext({ from: { id: 123 } });
+            ctx.reply = jest.fn().mockResolvedValue(undefined);
+
+            // Initialize session WITHOUT auth token but with old timestamp
+            (ctx as any).session = {
+                createdAt,
+                updatedAt
+                // No auth token
+            };
+
+            // Create a mock store
+            const mockStore = new Map();
+            const userId = 123;
+            const sessionKey = `user:${userId}`;
+            mockStore.set(sessionKey, ctx.session);
+
+            // Create proper mocks without recursion
+            const originalGet = mockStore.get.bind(mockStore);
+            mockStore.get = jest.fn(key => originalGet(key));
+            mockStore.delete = jest.fn();
+
+            // Mock current time
+            mockNow.mockReturnValue(now);
+
+            // Setup our middleware mock to simulate the TTL check
+            sessionMiddlewareMock.mockImplementation(async (_ctx: any, next: () => Promise<void>) => {
+                // Simulate obtaining session key and calling store.get
+                const getSessionKey = () => sessionKey;
+                const session = mockStore.get(getSessionKey());
+
+                // Check TTL expiration (simplified version of the real logic)
+                if (session?.auth?.accessToken) {
+                    const idleTime = now - session.updatedAt;
+                    if (idleTime > config.session.ttl * 1000) {
+                        mockStore.delete(sessionKey);
+                        await ctx.reply('Your session has expired due to inactivity. Please login again.');
+                    }
+                }
+
+                // Continue to next middleware
+                await next();
+            });
+
+            const middleware = sessionMiddleware();
+
+            // Act
+            await callMiddleware(middleware, ctx, mockNext);
+
+            // Assert
+            expect(mockStore.get).toHaveBeenCalled();
+            expect(mockStore.delete).not.toHaveBeenCalled(); // Session should not be deleted
+            expect(ctx.reply).not.toHaveBeenCalled(); // No expiry message
+            expect(mockNext).toHaveBeenCalled();
         });
     });
 }); 

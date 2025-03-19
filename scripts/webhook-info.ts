@@ -30,11 +30,11 @@ async function main() {
         // Show current environment configuration
         console.log('\nCurrent Environment Configuration:');
         console.log('--------------------------');
-        console.log(`Environment: ${config.env.nodeEnv}`);
-        console.log(`App Domain: ${config.env.app.domain || 'Not set'}`);
-        console.log(`App Port: ${config.env.app.port}`);
-        console.log(`Webhook Secret Path: ${config.env.webhook.secretPath || 'Not set'}`);
-        console.log(`Webhook Secret Token: ${config.env.webhook.secretToken ? '****' : 'Not set'}`);
+        console.log(`Environment: ${config.nodeEnv}`);
+        console.log(`App Domain: ${config.app.domain || 'Not set'}`);
+        console.log(`App Port: ${config.app.port}`);
+        console.log(`Webhook Secret Path: ${config.webhook.secretPath || 'Not set'}`);
+        console.log(`Webhook Secret Token: ${config.webhook.secretToken ? '****' : 'Not set'}`);
 
         process.exit(0);
     } catch (error) {

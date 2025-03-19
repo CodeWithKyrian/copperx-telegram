@@ -1,91 +1,128 @@
-import { environment } from "../config/environment";
+import { config } from '../config';
 import { ChainId } from '../types/api.types';
 
 /**
  * Validates that all required environment variables are set
- * @throws Error if any required environment variable is missing
+ * 
+ * @returns True if all required variables are set
+ * @throws Error if any required variables are missing
  */
-export const validateEnvironment = (): void => {
+export const validateEnvironment = () => {
     const errors: string[] = [];
 
-    // Check mandatory variables
-    if (!environment.bot.token) {
+    // Check required bot configuration
+    if (!config.bot.token) {
         errors.push('BOT_TOKEN is required');
     }
 
-    if (!environment.api.baseUrl) {
+    // Check required API configuration
+    if (!config.api.baseUrl) {
         errors.push('API_BASE_URL is required');
     }
 
-    if (!environment.app.key) {
+    // Check required app configuration
+    if (!config.app.key) {
         errors.push('APP_KEY is required for secure session storage');
     }
 
-    // Check production-specific requirements
-    if (environment.nodeEnv === 'production') {
-        if (!environment.app.domain) {
+    // Check required domain in production
+    if (config.env.isProduction) {
+        if (!config.app.domain) {
             errors.push('APP_DOMAIN is required in production mode for webhook configuration');
         }
     }
 
-    // Check session storage-specific requirements
-    const sessionDriver = environment.session.driver;
-    switch (sessionDriver) {
-        case 'redis':
-            if (!environment.redis.url) {
-                errors.push('REDIS_URL is required when SESSION_DRIVER is set to "redis"');
-            }
-            break;
-        case 'mongo':
-            if (!environment.mongo.uri) {
-                errors.push('MONGO_URI is required when SESSION_DRIVER is set to "mongo"');
-            }
-            if (!environment.mongo.database) {
-                errors.push('MONGO_DB is required when SESSION_DRIVER is set to "mongo"');
-            }
-            break;
-        case 'postgres':
-            if (!environment.postgres.host) {
-                errors.push('POSTGRES_HOST is required when SESSION_DRIVER is set to "postgres"');
-            }
-            if (!environment.postgres.port) {
-                errors.push('POSTGRES_PORT is required when SESSION_DRIVER is set to "postgres"');
-            }
-            if (!environment.postgres.database) {
-                errors.push('POSTGRES_DB is required when SESSION_DRIVER is set to "postgres"');
-            }
-            if (!environment.postgres.user) {
-                errors.push('POSTGRES_USER is required when SESSION_DRIVER is set to "postgres"');
-            }
-            break;
-        case 'sqlite':
-            if (!environment.sqlite.filename) {
-                errors.push('SQLITE_FILENAME is required when SESSION_DRIVER is set to "sqlite"');
-            }
-            break;
-        case 'memory':
-            // Memory storage doesn't require additional config
-            break;
-        default:
-            errors.push(`Unknown SESSION_DRIVER: "${sessionDriver}". Valid options are: memory, redis, mongo, postgres, sqlite`);
+    // Validate session driver configuration
+    const sessionDriver = config.session.driver;
+
+    if (sessionDriver === 'redis') {
+        if (!config.redis.url) {
+            errors.push('REDIS_URL is required when SESSION_DRIVER is set to "redis"');
+        }
+    }
+
+    if (sessionDriver === 'mongo') {
+        if (!config.mongo.uri) {
+            errors.push('MONGO_URI is required when SESSION_DRIVER is set to "mongo"');
+        }
+        if (!config.mongo.database) {
+            errors.push('MONGO_DB is required when SESSION_DRIVER is set to "mongo"');
+        }
+    }
+
+    if (sessionDriver === 'postgres') {
+        if (!config.postgres.host) {
+            errors.push('POSTGRES_HOST is required when SESSION_DRIVER is set to "postgres"');
+        }
+        if (!config.postgres.port) {
+            errors.push('POSTGRES_PORT is required when SESSION_DRIVER is set to "postgres"');
+        }
+        if (!config.postgres.database) {
+            errors.push('POSTGRES_DB is required when SESSION_DRIVER is set to "postgres"');
+        }
+        if (!config.postgres.user) {
+            errors.push('POSTGRES_USER is required when SESSION_DRIVER is set to "postgres"');
+        }
+    }
+
+    if (sessionDriver === 'sqlite') {
+        if (!config.sqlite.filename) {
+            errors.push('SQLITE_FILENAME is required when SESSION_DRIVER is set to "sqlite"');
+        }
     }
 
     // Check Pusher configuration if any Pusher variables are set
-    const hasPusherConfig = environment.pusher.key || environment.pusher.cluster;
+    const hasPusherConfig = config.pusher.key || config.pusher.cluster;
 
     if (hasPusherConfig) {
-        if (!environment.pusher.key) {
+        if (!config.pusher.key) {
             errors.push('PUSHER_KEY is required when using Pusher');
         }
-        if (!environment.pusher.cluster) {
+        if (!config.pusher.cluster) {
             errors.push('PUSHER_CLUSTER is required when using Pusher');
         }
     }
 
-    // If there are any validation errors, throw an exception
     if (errors.length > 0) {
-        throw new Error(`Environment validation failed:\n- ${errors.join('\n- ')}`);
+        throw new Error(`Environment validation failed: ${errors.join(', ')}`);
     }
+
+    return true;
+};
+
+/**
+ * Validates a chain ID
+ * 
+ * @param chainId Chain ID to validate
+ * @returns True if valid, false otherwise
+ */
+export const validateChainId = (chainId: string): boolean => {
+    const validChainIds: ChainId[] = [
+        '1', '5', '137', '80002', '42161', '421614', '8453', '84532', '10', '11155111', '11155420', '56', '97', '1399811149', '1399811150', '23434', '39361'
+    ];
+    return validChainIds.includes(chainId as ChainId);
+};
+
+/**
+ * Validates that a string is safe to use in a shell command
+ * 
+ * @param input String to validate
+ * @returns True if safe, false otherwise
+ */
+export const validateSafeString = (input: string): boolean => {
+    // Check for potential shell injection patterns
+    const dangerousPatterns = [
+        /[;&|`]/,
+        /\$\(/,
+        /\$\{/,
+        /\s*>\s*/,
+        /\s*<\s*/,
+        /\\\\/,
+        /\\\"/,
+        /\\'/,
+    ];
+
+    return !dangerousPatterns.some(pattern => pattern.test(input));
 };
 
 /**
@@ -349,3 +386,18 @@ export function isSafeInput(input: string): boolean {
 
     return !dangerousPatterns.some(pattern => pattern.test(input));
 }
+
+export const validatePusherConfig = () => {
+    const hasPusherConfig = config.pusher.key || config.pusher.cluster;
+
+    if (hasPusherConfig) {
+        if (!config.pusher.key) {
+            throw new Error('PUSHER_KEY is not set in environment variables');
+        }
+        if (!config.pusher.cluster) {
+            throw new Error('PUSHER_CLUSTER is not set in environment variables');
+        }
+    }
+
+    return true;
+};

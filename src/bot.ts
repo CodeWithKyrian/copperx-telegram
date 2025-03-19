@@ -1,5 +1,5 @@
 import { Context, Telegraf } from 'telegraf';
-import { environment } from './config/environment';
+import { config } from './config';
 import { configureScenes } from './scenes';
 import { configureCommands } from './commands';
 import { configureMiddlewares } from './middlewares';
@@ -11,7 +11,7 @@ import logger from './utils/logger.utils';
  * Initializes the Telegram bot
  */
 export const initBot = (): Telegraf<GlobalContext> => {
-    const bot = new Telegraf<GlobalContext>(environment.bot.token);
+    const bot = new Telegraf<GlobalContext>(config.bot.token);
 
     configureMiddlewares(bot);
 

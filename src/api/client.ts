@@ -1,12 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { environment } from '../config/environment';
+import { config } from '../config';
 import { ErrorResponse } from '../types/api.types';
 import logger from '../utils/logger.utils';
 
 /**
  * API request configuration
  */
-export interface ApiClientConfig {
+interface ApiClientConfig {
     baseURL?: string;
     timeout?: number;
     headers?: Record<string, string>;
@@ -17,20 +17,20 @@ export interface ApiClientConfig {
  */
 export class ApiClient {
     private client: AxiosInstance;
-    private accessToken: string | null = null;
+    private token: string | null = null;
 
     /**
      * Creates a new API client
-     * @param config Optional configuration for the client
+     * @param clientConfig Optional configuration for the client
      */
-    constructor(config: ApiClientConfig = {}) {
+    constructor(clientConfig: ApiClientConfig = {}) {
         this.client = axios.create({
-            baseURL: config.baseURL || environment.api.baseUrl,
-            timeout: config.timeout || environment.api.timeout,
+            baseURL: clientConfig.baseURL || config.api.baseUrl,
+            timeout: clientConfig.timeout || config.api.timeout,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                ...config.headers,
+                ...clientConfig.headers,
             },
         });
 
@@ -45,8 +45,8 @@ export class ApiClient {
         // Request interceptor - add auth header if token exists
         this.client.interceptors.request.use(
             (config) => {
-                if (this.accessToken) {
-                    config.headers.Authorization = `Bearer ${this.accessToken}`;
+                if (this.token) {
+                    config.headers.Authorization = `Bearer ${this.token}`;
                 }
                 return config;
             },
@@ -94,7 +94,7 @@ export class ApiClient {
      * @param token Access token
      */
     public setAccessToken(token: string | null): void {
-        this.accessToken = token;
+        this.token = token;
         this.client.defaults.headers.common.Authorization = token ? `Bearer ${token}` : undefined;
     }
 
@@ -103,7 +103,7 @@ export class ApiClient {
      * @returns Current access token or null
      */
     public getAccessToken(): string | null {
-        return this.accessToken;
+        return this.token;
     }
 
     /**

@@ -14,7 +14,7 @@ const setupHealthRoutes = (app: FastifyInstance) => {
             status: 'ok',
             message: 'Server is running',
             timestamp: new Date().toISOString(),
-            env: config.env.nodeEnv
+            env: config.nodeEnv
         };
     });
 
@@ -23,7 +23,7 @@ const setupHealthRoutes = (app: FastifyInstance) => {
             status: 'ok',
             message: 'Server is healthy',
             timestamp: new Date().toISOString(),
-            env: config.env.nodeEnv
+            env: config.nodeEnv
         };
     });
 };
@@ -53,13 +53,13 @@ export const getWebhookInfo = async (bot: Telegraf<GlobalContext>) => {
 const configureWebhook = async (app: FastifyInstance, bot: Telegraf<GlobalContext>): Promise<boolean> => {
     try {
         // Get app domain from config
-        const appDomain = config.env.app.domain;
+        const appDomain = config.app.domain;
 
         const hasProtocol = appDomain.startsWith('https://') || appDomain.startsWith('http://');
         const cleanDomain = hasProtocol ? new URL(appDomain).host : appDomain;
 
         // Create webhook URL
-        const webhookPath = config.env.webhook.secretPath || `/telegraf/${bot.secretPathComponent()}`;
+        const webhookPath = config.webhook.secretPath || `/telegraf/${bot.secretPathComponent()}`;
         const webhookUrl = `https://${cleanDomain}${webhookPath}`;
 
         // Delete any existing webhook first
@@ -67,7 +67,7 @@ const configureWebhook = async (app: FastifyInstance, bot: Telegraf<GlobalContex
 
         // Create webhook handler
         const webhookCallback = bot.webhookCallback(webhookPath, {
-            secretToken: config.env.webhook.secretToken
+            secretToken: config.webhook.secretToken
         });
 
         // Register the webhook route with Fastify
@@ -76,7 +76,7 @@ const configureWebhook = async (app: FastifyInstance, bot: Telegraf<GlobalContex
 
         // Set the webhook on Telegram's side
         await bot.telegram.setWebhook(webhookUrl, {
-            secret_token: config.env.webhook.secretToken
+            secret_token: config.webhook.secretToken
         });
 
         logger.info(`Webhook set to ${webhookUrl}`);

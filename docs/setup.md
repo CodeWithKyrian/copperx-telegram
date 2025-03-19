@@ -139,6 +139,21 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_postgres_password
 ```
 
+## Session TTL Configuration
+
+The bot supports automatic session expiration for enhanced security:
+
+```env
+SESSION_TTL=604800  # Session time-to-live in seconds (default: 7 days)
+```
+
+This configuration automatically expires inactive authenticated sessions after the specified period. When a session expires:
+- The user is logged out and must authenticate again
+- A notification is sent informing them about the expiration
+- An audit log entry is created with the session details
+
+Shorter TTL values provide better security but may require users to log in more frequently.
+
 ## Pusher Configuration (for Real-time Notifications)
 
 To enable real-time deposit notifications, set up Pusher:

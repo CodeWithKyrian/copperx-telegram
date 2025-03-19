@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { Telegraf } from 'telegraf';
 import { initBot } from './bot';
 import { initServer } from './server';
-import { environment } from './config/environment';
+import { config } from './config';
 import { validateEnvironment } from './utils/validators';
 import logger from './utils/logger.utils';
 import { GlobalContext } from './types';
@@ -17,17 +17,17 @@ const bootstrap = async () => {
         logger.info('Environment validation passed');
 
         logger.info('CopperX Telegram Bot starting', {
-            environment: environment.nodeEnv,
-            logLevel: environment.logging.level,
-            sessionDriver: environment.session.driver,
+            environment: config.nodeEnv,
+            logLevel: config.logging.level,
+            sessionDriver: config.session.driver,
         });
 
         const bot = initBot();
 
         const app = await initServer(bot);
 
-        const host = environment.app.host;
-        const port = environment.app.port;
+        const host = config.app.host;
+        const port = config.app.port;
 
         await app.listen({ host, port });
 

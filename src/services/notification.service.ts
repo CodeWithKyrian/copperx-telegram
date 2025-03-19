@@ -5,7 +5,7 @@ import notificationApi from '../api/notification.api';
 import logger from '../utils/logger.utils';
 import { formatDate } from '../utils/formatters.utils';
 import { formatNetworkName, getExplorerTxUrl } from '../utils/chain.utils';
-import { environment } from '../config/environment';
+import { config } from '../config';
 
 interface DepositEvent {
     title: string;
@@ -31,14 +31,14 @@ export class NotificationService {
     public initialize(bot: Telegraf<GlobalContext>): void {
         this.bot = bot;
 
-        if (!environment.pusher.key || !environment.pusher.cluster) {
+        if (!config.pusher.key || !config.pusher.cluster) {
             logger.warn('Pusher keys not configured, real-time notifications disabled');
             return;
         }
 
         try {
-            this.pusher = new Pusher(environment.pusher.key, {
-                cluster: environment.pusher.cluster,
+            this.pusher = new Pusher(config.pusher.key, {
+                cluster: config.pusher.cluster,
                 authorizer: this.createAuthorizer()
             });
 

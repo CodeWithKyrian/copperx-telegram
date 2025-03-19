@@ -18,6 +18,7 @@ copperx-telegram/
 │   ├── types/             # TypeScript type definitions
 │   ├── utils/             # Utility functions
 │   ├── bot.ts             # Bot configuration
+│   ├── server.ts          # HTTP server and webhook configuration
 │   └── index.ts           # Application entry point
 ├── scripts/               # Helper scripts
 ├── tests/                  # Test files
@@ -33,8 +34,9 @@ The application starts with `index.ts`, which:
 1. Loads and validates environment variables
 2. Configures logging
 3. Initializes the bot via `initBot()` function
-4. Sets up webhook or long-polling mode based on environment
-5. Configures graceful shutdown handlers
+4. Creates the HTTP server with `initServer()` function, passing the bot instance
+5. Configures webhook or long-polling mode based on environment
+6. Sets up graceful shutdown handlers
 
 ```typescript
 // Simplified flow in index.ts
@@ -42,21 +44,30 @@ try {
     validateEnvironment();
     logger.info('Environment validation passed');
 
+    // Initialize bot
     const bot = initBot();
+    logger.info('Bot initialized successfully');
 
-    if (config.env.nodeEnv === 'production') {
-        // Configure webhook mode
-        bot.launch({
-            webhook: { /* webhook config */ }
-        });
-    } else {
-        // Use long-polling mode for development
-        bot.launch();
-    }
+    // Initialize server with bot instance
+    const app = await initServer(bot);
+    
+    // Start the server
+    await app.listen({
+        port: config.app.port,
+        host: config.app.host
+    });
+    
+    logger.info(`Server listening on ${config.app.host}:${config.app.port}`);
 
     // Setup graceful shutdown
-    process.once('SIGINT', () => bot.stop('SIGINT'));
-    process.once('SIGTERM', () => bot.stop('SIGTERM'));
+    process.once('SIGINT', async () => {
+        await app.close();
+        bot.stop('SIGINT');
+    });
+    process.once('SIGTERM', async () => {
+        await app.close();
+        bot.stop('SIGTERM');
+    });
 } catch (error) {
     logger.error('Failed to start bot', { error });
     process.exit(1);
@@ -77,7 +88,7 @@ The `bot.ts` file orchestrates all the bot components:
 ```typescript
 // Simplified flow in bot.ts
 export const initBot = (): Telegraf<GlobalContext> => {
-    const bot = new Telegraf<GlobalContext>(environment.bot.token);
+    const bot = new Telegraf<GlobalContext>(config.bot.token);
 
     configureMiddlewares(bot);
     configureErrorHandler(bot);
@@ -88,6 +99,88 @@ export const initBot = (): Telegraf<GlobalContext> => {
     return bot;
 };
 ```
+
+### Server Configuration (server.ts)
+
+The `server.ts` file manages the HTTP server and webhook configuration:
+
+1. Creates a Fastify server instance
+2. Configures health check endpoints
+3. Sets up webhook routes for production or enables long polling for development
+4. Manages webhook registration with Telegram API
+
+```typescript
+// Simplified flow in server.ts
+export const initServer = async (bot: Telegraf<GlobalContext>): Promise<FastifyInstance> => {
+    // Initialize Fastify
+    const app = fastify({
+        logger: false
+    });
+
+    // Setup health check routes
+    setupHealthRoutes(app);
+
+    // Configure bot mode based on environment
+    if (config.env.isProduction) {
+        // Configure webhook mode for production
+        const success = await configureWebhook(app, bot);
+        if (!success) {
+            throw new Error('Failed to configure webhook');
+        }
+    } else {
+        // Use long-polling mode for development
+        const success = await configureLongPolling(bot);
+        if (!success) {
+            throw new Error('Failed to configure long polling');
+        }
+    }
+
+    return app;
+};
+```
+
+#### Health Check Routes
+
+The server provides health check endpoints at `/` and `/health` that return basic status information:
+
+```typescript
+const setupHealthRoutes = (app: FastifyInstance) => {
+    app.get('/', async () => {
+        return {
+            status: 'ok',
+            message: 'Server is running',
+            timestamp: new Date().toISOString(),
+            env: config.nodeEnv
+        };
+    });
+
+    app.get('/health', async () => {
+        return {
+            status: 'ok',
+            message: 'Server is healthy',
+            timestamp: new Date().toISOString(),
+            env: config.nodeEnv
+        };
+    });
+};
+```
+
+#### Webhook Configuration
+
+For production environments, the server configures a webhook with the Telegram API:
+
+1. Builds a webhook URL using the app domain and secret path
+2. Registers routes in Fastify to handle incoming webhook requests
+3. Sets the webhook URL with Telegram's API
+4. Provides security through optional secret tokens
+
+#### Long Polling Configuration
+
+For development, the server configures long polling:
+
+1. Removes any existing webhook
+2. Starts the bot in long polling mode
+3. Automatically processes updates from Telegram
 
 ## Middleware System
 
@@ -696,9 +789,70 @@ These services abstract complex operations and provide a cleaner separation of c
 
 The `src/config/` directory contains application configuration:
 
-- `environment.ts` - Environment variable parsing
+- `index.ts` - Centralized configuration with environment variable processing
 - `protected-routes.ts` - Authentication requirements for commands
 - etc.
+
+The configuration system uses a single `config` object that loads environment variables and organizes them into logical sections:
+
+```typescript
+// src/config/index.ts
+export const config = {
+    // Environment flags
+    env: {
+        isDevelopment: nodeEnv === 'development',
+        isProduction: nodeEnv === 'production',
+        isTest: nodeEnv === 'test',
+    },
+    
+    // Node environment
+    nodeEnv,
+    
+    // Bot configuration
+    bot: {
+        token: process.env.BOT_TOKEN || '',
+        username: process.env.BOT_USERNAME || '',
+    },
+    
+    // API configuration, session settings, etc.
+    api: { /* ... */ },
+    session: { /* ... */ },
+    // ... other configuration sections
+};
+```
+
+This approach provides a consistent, type-safe way to access configuration throughout the application.
+
+## Server and Web Hooks
+
+The `src/server.ts` file manages the HTTP server configuration for the bot:
+
+- Configures health check endpoints
+- Sets up webhook handling in production environments
+- Initializes long polling in development mode
+- Manages server lifecycle
+
+```typescript
+// src/server.ts
+export const initServer = async (bot: Telegraf<GlobalContext>): Promise<FastifyInstance> => {
+    // Initialize Fastify
+    const app = fastify({ logger: false });
+
+    // Setup health check routes
+    setupHealthRoutes(app);
+
+    // Configure bot mode based on environment
+    if (config.env.isProduction) {
+        const success = await configureWebhook(app, bot);
+        // ...
+    } else {
+        const success = await configureLongPolling(bot);
+        // ...
+    }
+
+    return app;
+};
+```
 
 ## Security Features
 
@@ -763,14 +917,15 @@ The CopperX Telegram Bot follows a modular, well-structured architecture that se
 
 1. **index.ts** - Application entry point and bootstrap
 2. **bot.ts** - Bot configuration and component integration
-3. **middlewares/** - Request processing pipeline
-4. **commands/** - Command handlers for user interactions
-5. **scenes/** - Multi-step conversation flows
-6. **api/** - Integration with CopperX API
-7. **services/** - Business logic coordination
-8. **config/** - Application configuration
-9. **utils/** - Helper functions
-10. **types/** - TypeScript type definitions
+3. **server.ts** - HTTP server and webhook management
+4. **middlewares/** - Request processing pipeline
+5. **commands/** - Command handlers for user interactions
+6. **scenes/** - Multi-step conversation flows
+7. **api/** - Integration with CopperX API
+8. **services/** - Business logic coordination
+9. **config/** - Application configuration
+10. **utils/** - Helper functions
+11. **types/** - TypeScript type definitions
 
 This architecture ensures the code is maintainable, testable, and extensible as new features are added.
 

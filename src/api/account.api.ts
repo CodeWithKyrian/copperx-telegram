@@ -36,3 +36,6 @@ export class AccountApi {
     }
 
 }
+
+export const accountApi = new AccountApi();
+export default accountApi;

@@ -9,6 +9,34 @@ export interface ErrorResponse {
     error: string;
 }
 
+/**
+ * Custom API Error class that provides structured access to API error details
+ */
+export class ApiError extends Error {
+    statusCode: number;
+    errorData: ErrorResponse;
+
+    constructor(message: string, statusCode: number, errorData: ErrorResponse) {
+        super(message);
+        this.name = 'ApiError';
+        this.statusCode = statusCode;
+        this.errorData = errorData;
+
+        // Necessary for extending Error in TypeScript
+        Object.setPrototypeOf(this, ApiError.prototype);
+    }
+
+    /**
+     * Check if this error is a specific API error by message or status code
+     */
+    is(messageOrCode: string | number): boolean {
+        if (typeof messageOrCode === 'string') {
+            return this.errorData.message === messageOrCode || this.errorData.error === messageOrCode;
+        }
+        return this.statusCode === messageOrCode || this.errorData.statusCode === messageOrCode;
+    }
+}
+
 export interface PaginatedResponse<D> {
     data: D[];
     page: number;

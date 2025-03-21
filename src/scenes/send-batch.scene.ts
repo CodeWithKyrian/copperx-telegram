@@ -115,8 +115,8 @@ async function showPayeeList(ctx: SendBatchContext, page = 1) {
 
         if (!payees || !payees.data || payees.data.length === 0) {
             await ctx.reply(
-                '❌ *No Saved Recipients*\n\n' +
-                'You don\'t have any saved recipients yet. Please choose a different method or add a recipient first.',
+                '❌ *No Saved Payees*\n\n' +
+                'You don\'t have any saved payees yet. Please choose a different method or add a recipient first.',
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
@@ -158,8 +158,8 @@ async function showPayeeList(ctx: SendBatchContext, page = 1) {
     } catch (error) {
         logger.error({ error }, 'Error fetching payees for selection');
         await ctx.reply(
-            '❌ *Error Retrieving Recipients*\n\n' +
-            'We encountered an error retrieving your saved recipients. Please try again or choose a different method.',
+            '❌ *Error Retrieving Payees*\n\n' +
+            'We encountered an error retrieving your saved payees. Please try again or choose a different method.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([

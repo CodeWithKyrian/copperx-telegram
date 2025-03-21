@@ -1,5 +1,5 @@
 import kycApi from '../api/kyc.api';
-import { Kyc, KycStatus } from '../types/api.types';
+import { Kyc, KycStatus, ApiError } from '../types/api.types';
 import logger from '../utils/logger.utils';
 import { GlobalContext } from '../types/session.types';
 import { authService } from './auth.service';
@@ -49,6 +49,15 @@ export class KycService {
                     message: '🔍 No KYC verification record found. Please start the verification process.'
                 };
             } catch (error) {
+                // Check if this is a "No KYC found" error
+                if (error instanceof ApiError &&
+                    (error.is("No KYC found for the email") || error.is(400) || error.is(404))) {
+                    return {
+                        status: null,
+                        message: '🔍 No KYC verification record found. Please start the verification process.'
+                    };
+                }
+
                 logger.error({ error, email }, 'Error fetching KYC status');
                 return {
                     status: null,

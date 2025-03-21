@@ -70,7 +70,7 @@ sendSingleScene.enter(async (ctx) => {
                     Markup.button.callback('📝 Send to Wallet Address', 'recipient_type:wallet')
                 ],
                 [
-                    Markup.button.callback('👤 Send to Saved Recipient', 'recipient_type:payee')
+                    Markup.button.callback('👤 Send to Saved Payee', 'recipient_type:payee')
                 ],
                 [
                     Markup.button.callback('❌ Cancel', 'cancel')
@@ -122,12 +122,12 @@ async function showPayeeList(ctx: SendTransferContext, page = 1) {
 
         if (!payees || !payees.data || payees.data.length === 0) {
             await ctx.reply(
-                '❌ *No Saved Recipients*\n\n' +
-                'You don\'t have any saved recipients yet. Please choose a different method or add a recipient first.',
+                '❌ *No Saved Payees*\n\n' +
+                'You don\'t have any saved payees yet. Please choose a different method or add a payee first.',
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
-                        [Markup.button.callback('➕ Add Recipient', 'add_payee')],
+                        [Markup.button.callback('➕ Add Payee', 'add_payee')],
                         [Markup.button.callback('🔙 Back', 'back_to_recipient_type')]
                     ])
                 }
@@ -143,7 +143,7 @@ async function showPayeeList(ctx: SendTransferContext, page = 1) {
         // Add pagination if needed
         if (payees.hasMore) {
             payeeButtons.push([
-                Markup.button.callback('⏩ More Recipients', `more_payees:${page + 1}`),
+                Markup.button.callback('⏩ More Payees', `more_payees:${page + 1}`),
                 Markup.button.callback('🔙 Back', 'back_to_recipient_type')
             ]);
         } else {
@@ -153,8 +153,8 @@ async function showPayeeList(ctx: SendTransferContext, page = 1) {
         payeeButtons.push([Markup.button.callback('❌ Cancel', 'cancel')]);
 
         await ctx.reply(
-            '👤 *Select Recipient*\n\n' +
-            'Please select a saved recipient to send funds to:',
+            '👤 *Select Payee*\n\n' +
+            'Please select a saved payee to send funds to:',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard(payeeButtons)
@@ -163,8 +163,8 @@ async function showPayeeList(ctx: SendTransferContext, page = 1) {
     } catch (error) {
         logger.error({ error }, 'Error fetching payees for selection');
         await ctx.reply(
-            '❌ *Error Retrieving Recipients*\n\n' +
-            'We encountered an error retrieving your saved recipients. Please try again or choose a different method.',
+            '❌ *Error Retrieving Payees*\n\n' +
+            'We encountered an error retrieving your saved payees. Please try again or choose a different method.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([
@@ -240,8 +240,8 @@ sendSingleScene.action(/select_payee:(.+)/, async (ctx) => {
     } catch (error) {
         logger.error({ error, payeeId }, 'Error fetching payee details');
         await ctx.reply(
-            '❌ *Error Retrieving Recipient*\n\n' +
-            'We encountered an error retrieving the recipient details. Please try again.',
+            '❌ *Error Retrieving Payee*\n\n' +
+            'We encountered an error retrieving the payee details. Please try again.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([

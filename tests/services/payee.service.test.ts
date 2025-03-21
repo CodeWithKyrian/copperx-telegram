@@ -325,7 +325,7 @@ describe('Payee Service', () => {
             const result = payeeService.formatPayeeList([]);
 
             // Assert
-            expect(result).toBe('You don\'t have any saved recipients yet.');
+            expect(result).toBe('You don\'t have any saved payees yet.');
         });
 
         it('should handle null input gracefully', () => {
@@ -333,7 +333,7 @@ describe('Payee Service', () => {
             const result = payeeService.formatPayeeList(null as any);
 
             // Assert
-            expect(result).toBe('You don\'t have any saved recipients yet.');
+            expect(result).toBe('You don\'t have any saved payees yet.');
         });
 
         it('should format payee with missing name fields', () => {

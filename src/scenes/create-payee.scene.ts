@@ -39,8 +39,8 @@ createPayeeScene.enter(async (ctx) => {
     } else {
         // Otherwise, ask for email first
         await ctx.reply(
-            '📧 *Add New Recipient*\n\n' +
-            'Please enter the email address of the recipient:',
+            '📧 *Add New Payee*\n\n' +
+            'Please enter the email address of the payee:',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([
@@ -136,33 +136,49 @@ createPayeeScene.action('confirm_payee', async (ctx) => {
 
 createPayeeScene.action('cancel_payee', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.reply('Recipient creation cancelled.');
+    await ctx.reply('Payee creation cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
 createPayeeScene.command('cancel', async (ctx) => {
-    await ctx.reply('Recipient creation cancelled.');
+    await ctx.reply('Payee creation cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
 // Helper functions
 async function askForNickname(ctx: CreatePayeeContext): Promise<void> {
     await ctx.reply(
-        '👤 *Add New Recipient*\n\n' +
+        '👤 *Add New Payee*\n\n' +
         `Email: *${ctx.scene.session.payeeData.email}*\n\n` +
-        'Please enter a nickname for this recipient:',
-        { parse_mode: 'Markdown' }
+        'Please enter a nickname for this payee:',
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('❌ Cancel', 'cancel_payee')]
+            ])
+        }
     );
 }
 
 async function askForFirstName(ctx: CreatePayeeContext): Promise<void> {
     await ctx.reply(
         '👤 *First Name (Optional)*\n\n' +
-        'Please enter the first name of the recipient or click Skip:',
+        'Please enter the first name of the payee or click Skip:',
         {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
-                [Markup.button.callback('⏩ Skip', 'skip_first_name')]
+                [Markup.button.callback('⏩ Skip', 'skip_first_name')],
+                [Markup.button.callback('❌ Cancel', 'cancel_payee')]
             ])
         }
     );
@@ -171,11 +187,12 @@ async function askForFirstName(ctx: CreatePayeeContext): Promise<void> {
 async function askForLastName(ctx: CreatePayeeContext): Promise<void> {
     await ctx.reply(
         '👤 *Last Name (Optional)*\n\n' +
-        'Please enter the last name of the recipient or click Skip:',
+        'Please enter the last name of the payee or click Skip:',
         {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
-                [Markup.button.callback('⏩ Skip', 'skip_last_name')]
+                [Markup.button.callback('⏩ Skip', 'skip_last_name')],
+                [Markup.button.callback('❌ Cancel', 'cancel_payee')]
             ])
         }
     );
@@ -184,7 +201,7 @@ async function askForLastName(ctx: CreatePayeeContext): Promise<void> {
 async function showConfirmation(ctx: CreatePayeeContext): Promise<void> {
     const { email, nickName, firstName, lastName } = ctx.scene.session.payeeData;
 
-    let message = '🔍 *Confirm Recipient Details*\n\n';
+    let message = '🔍 *Confirm Payee Details*\n\n';
     message += `*Email:* ${email}\n`;
     message += `*Nickname:* ${nickName}\n`;
 
@@ -213,7 +230,7 @@ async function showConfirmation(ctx: CreatePayeeContext): Promise<void> {
 }
 
 async function createPayee(ctx: CreatePayeeContext): Promise<void> {
-    await ctx.reply('🔄 Creating recipient...');
+    await ctx.reply('🔄 Creating payee...');
 
     try {
         const { email, nickName, firstName, lastName } = ctx.scene.session.payeeData;
@@ -227,8 +244,8 @@ async function createPayee(ctx: CreatePayeeContext): Promise<void> {
 
         if (!result) {
             await ctx.reply(
-                '❌ *Failed to Create Recipient*\n\n' +
-                'We encountered an error creating this recipient. Please try again later.',
+                '❌ *Failed to Create Payee*\n\n' +
+                'We encountered an error creating this payee. Please try again later.',
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
@@ -240,14 +257,14 @@ async function createPayee(ctx: CreatePayeeContext): Promise<void> {
         }
 
         await ctx.reply(
-            '✅ *Recipient Created Successfully*\n\n' +
+            '✅ *Payee Created Successfully*\n\n' +
             `*Nickname:* ${result.nickName}\n` +
             `*Email:* ${result.email}\n\n` +
-            'You can now quickly send funds to this recipient using the /send command.',
+            'You can now quickly send funds to this payee using the /send command.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([
-                    [Markup.button.callback('👥 View All Recipients', 'list_payees')],
+                    [Markup.button.callback('👥 View All Payees', 'list_payees')],
                     [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
                 ])
             }
@@ -258,8 +275,8 @@ async function createPayee(ctx: CreatePayeeContext): Promise<void> {
         logger.error({ error }, 'Error creating payee');
 
         await ctx.reply(
-            '❌ *Failed to Create Recipient*\n\n' +
-            'We encountered an error creating this recipient. Please try again later.',
+            '❌ *Failed to Create Payee*\n\n' +
+            'We encountered an error creating this payee. Please try again later.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([

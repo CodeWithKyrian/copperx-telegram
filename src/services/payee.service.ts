@@ -115,7 +115,7 @@ export class PayeeService {
      */
     public formatPayeeList(payees: Payee[]): string {
         if (!payees || payees.length === 0) {
-            return 'You don\'t have any saved recipients yet.';
+            return 'You don\'t have any saved payees yet.';
         }
 
         let message = '';

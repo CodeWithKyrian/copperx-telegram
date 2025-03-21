@@ -15,12 +15,12 @@ removePayeeScene.enter(async (ctx) => {
 
         if (!response || !response.data || response.data.length === 0) {
             await ctx.reply(
-                '📭 *No Recipients to Remove*\n\n' +
-                'You don\'t have any saved recipients to remove.',
+                '📭 *No Payees to Remove*\n\n' +
+                'You don\'t have any saved payees to remove.',
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
-                        [Markup.button.callback('👥 View Recipients', 'list_payees')]
+                        [Markup.button.callback('👥 View Payees', 'list_payees')]
                     ])
                 }
             );
@@ -28,15 +28,15 @@ removePayeeScene.enter(async (ctx) => {
         }
 
         // Format available payees for reference
-        let message = '🗑️ *Remove Recipient*\n\n';
-        message += 'Available recipients:\n\n';
+        let message = '🗑️ *Remove Payee*\n\n';
+        message += 'Available payees:\n\n';
 
         response.data.forEach((payee, index) => {
             message += `${index + 1}. ${payee.nickName} - ID: \`${payee.id}\`\n`;
             message += `   📧 ${payee.email}\n\n`;
         });
 
-        message += 'Please enter the ID of the recipient you want to remove:';
+        message += 'Please enter the ID of the payee you want to remove:';
 
         await ctx.reply(message, {
             parse_mode: 'Markdown',
@@ -48,8 +48,8 @@ removePayeeScene.enter(async (ctx) => {
     } catch (error) {
         logger.error({ error }, 'Error fetching payees for removal');
         await ctx.reply(
-            '❌ *Error Retrieving Recipients*\n\n' +
-            'We encountered an error while retrieving your saved recipients. Please try again later.',
+            '❌ *Error Retrieving Payees*\n\n' +
+            'We encountered an error while retrieving your saved payees. Please try again later.',
             { parse_mode: 'Markdown' }
         );
         return ctx.scene.leave();
@@ -63,7 +63,7 @@ removePayeeScene.on(message('text'), async (ctx) => {
     if (!payeeId) {
         await ctx.reply(
             '❌ *Invalid Input*\n\n' +
-            'Please enter a valid recipient ID or type /cancel to exit.',
+            'Please enter a valid payee ID or type /cancel to exit.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([
@@ -80,8 +80,8 @@ removePayeeScene.on(message('text'), async (ctx) => {
 
         if (!payee) {
             await ctx.reply(
-                '❌ *Recipient Not Found*\n\n' +
-                'The recipient ID you entered was not found. Please check the ID and try again.',
+                '❌ *Payee Not Found*\n\n' +
+                'The payee ID you entered was not found. Please check the ID and try again.',
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
@@ -95,7 +95,7 @@ removePayeeScene.on(message('text'), async (ctx) => {
         // Show confirmation
         await ctx.reply(
             '⚠️ *Confirm Removal*\n\n' +
-            `Are you sure you want to remove this recipient?\n\n` +
+            `Are you sure you want to remove this payee?\n\n` +
             `*Nickname:* ${payee.nickName}\n` +
             `*Email:* ${payee.email}\n\n` +
             'This action cannot be undone.',
@@ -113,8 +113,8 @@ removePayeeScene.on(message('text'), async (ctx) => {
     } catch (error) {
         logger.error({ error, payeeId }, 'Error fetching payee for removal');
         await ctx.reply(
-            '❌ *Error Finding Recipient*\n\n' +
-            'We encountered an error while finding this recipient. Please try again later.',
+            '❌ *Error Finding Payee*\n\n' +
+            'We encountered an error while finding this payee. Please try again later.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([
@@ -134,26 +134,26 @@ removePayeeScene.action(/confirm_remove:(.+)/, async (ctx) => {
     const payeeId = ctx.match[1];
 
     try {
-        await ctx.reply('🔄 Removing recipient...');
+        await ctx.reply('🔄 Removing payee...');
 
         const success = await payeeService.deletePayee(payeeId);
 
         if (success) {
             await ctx.reply(
-                '✅ *Recipient Removed Successfully*\n\n' +
-                'The recipient has been removed from your saved recipients list.',
+                '✅ *Payee Removed Successfully*\n\n' +
+                'The payee has been removed from your saved payees list.',
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
-                        [Markup.button.callback('👥 View Recipients', 'list_payees')],
+                        [Markup.button.callback('👥 View Payees', 'list_payees')],
                         [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
                     ])
                 }
             );
         } else {
             await ctx.reply(
-                '❌ *Failed to Remove Recipient*\n\n' +
-                'We encountered an error while removing this recipient. Please try again later.',
+                '❌ *Failed to Remove Payee*\n\n' +
+                'We encountered an error while removing this payee. Please try again later.',
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
@@ -168,8 +168,8 @@ removePayeeScene.action(/confirm_remove:(.+)/, async (ctx) => {
     } catch (error) {
         logger.error({ error, payeeId }, 'Error removing payee');
         await ctx.reply(
-            '❌ *Failed to Remove Recipient*\n\n' +
-            'We encountered an error while removing this recipient. Please try again later.',
+            '❌ *Failed to Remove Payee*\n\n' +
+            'We encountered an error while removing this payee. Please try again later.',
             {
                 parse_mode: 'Markdown',
                 ...Markup.inlineKeyboard([
@@ -184,7 +184,7 @@ removePayeeScene.action(/confirm_remove:(.+)/, async (ctx) => {
 // Handle cancel action
 removePayeeScene.action('cancel_remove', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.reply('Recipient removal cancelled.', {
+    await ctx.reply('Payee removal cancelled.', {
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
             [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
@@ -195,7 +195,7 @@ removePayeeScene.action('cancel_remove', async (ctx) => {
 
 // Handle cancel command
 removePayeeScene.command('cancel', async (ctx) => {
-    await ctx.reply('Recipient removal cancelled.', {
+    await ctx.reply('Payee removal cancelled.', {
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
             [Markup.button.callback('🔙 Back to Menu', 'main_menu')]

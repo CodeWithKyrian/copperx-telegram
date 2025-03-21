@@ -73,6 +73,9 @@ function getInlineKeyboard(status: KycStatus | null): InlineKeyboardButton[][] {
                 [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
             ];
         default:
-            return [];
+            return [
+                [Markup.button.url('🔐 Start KYC Verification', KYC_APPLICATION_URL)],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+            ];
     }
 }

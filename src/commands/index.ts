@@ -112,7 +112,6 @@ const registerActionHandlers = (bot: Telegraf<GlobalContext>): void => {
     bot.action('history', historyAction);
     bot.action('transfer_details', transferDetailsAction);
 
-    bot.command('payees', payeesCommand);
     bot.action('list_payees', listPayeesAction);
     bot.action('add_payee', addPayeeAction);
     bot.action('remove_payee', removePayeeAction);

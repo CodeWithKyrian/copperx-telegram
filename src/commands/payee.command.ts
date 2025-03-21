@@ -4,23 +4,23 @@ import { payeeService } from '../services/payee.service';
 import logger from '../utils/logger.utils';
 
 /**
- * Handles the /payees command to list saved recipients
+ * Handles the /payees command to list saved payees
  */
 export const payeesCommand = async (ctx: GlobalContext): Promise<void> => {
     try {
-        await ctx.reply('🔍 Fetching your saved recipients...');
+        await ctx.reply('🔍 Fetching your saved payees...');
 
         // Get the first page of payees using your existing service
         const response = await payeeService.getPayees(1, 10);
 
         if (!response || !response.data || response.data.length === 0) {
             await ctx.reply(
-                '📭 *No Saved Recipients*\n\n' +
-                'You haven\'t saved any recipients yet. Add a recipient to quickly send funds in the future.',
+                '📭 *No Saved Payees*\n\n' +
+                'You haven\'t saved any payees yet. Add a payee to quickly send funds in the future.',
                 {
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
-                        [Markup.button.callback('➕ Add Recipient', 'add_payee')],
+                        [Markup.button.callback('➕ Add Payee', 'add_payee')],
                         [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
                     ])
                 }
@@ -29,7 +29,7 @@ export const payeesCommand = async (ctx: GlobalContext): Promise<void> => {
         }
 
         // Format payee list using your existing service
-        const message = '👥 *Your Saved Recipients*\n\n' + formatDetailedPayeeList(response.data);
+        const message = '👥 *Your Saved Payees*\n\n' + formatDetailedPayeeList(response.data);
 
         // Create send buttons for each payee
         const buttons = [];
@@ -41,9 +41,9 @@ export const payeesCommand = async (ctx: GlobalContext): Promise<void> => {
             ]);
         }
 
-        // Add new recipient and back buttons
-        buttons.push([Markup.button.callback('➕ Add New Recipient', 'add_payee')]);
-        buttons.push([Markup.button.callback('🗑️ Remove Recipient', 'remove_payee')]);
+        // Add new payee and back buttons
+        buttons.push([Markup.button.callback('➕ Add New Payee', 'add_payee')]);
+        buttons.push([Markup.button.callback('🗑️ Remove Payee', 'remove_payee')]);
         buttons.push([Markup.button.callback('🔙 Back to Menu', 'main_menu')]);
 
         await ctx.reply(message, {
@@ -54,8 +54,8 @@ export const payeesCommand = async (ctx: GlobalContext): Promise<void> => {
     } catch (error) {
         logger.error({ error }, 'Error in payees command');
         await ctx.reply(
-            '❌ *Error Retrieving Recipients*\n\n' +
-            'We encountered an error while retrieving your saved recipients. Please try again later.',
+            '❌ *Error Retrieving Payees*\n\n' +
+            'We encountered an error while retrieving your saved payees. Please try again later.',
             { parse_mode: 'Markdown' }
         );
     }
@@ -80,12 +80,12 @@ export async function payeesPageAction(ctx: GlobalContext & { match: RegExpExecA
         const response = await payeeService.getPayees(page, 10);
 
         if (!response || !response.data || response.data.length === 0) {
-            await ctx.reply('No recipients found on this page.');
+            await ctx.reply('No payees found on this page.');
             return;
         }
 
         // Format payee list
-        const message = `👥 *Your Saved Recipients (Page ${page})*\n\n` +
+        const message = `👥 *Your Saved Payees (Page ${page})*\n\n` +
             formatDetailedPayeeList(response.data);
 
         // Create buttons for each payee
@@ -104,9 +104,9 @@ export async function payeesPageAction(ctx: GlobalContext & { match: RegExpExecA
             buttons.push(paginationButtons);
         }
 
-        // Add new recipient and back buttons
-        buttons.push([Markup.button.callback('➕ Add New Recipient', 'add_payee')]);
-        buttons.push([Markup.button.callback('🗑️ Remove Recipient', 'remove_payee')]);
+        // Add new payee and back buttons
+        buttons.push([Markup.button.callback('➕ Add New Payee', 'add_payee')]);
+        buttons.push([Markup.button.callback('🗑️ Remove Payee', 'remove_payee')]);
         buttons.push([Markup.button.callback('🔙 Back to Menu', 'main_menu')]);
 
         await ctx.reply(message, {
@@ -117,8 +117,8 @@ export async function payeesPageAction(ctx: GlobalContext & { match: RegExpExecA
     } catch (error) {
         logger.error({ error, page }, 'Error in payees pagination');
         await ctx.reply(
-            '❌ *Error Retrieving Recipients*\n\n' +
-            'We encountered an error while retrieving your saved recipients. Please try again later.',
+            '❌ *Error Retrieving Payees*\n\n' +
+            'We encountered an error while retrieving your saved payees. Please try again later.',
             { parse_mode: 'Markdown' }
         );
     }
@@ -156,12 +156,12 @@ export async function savePayeeAction(ctx: GlobalContext & { match: RegExpExecAr
 
 export async function noSavePayeeAction(ctx: GlobalContext) {
     await ctx.answerCbQuery();
-    await ctx.reply('👍 No problem! You can add recipients later using the /payees command.');
+    await ctx.reply('👍 No problem! You can add payees later using the /payees command.');
 }
 
 function formatDetailedPayeeList(payees: any[]): string {
     if (!payees || payees.length === 0) {
-        return 'You don\'t have any saved recipients yet.';
+        return 'You don\'t have any saved payees yet.';
     }
 
     let message = '';

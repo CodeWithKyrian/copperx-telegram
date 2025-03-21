@@ -32,7 +32,7 @@ describe('Payee Commands', () => {
             await payeesCommand(ctx);
 
             // Assert
-            expect(ctx.reply).toHaveBeenNthCalledWith(1, '🔍 Fetching your saved recipients...');
+            expect(ctx.reply).toHaveBeenNthCalledWith(1, '🔍 Fetching your saved payees...');
         });
 
         describe('when user has payees', () => {
@@ -45,13 +45,13 @@ describe('Payee Commands', () => {
 
                 // Assert
                 expect(ctx.reply).toHaveBeenLastCalledWith(
-                    expect.stringContaining('Your Saved Recipients'),
+                    expect.stringContaining('Your Saved Payees'),
                     expect.objectContaining({
                         parse_mode: 'Markdown',
                         reply_markup: expect.objectContaining({
                             inline_keyboard: expect.arrayContaining([
                                 expect.arrayContaining([
-                                    expect.objectContaining({ text: '➕ Add New Recipient' })
+                                    expect.objectContaining({ text: '➕ Add New Payee' })
                                 ])
                             ])
                         })
@@ -110,13 +110,13 @@ describe('Payee Commands', () => {
 
                 // Assert
                 expect(ctx.reply).toHaveBeenLastCalledWith(
-                    expect.stringContaining('No Saved Recipients'),
+                    expect.stringContaining('No Saved Payees'),
                     expect.objectContaining({
                         parse_mode: 'Markdown',
                         reply_markup: expect.objectContaining({
                             inline_keyboard: expect.arrayContaining([
                                 expect.arrayContaining([
-                                    expect.objectContaining({ text: '➕ Add Recipient' })
+                                    expect.objectContaining({ text: '➕ Add Payee' })
                                 ])
                             ])
                         })
@@ -134,7 +134,7 @@ describe('Payee Commands', () => {
 
             // Assert
             expect(ctx.reply).toHaveBeenLastCalledWith(
-                expect.stringContaining('Error Retrieving Recipients'),
+                expect.stringContaining('Error Retrieving Payees'),
                 expect.objectContaining({ parse_mode: 'Markdown' })
             );
         });
@@ -156,7 +156,7 @@ describe('Payee Commands', () => {
             // Assert
             expect(payeeService.getPayees).toHaveBeenCalledWith(2, 10);
             expect(ctxWithMatch.reply).toHaveBeenCalledWith(
-                expect.stringContaining('Your Saved Recipients (Page 2)'),
+                expect.stringContaining('Your Saved Payees (Page 2)'),
                 expect.any(Object)
             );
         });
@@ -208,7 +208,7 @@ describe('Payee Commands', () => {
 
             // Assert
             expect(ctxWithMatch.reply).toHaveBeenCalledWith(
-                'No recipients found on this page.'
+                'No payees found on this page.'
             );
         });
     });
@@ -275,7 +275,7 @@ describe('Payee Commands', () => {
             // Assert
             expect(ctx.answerCbQuery).toHaveBeenCalled();
             expect(ctx.reply).toHaveBeenCalledWith(
-                expect.stringContaining('You can add recipients later')
+                expect.stringContaining('You can add payees later')
             );
         });
     });

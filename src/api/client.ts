@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { config } from '../config';
-import { ErrorResponse } from '../types/api.types';
+import { ErrorResponse, ApiError } from '../types/api.types';
 import logger from '../utils/logger.utils';
 
 /**
@@ -174,7 +174,11 @@ export class ApiClient {
                 ? errorData.message
                 : JSON.stringify(errorData.message);
 
-            return new Error(`API Error (${errorData.statusCode}): ${message}`);
+            return new ApiError(
+                `API Error (${errorData.statusCode}): ${message}`,
+                error.response.status,
+                errorData
+            );
         }
 
         return error instanceof Error ? error : new Error(String(error));

@@ -131,7 +131,12 @@ withdrawScene.action(/select_account:(.+)/, async (ctx) => {
     await ctx.reply(
         '💰 *Enter Withdrawal Amount*\n\n' +
         'Please enter the amount you want to withdraw in USD:',
-        { parse_mode: 'Markdown' }
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('❌ Cancel', 'cancel')]
+            ])
+        }
     );
 });
 
@@ -149,7 +154,12 @@ withdrawScene.action('create_account', async (ctx) => {
         await ctx.reply(
             '❌ *No Providers Available*\n\n' +
             'We couldn\'t find any available providers for bank account creation. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }
@@ -190,7 +200,12 @@ withdrawScene.action(/select_provider:(.+)/, async (ctx) => {
     await ctx.reply(
         '➕ *Add New Bank Account*\n\n' +
         'Please enter the bank name (e.g., "Chase", "Bank of America"):',
-        { parse_mode: 'Markdown' }
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('❌ Cancel', 'cancel')]
+            ])
+        }
     );
 });
 
@@ -212,7 +227,12 @@ withdrawScene.on(message('text'), async (ctx) => {
             ctx.scene.session.bankName = input;
             ctx.scene.session.currentStep = 'enter_bank_address';
 
-            await ctx.reply('Please enter the bank address:');
+            await ctx.reply('Please enter the bank address:', {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            });
             break;
 
         case 'enter_bank_address':
@@ -234,7 +254,12 @@ withdrawScene.on(message('text'), async (ctx) => {
                 await ctx.reply(
                     '❌ *Invalid Routing Number*\n\n' +
                     'Please enter a valid 9-digit routing number:',
-                    { parse_mode: 'Markdown' }
+                    {
+                        parse_mode: 'Markdown',
+                        ...Markup.inlineKeyboard([
+                            [Markup.button.callback('❌ Cancel', 'cancel')]
+                        ])
+                    }
                 );
                 return;
             }
@@ -242,7 +267,12 @@ withdrawScene.on(message('text'), async (ctx) => {
             ctx.scene.session.bankRoutingNumber = input;
             ctx.scene.session.currentStep = 'enter_account_number';
 
-            await ctx.reply('Please enter the bank account number:');
+            await ctx.reply('Please enter the bank account number:', {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            });
             break;
 
         case 'enter_account_number':
@@ -251,7 +281,12 @@ withdrawScene.on(message('text'), async (ctx) => {
                 await ctx.reply(
                     '❌ *Invalid Account Number*\n\n' +
                     'Please enter a valid bank account number (4-17 digits):',
-                    { parse_mode: 'Markdown' }
+                    {
+                        parse_mode: 'Markdown',
+                        ...Markup.inlineKeyboard([
+                            [Markup.button.callback('❌ Cancel', 'cancel')]
+                        ])
+                    }
                 );
                 return;
             }
@@ -259,21 +294,36 @@ withdrawScene.on(message('text'), async (ctx) => {
             ctx.scene.session.bankAccountNumber = input;
             ctx.scene.session.currentStep = 'enter_beneficiary_name';
 
-            await ctx.reply('Please enter the beneficiary name (full legal name):');
+            await ctx.reply('Please enter the beneficiary name (full legal name):', {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            });
             break;
 
         case 'enter_beneficiary_name':
             ctx.scene.session.bankBeneficiaryName = input;
             ctx.scene.session.currentStep = 'enter_beneficiary_address';
 
-            await ctx.reply('Please enter the beneficiary address:');
+            await ctx.reply('Please enter the beneficiary address:', {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            });
             break;
 
         case 'enter_beneficiary_address':
             ctx.scene.session.bankBeneficiaryAddress = input;
             ctx.scene.session.currentStep = 'enter_swift_code';
 
-            await ctx.reply('Please enter the bank SWIFT code (if applicable, or type "N/A"):');
+            await ctx.reply('Please enter the bank SWIFT code (if applicable, or type "N/A"):', {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            });
             break;
 
         case 'enter_swift_code':
@@ -310,7 +360,13 @@ withdrawScene.action(/bank_type:(.+)/, async (ctx) => {
 
     await ctx.reply(
         `You selected: ${type === 'savings' ? 'Savings' : 'Checking'}\n\n` +
-        'Please enter the bank routing number (9 digits):'
+        'Please enter the bank routing number (9 digits):',
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('❌ Cancel', 'cancel')]
+            ])
+        }
     );
 
     ctx.scene.session.currentStep = 'enter_routing_number';
@@ -371,7 +427,12 @@ withdrawScene.action('confirm_bank_account', async (ctx) => {
             await ctx.reply(
                 '❌ *Error Creating Bank Account*\n\n' +
                 'Some required information is missing. Please try again.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return ctx.scene.leave();
         }
@@ -401,7 +462,12 @@ withdrawScene.action('confirm_bank_account', async (ctx) => {
             await ctx.reply(
                 '❌ *Error Creating Bank Account*\n\n' +
                 'We encountered an issue while creating your bank account. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return ctx.scene.leave();
         }
@@ -420,7 +486,12 @@ withdrawScene.action('confirm_bank_account', async (ctx) => {
         await ctx.reply(
             '💰 *Enter Withdrawal Amount*\n\n' +
             'Please enter the amount you want to withdraw in USD:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
 
     } catch (error) {
@@ -428,7 +499,12 @@ withdrawScene.action('confirm_bank_account', async (ctx) => {
         await ctx.reply(
             '❌ *Error Creating Bank Account*\n\n' +
             'We encountered an error while creating your bank account. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }
@@ -448,7 +524,12 @@ withdrawScene.action('confirm', async (ctx) => {
         await ctx.reply(
             '❌ *Withdrawal Failed*\n\n' +
             'We encountered an error processing your withdrawal. Some required information is missing.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }
@@ -465,7 +546,12 @@ withdrawScene.action('confirm', async (ctx) => {
             await ctx.reply(
                 '❌ *Withdrawal Failed*\n\n' +
                 'We encountered an error processing your withdrawal. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return ctx.scene.leave();
         }
@@ -497,7 +583,12 @@ withdrawScene.action('confirm', async (ctx) => {
         await ctx.reply(
             '❌ *Withdrawal Failed*\n\n' +
             'We encountered an error processing your withdrawal. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }
@@ -508,7 +599,12 @@ withdrawScene.action('confirm', async (ctx) => {
  */
 withdrawScene.action('cancel', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.reply('Withdrawal cancelled.');
+    await ctx.reply('Withdrawal cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
@@ -516,7 +612,12 @@ withdrawScene.action('cancel', async (ctx) => {
  * Handle /cancel command
  */
 withdrawScene.command('cancel', async (ctx) => {
-    await ctx.reply('Withdrawal cancelled.');
+    await ctx.reply('Withdrawal cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
@@ -590,7 +691,12 @@ async function handleAmountInput(ctx: WithdrawContext, input: string): Promise<v
         await ctx.reply(
             '❌ *Invalid Amount*\n\n' +
             'Please enter a valid amount greater than 0:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
         return;
     }
@@ -617,7 +723,12 @@ async function handleAmountInput(ctx: WithdrawContext, input: string): Promise<v
             '❌ *Error Getting Quote*\n\n' +
             'We encountered an issue getting a quote for your withdrawal. ' +
             (quote?.error ? `Error: ${quote.error}` : 'Please try again later.'),
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }

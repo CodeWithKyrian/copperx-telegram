@@ -1,39 +1,45 @@
 import { Markup, Scenes } from 'telegraf';
 import { CreateSendTransferBatchSingleRequest, PurposeCode } from '../types/api.types';
 import { GlobalContext, GlobalSceneSession } from '../types/session.types';
-import { formatHumanAmount, formatPurposeCode, formatWalletBalance } from '../utils/formatters.utils';
+import { formatHumanAmount, formatPurposeCode, formatWalletAddress, formatWalletBalance, toRawAmount } from '../utils/formatters.utils';
 import logger from '../utils/logger.utils';
 import { walletService } from '../services/wallet.service';
 import { transferService } from '../services/transfer.service';
+import { payeeService } from '../services/payee.service';
 import { isValidEmail, isValidWalletAddress } from '../utils/validators';
 import { message } from 'telegraf/filters';
 
 interface Recipient {
-    type: 'email' | 'wallet';
+    type: 'email' | 'wallet' | 'payee';
     value: string;
     amount: string;
+    payeeId?: string;
+    payeeName?: string;
 }
 
-interface BulkSendSessionData extends GlobalSceneSession {
+interface SendBatchSessionData extends GlobalSceneSession {
     currentStep?: 'value' | 'amount';
     recipients: Recipient[];
     purposeCode?: PurposeCode;
     totalAmount: number;
     addingRecipient?: boolean;
+    removingRecipient?: boolean;
     currentRecipient?: {
-        type?: 'email' | 'wallet';
+        type?: 'email' | 'wallet' | 'payee';
         value?: string;
+        payeeId?: string;
+        payeeName?: string;
     };
 }
 
-export type BulkSendContext = GlobalContext<BulkSendSessionData>;
+export type SendBatchContext = GlobalContext<SendBatchSessionData>;
 
 const PURPOSE_CODES: PurposeCode[] = [
     'self', 'salary', 'gift', 'income', 'saving',
     'education_support', 'family', 'home_improvement', 'reimbursement'
 ];
 
-const sendBatchScene = new Scenes.BaseScene<BulkSendContext>('send_batch');
+const sendBatchScene = new Scenes.BaseScene<SendBatchContext>('send_batch');
 
 sendBatchScene.enter(async (ctx) => {
     // Reset session data
@@ -41,17 +47,15 @@ sendBatchScene.enter(async (ctx) => {
     ctx.scene.session.purposeCode = undefined;
     ctx.scene.session.totalAmount = 0;
     ctx.scene.session.addingRecipient = false;
+    ctx.scene.session.removingRecipient = false;
     ctx.scene.session.currentStep = undefined;
     ctx.scene.session.currentRecipient = undefined;
 
-
-    await showMainMenu(ctx);
+    await promptAddRecipient(ctx);
 });
 
-// Handle adding new recipient - Select type
-sendBatchScene.action('add_recipient', async (ctx) => {
-    await ctx.answerCbQuery();
-
+// Function to prompt for adding a recipient
+async function promptAddRecipient(ctx: SendBatchContext): Promise<void> {
     ctx.scene.session.addingRecipient = true;
     ctx.scene.session.currentStep = 'value';
     ctx.scene.session.currentRecipient = {};
@@ -66,17 +70,31 @@ sendBatchScene.action('add_recipient', async (ctx) => {
                     Markup.button.callback('📧 Email Address', 'recipient_type:email'),
                     Markup.button.callback('📝 Wallet Address', 'recipient_type:wallet')
                 ],
-                [Markup.button.callback('🔙 Back', 'back_to_main')]
+                [
+                    Markup.button.callback('👤 Saved Payee', 'recipient_type:payee')
+                ],
+                [Markup.button.callback('❌ Cancel', 'cancel')]
             ])
         }
     );
+}
+
+// Handle adding new recipient - Select type
+sendBatchScene.action('add_recipient', async (ctx) => {
+    await ctx.answerCbQuery();
+    await promptAddRecipient(ctx);
 });
 
 sendBatchScene.action(/recipient_type:(.+)/, async (ctx) => {
     await ctx.answerCbQuery();
 
-    const type = ctx.match[1] as 'email' | 'wallet';
+    const type = ctx.match[1] as 'email' | 'wallet' | 'payee';
     ctx.scene.session.currentRecipient!.type = type;
+
+    if (type === 'payee') {
+        await showPayeeList(ctx);
+        return;
+    }
 
     const promptText = type === 'email'
         ? '📧 *Enter Recipient Email*\n\nPlease enter the email address:'
@@ -90,6 +108,127 @@ sendBatchScene.action(/recipient_type:(.+)/, async (ctx) => {
     });
 });
 
+// Function to display payee list
+async function showPayeeList(ctx: SendBatchContext, page = 1) {
+    try {
+        const payees = await payeeService.getPayees(page, 10);
+
+        if (!payees || !payees.data || payees.data.length === 0) {
+            await ctx.reply(
+                '❌ *No Saved Recipients*\n\n' +
+                'You don\'t have any saved recipients yet. Please choose a different method or add a recipient first.',
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back', 'back_to_type_selection')],
+                        [Markup.button.callback('❌ Cancel', 'cancel')]
+                    ])
+                }
+            );
+            return;
+        }
+
+        // Create buttons for payee selection
+        const payeeButtons = payees.data.map(payee =>
+            [Markup.button.callback(`${payee.nickName} (${payee.email})`, `select_payee:${payee.id}`)]
+        );
+
+        // Add pagination if needed
+        if (payees.hasMore) {
+            payeeButtons.push([
+                Markup.button.callback('⏩ More Recipients', `more_payees:${page + 1}`),
+                Markup.button.callback('🔙 Back', 'back_to_type_selection'),
+                Markup.button.callback('❌ Cancel', 'cancel')
+            ]);
+        } else {
+            payeeButtons.push([
+                Markup.button.callback('🔙 Back', 'back_to_type_selection'),
+                Markup.button.callback('❌ Cancel', 'cancel')
+            ]);
+        }
+
+        await ctx.reply(
+            '👤 *Select Recipient*\n\n' +
+            'Please select a saved recipient to send funds to:',
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard(payeeButtons)
+            }
+        );
+    } catch (error) {
+        logger.error('Error fetching payees for selection', { error });
+        await ctx.reply(
+            '❌ *Error Retrieving Recipients*\n\n' +
+            'We encountered an error retrieving your saved recipients. Please try again or choose a different method.',
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back', 'back_to_type_selection'),
+                    Markup.button.callback('❌ Cancel', 'cancel')
+                    ]
+                ])
+            }
+        );
+    }
+}
+
+// Handle pagination for payees
+sendBatchScene.action(/more_payees:(\d+)/, async (ctx) => {
+    await ctx.answerCbQuery();
+    const page = parseInt(ctx.match[1]);
+    await showPayeeList(ctx, page);
+});
+
+// Handle payee selection
+sendBatchScene.action(/select_payee:([^:]+)/, async (ctx) => {
+    await ctx.answerCbQuery();
+    const payeeId = ctx.match[1];
+
+    const payee = await payeeService.getPayee(payeeId);
+
+    if (!payee) {
+        await ctx.reply('❌ *Payee Not Found*\n\n' +
+            'The payee you selected was not found. Please try again or choose a different method.',
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back', 'back_to_type_selection'),
+                    Markup.button.callback('❌ Cancel', 'cancel')
+                    ]
+                ])
+            }
+        );
+
+        return;
+    }
+
+    ctx.scene.session.currentRecipient!.type = 'payee';
+    ctx.scene.session.currentRecipient!.payeeId = payeeId;
+    ctx.scene.session.currentRecipient!.payeeName = payee.nickName;
+    ctx.scene.session.currentRecipient!.value = payee.email;
+    ctx.scene.session.currentStep = 'amount';
+
+    // Get wallet balance for amount prompt
+    const balance = await walletService.getDefaultWalletBalance();
+    let balanceDisplay = 'Unknown';
+
+    if (balance) {
+        balanceDisplay = `${formatWalletBalance(balance)}`;
+    }
+
+    await ctx.reply(
+        '💰 *Enter Amount*\n\n' +
+        `Recipient: *${payee.nickName}* (${payee.email})\n` +
+        `Your current balance: *${balanceDisplay}*\n\n` +
+        'Please enter the amount of USDC to send to this recipient:',
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('❌ Cancel', 'cancel')]
+            ])
+        }
+    );
+});
 
 // Handle back to type selection
 sendBatchScene.action('back_to_type_selection', async (ctx) => {
@@ -98,20 +237,7 @@ sendBatchScene.action('back_to_type_selection', async (ctx) => {
     ctx.scene.session.currentRecipient = {};
     ctx.scene.session.currentStep = 'value';
 
-    await ctx.reply(
-        '➕ *Add Recipient*\n\n' +
-        'Please select the recipient type:',
-        {
-            parse_mode: 'Markdown',
-            ...Markup.inlineKeyboard([
-                [
-                    Markup.button.callback('📧 Email Address', 'recipient_type:email'),
-                    Markup.button.callback('📝 Wallet Address', 'recipient_type:wallet')
-                ],
-                [Markup.button.callback('🔙 Back', 'back_to_main')]
-            ])
-        }
-    );
+    await promptAddRecipient(ctx);
 });
 
 // Handle back to main menu
@@ -119,6 +245,7 @@ sendBatchScene.action('back_to_main', async (ctx) => {
     await ctx.answerCbQuery();
 
     ctx.scene.session.addingRecipient = false;
+    ctx.scene.session.removingRecipient = false;
     ctx.scene.session.currentStep = undefined;
     ctx.scene.session.currentRecipient = undefined;
 
@@ -131,7 +258,56 @@ sendBatchScene.action('view_summary', async (ctx) => {
     await showBatchSummary(ctx);
 });
 
-// Handle remove recipient
+// Handle remove recipient action
+sendBatchScene.action('remove_recipient', async (ctx) => {
+    await ctx.answerCbQuery();
+
+    if (ctx.scene.session.recipients.length === 0) {
+        await ctx.reply(
+            '❌ *No Recipients*\n\n' +
+            'There are no recipients to remove.',
+            { parse_mode: 'Markdown' }
+        );
+        return showMainMenu(ctx);
+    }
+
+    ctx.scene.session.removingRecipient = true;
+    await showRecipientRemovalList(ctx);
+});
+
+// Show list of recipients for removal
+async function showRecipientRemovalList(ctx: SendBatchContext): Promise<void> {
+    const recipients = ctx.scene.session.recipients;
+    const buttons = recipients.map((recipient, index) => {
+        const displayText = formatRecipientForDisplay(recipient);
+        return [Markup.button.callback(`${index + 1}. ${displayText}`, `remove_recipient:${index}`)];
+    });
+
+    buttons.push([Markup.button.callback('🔙 Back to Summary', 'view_summary')]);
+
+    await ctx.reply(
+        '🗑️ *Remove Recipient*\n\n' +
+        'Select a recipient to remove from the batch:',
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard(buttons)
+        }
+    );
+}
+
+// Format recipient details for display
+function formatRecipientForDisplay(recipient: Recipient): string {
+    switch (recipient.type) {
+        case 'email':
+            return `📧 ${recipient.value} - ${formatHumanAmount(recipient.amount, 2)} USDC`;
+        case 'wallet':
+            return `📝 ${formatWalletAddress(recipient.value)} - ${formatHumanAmount(recipient.amount, 2)} USDC`;
+        case 'payee':
+            return `👤 ${recipient.payeeName} - ${formatHumanAmount(recipient.amount, 2)} USDC`;
+    }
+}
+
+// Handle remove specific recipient
 sendBatchScene.action(/remove_recipient:(\d+)/, async (ctx) => {
     await ctx.answerCbQuery();
 
@@ -144,7 +320,10 @@ sendBatchScene.action(/remove_recipient:(\d+)/, async (ctx) => {
         // Remove recipient
         ctx.scene.session.recipients.splice(index, 1);
 
+        ctx.scene.session.removingRecipient = false;
+
         // Show updated summary
+        await ctx.reply('✅ Recipient removed successfully.');
         await showBatchSummary(ctx);
     }
 });
@@ -194,14 +373,27 @@ sendBatchScene.action('confirm_batch', async (ctx) => {
 
     try {
         // Prepare batch requests
-        const batchRequests: CreateSendTransferBatchSingleRequest[] = ctx.scene.session.recipients.map((r, index) => ({
-            requestId: `transfer-${index + 1}`,
-            request: {
-                [r.type === 'email' ? 'email' : 'walletAddress']: r.value,
-                amount: r.amount,
-                purposeCode: ctx.scene.session.purposeCode!,
+        const batchRequests: CreateSendTransferBatchSingleRequest[] = ctx.scene.session.recipients.map((r, index) => {
+            if (r.type === 'payee') {
+                return {
+                    requestId: `transfer-${index + 1}`,
+                    request: {
+                        payeeId: r.payeeId!,
+                        amount: r.amount,
+                        purposeCode: ctx.scene.session.purposeCode!,
+                    }
+                };
+            } else {
+                return {
+                    requestId: `transfer-${index + 1}`,
+                    request: {
+                        [r.type === 'email' ? 'email' : 'walletAddress']: r.value,
+                        amount: toRawAmount(r.amount),
+                        purposeCode: ctx.scene.session.purposeCode!,
+                    }
+                };
             }
-        }));
+        });
 
         // Execute batch transfer
         const result = await transferService.sendBatch({ requests: batchRequests });
@@ -210,7 +402,12 @@ sendBatchScene.action('confirm_batch', async (ctx) => {
             await ctx.reply(
                 '❌ *Batch Transfer Failed*\n\n' +
                 'We encountered an error processing your batch transfer. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return ctx.scene.leave();
         }
@@ -229,10 +426,7 @@ sendBatchScene.action('confirm_batch', async (ctx) => {
             result.responses.forEach((resp, index) => {
                 if (resp.error) {
                     const recipient = ctx.scene.session.recipients[index];
-                    const truncatedValue = recipient.value.length > 15
-                        ? recipient.value.substring(0, 12) + '...'
-                        : recipient.value;
-                    resultMessage += `• ${recipient.type === 'email' ? '📧' : '📝'} ${truncatedValue} - ${resp.error.message || 'Unknown error'}\n`;
+                    resultMessage += `• ${formatRecipientForDisplay(recipient)} - ${resp.error.message || 'Unknown error'}\n`;
                 }
             });
         }
@@ -255,7 +449,12 @@ sendBatchScene.action('confirm_batch', async (ctx) => {
         await ctx.reply(
             '❌ *Batch Transfer Failed*\n\n' +
             'We encountered an error processing your batch transfer. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }
@@ -264,28 +463,28 @@ sendBatchScene.action('confirm_batch', async (ctx) => {
 // Handle cancel
 sendBatchScene.action('cancel', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.reply('Batch transfer cancelled.');
+    await ctx.reply('Batch transfer cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
 sendBatchScene.command('cancel', async (ctx) => {
-    await ctx.answerCbQuery();
-    await ctx.reply('Batch transfer cancelled.');
+    await ctx.reply('Batch transfer cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
 // Handle text messages (for recipient value and amount input)
 sendBatchScene.on(message('text'), async (ctx) => {
     const text = ctx.message.text.trim();
-
-    // Command handling
-    if (text.startsWith('/')) {
-        if (text === '/cancel') {
-            await ctx.reply('Batch transfer cancelled.');
-            return ctx.scene.leave();
-        }
-        return;
-    }
 
     // If not adding a recipient, ignore the message
     if (!ctx.scene.session.addingRecipient) {
@@ -301,6 +500,9 @@ sendBatchScene.on(message('text'), async (ctx) => {
             return;
         }
 
+        // Skip validation for payee type (handled by action)
+        if (type === 'payee') return;
+
         // Validate input based on type
         const isValid = type === 'email' ? isValidEmail(text) : isValidWalletAddress(text);
 
@@ -309,7 +511,13 @@ sendBatchScene.on(message('text'), async (ctx) => {
                 ? '❌ *Invalid Email Format*\n\nPlease enter a valid email address:'
                 : '❌ *Invalid Wallet Address*\n\nPlease enter a valid wallet address:';
 
-            await ctx.reply(errorMessage, { parse_mode: 'Markdown' });
+            await ctx.reply(errorMessage, {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            });
+
             return;
         }
 
@@ -329,7 +537,12 @@ sendBatchScene.on(message('text'), async (ctx) => {
             '💰 *Enter Amount*\n\n' +
             `Your current balance: *${balanceDisplay}*\n\n` +
             'Please enter the amount of USDC to send to this recipient:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
 
         return;
@@ -344,7 +557,13 @@ sendBatchScene.on(message('text'), async (ctx) => {
             await ctx.reply(
                 '❌ *Invalid Amount*\n\n' +
                 'Please enter a valid amount of at least 1 USDC:',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        Markup.button.callback('🔙 Back to Summary', 'back_to_summary'),
+                        Markup.button.callback('❌ Cancel', 'cancel')
+                    ])
+                }
             );
             return;
         }
@@ -359,18 +578,32 @@ sendBatchScene.on(message('text'), async (ctx) => {
                 `Your current balance is ${formatWalletBalance(balance)}.\n` +
                 `Total batch amount would be ${formatHumanAmount(currentTotal, 2)} ${balance.symbol}.\n\n` +
                 'Please enter a smaller amount:',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Summary', 'back_to_summary')],
+                        [Markup.button.callback('❌ Cancel', 'cancel')]
+                    ])
+                }
             );
             return;
         }
 
         // Add recipient to the batch
-        if (ctx.scene.session.currentRecipient?.type && ctx.scene.session.currentRecipient?.value) {
-            ctx.scene.session.recipients.push({
+        if (ctx.scene.session.currentRecipient?.type) {
+            const newRecipient: Recipient = {
                 type: ctx.scene.session.currentRecipient.type,
-                value: ctx.scene.session.currentRecipient.value,
+                value: ctx.scene.session.currentRecipient.value!,
                 amount: text
-            });
+            };
+
+            // Add payee details if applicable
+            if (newRecipient.type === 'payee' && ctx.scene.session.currentRecipient.payeeId) {
+                newRecipient.payeeId = ctx.scene.session.currentRecipient.payeeId;
+                newRecipient.payeeName = ctx.scene.session.currentRecipient.payeeName;
+            }
+
+            ctx.scene.session.recipients.push(newRecipient);
 
             // Update total amount
             ctx.scene.session.totalAmount += amount;
@@ -380,13 +613,10 @@ sendBatchScene.on(message('text'), async (ctx) => {
             ctx.scene.session.currentStep = undefined;
             ctx.scene.session.currentRecipient = undefined;
 
-            await ctx.reply(
-                '✅ *Recipient Added Successfully*\n\n' +
-                `Type: ${ctx.scene.session.recipients[ctx.scene.session.recipients.length - 1].type === 'email' ? 'Email' : 'Wallet Address'}\n` +
-                `Recipient: ${ctx.scene.session.recipients[ctx.scene.session.recipients.length - 1].value}\n` +
-                `Amount: ${formatHumanAmount(text, 2)} USDC`,
-                { parse_mode: 'Markdown' }
-            );
+            let successMessage = '✅ *Recipient Added Successfully*\n\n';
+            successMessage += formatRecipientForDisplay(ctx.scene.session.recipients[ctx.scene.session.recipients.length - 1]);
+
+            await ctx.reply(successMessage, { parse_mode: 'Markdown' });
 
             // Show main menu
             await showMainMenu(ctx);
@@ -396,7 +626,7 @@ sendBatchScene.on(message('text'), async (ctx) => {
 
 // Helper functions for UI
 
-async function showMainMenu(ctx: BulkSendContext): Promise<void> {
+async function showMainMenu(ctx: SendBatchContext): Promise<void> {
     const recipientCount = ctx.scene.session.recipients.length;
 
     let message = '👥 *Batch Transfer*\n\n';
@@ -414,10 +644,8 @@ async function showMainMenu(ctx: BulkSendContext): Promise<void> {
     ];
 
     if (recipientCount > 0) {
-        buttons.push([
-            Markup.button.callback('📋 View Batch Summary', 'view_summary'),
-            Markup.button.callback('▶️ Proceed', 'proceed_to_purpose')
-        ]);
+        buttons.push([Markup.button.callback('📋 View Batch Summary', 'view_summary')]);
+        buttons.push([Markup.button.callback('▶️ Proceed', 'proceed_to_purpose')]);
     }
 
     buttons.push([Markup.button.callback('❌ Cancel', 'cancel')]);
@@ -431,7 +659,7 @@ async function showMainMenu(ctx: BulkSendContext): Promise<void> {
     );
 }
 
-async function showBatchSummary(ctx: BulkSendContext): Promise<void> {
+async function showBatchSummary(ctx: SendBatchContext): Promise<void> {
     const recipients = ctx.scene.session.recipients;
 
     if (recipients.length === 0) {
@@ -449,13 +677,7 @@ async function showBatchSummary(ctx: BulkSendContext): Promise<void> {
     message += '*Recipient Details:*\n';
 
     recipients.forEach((recipient, index) => {
-        const displayValue = recipient.type === 'email'
-            ? recipient.value
-            : (recipient.value.substring(0, 6) + '...' + recipient.value.substring(recipient.value.length - 4));
-        const icon = recipient.type === 'email' ? '📧' : '📝';
-
-        message += `${index + 1}. ${icon} ${displayValue} - ${formatHumanAmount(recipient.amount, 2)} USDC `;
-        message += `[❌](remove_recipient:${index})\n`;
+        message += `${index + 1}. ${formatRecipientForDisplay(recipient)}\n`;
     });
 
     await ctx.reply(
@@ -463,8 +685,9 @@ async function showBatchSummary(ctx: BulkSendContext): Promise<void> {
         {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
+                [Markup.button.callback('➕ Add More', 'add_recipient')],
                 [
-                    Markup.button.callback('➕ Add More', 'add_recipient'),
+                    Markup.button.callback('🗑️ Remove Recipient', 'remove_recipient'),
                     Markup.button.callback('▶️ Proceed', 'proceed_to_purpose')
                 ],
                 [Markup.button.callback('🔙 Back', 'back_to_main')]
@@ -473,7 +696,7 @@ async function showBatchSummary(ctx: BulkSendContext): Promise<void> {
     );
 }
 
-async function showPurposeSelection(ctx: BulkSendContext): Promise<void> {
+async function showPurposeSelection(ctx: SendBatchContext): Promise<void> {
     const purposeButtons = PURPOSE_CODES.map(code =>
         Markup.button.callback(formatPurposeCode(code), `purpose:${code}`)
     );
@@ -498,7 +721,7 @@ async function showPurposeSelection(ctx: BulkSendContext): Promise<void> {
     );
 }
 
-async function showBatchConfirmation(ctx: BulkSendContext): Promise<void> {
+async function showBatchConfirmation(ctx: SendBatchContext): Promise<void> {
     const recipients = ctx.scene.session.recipients;
     const purpose = formatPurposeCode(ctx.scene.session.purposeCode!);
 
@@ -506,18 +729,12 @@ async function showBatchConfirmation(ctx: BulkSendContext): Promise<void> {
     message += `*Number of Recipients:* ${recipients.length}\n`;
     message += `*Total Amount:* ${formatHumanAmount(ctx.scene.session.totalAmount, 2)} USDC\n`;
     message += `*Purpose:* ${purpose}\n\n`;
+    message += '*Recipients:*\n';
 
-    // Show a summary of recipient types
-    const emailCount = recipients.filter(r => r.type === 'email').length;
-    const walletCount = recipients.filter(r => r.type === 'wallet').length;
-
-    if (emailCount > 0) {
-        message += `- *${emailCount}* Email recipient${emailCount !== 1 ? 's' : ''}\n`;
-    }
-
-    if (walletCount > 0) {
-        message += `- *${walletCount}* Wallet address${walletCount !== 1 ? 'es' : ''}\n`;
-    }
+    // List all recipients with details
+    recipients.forEach((recipient, index) => {
+        message += `${index + 1}. ${formatRecipientForDisplay(recipient)}\n`;
+    });
 
     message += '\nPlease review carefully and confirm to process all transfers:';
 

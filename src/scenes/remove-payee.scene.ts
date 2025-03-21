@@ -64,7 +64,12 @@ removePayeeScene.on(message('text'), async (ctx) => {
         await ctx.reply(
             '❌ *Invalid Input*\n\n' +
             'Please enter a valid recipient ID or type /cancel to exit.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel_remove')]
+                ])
+            }
         );
         return;
     }
@@ -77,7 +82,12 @@ removePayeeScene.on(message('text'), async (ctx) => {
             await ctx.reply(
                 '❌ *Recipient Not Found*\n\n' +
                 'The recipient ID you entered was not found. Please check the ID and try again.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('❌ Cancel', 'cancel_remove')]
+                    ])
+                }
             );
             return;
         }
@@ -105,8 +115,15 @@ removePayeeScene.on(message('text'), async (ctx) => {
         await ctx.reply(
             '❌ *Error Finding Recipient*\n\n' +
             'We encountered an error while finding this recipient. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
+
+        return await ctx.scene.leave();
     }
 });
 
@@ -137,7 +154,12 @@ removePayeeScene.action(/confirm_remove:(.+)/, async (ctx) => {
             await ctx.reply(
                 '❌ *Failed to Remove Recipient*\n\n' +
                 'We encountered an error while removing this recipient. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
         }
 
@@ -148,7 +170,12 @@ removePayeeScene.action(/confirm_remove:(.+)/, async (ctx) => {
         await ctx.reply(
             '❌ *Failed to Remove Recipient*\n\n' +
             'We encountered an error while removing this recipient. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }
@@ -157,13 +184,23 @@ removePayeeScene.action(/confirm_remove:(.+)/, async (ctx) => {
 // Handle cancel action
 removePayeeScene.action('cancel_remove', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.reply('Recipient removal cancelled.');
+    await ctx.reply('Recipient removal cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
 // Handle cancel command
 removePayeeScene.command('cancel', async (ctx) => {
-    await ctx.reply('Recipient removal cancelled.');
+    await ctx.reply('Recipient removal cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 

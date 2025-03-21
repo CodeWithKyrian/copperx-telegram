@@ -26,7 +26,12 @@ const step1SelectWallet = async (ctx: DefaultWalletContext) => {
         await ctx.reply(
             '❌ *No Wallets Found*\n\n' +
             'You don\'t have any wallets to set as default. Please create a wallet first.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return await ctx.scene.leave();
     }
@@ -38,7 +43,13 @@ const step1SelectWallet = async (ctx: DefaultWalletContext) => {
         await ctx.reply(
             '❓ *All Set*\n\n' +
             'You only have one wallet, which is already set as default.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('💼 View All Wallets', 'view_wallets')],
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return await ctx.scene.leave();
     }
@@ -83,7 +94,12 @@ const step2HandleSelection = async (ctx: DefaultWalletContext) => {
 
     if (callbackData === 'cancel') {
         await ctx.answerCbQuery();
-        await ctx.reply('Operation cancelled.');
+        await ctx.reply('Operation cancelled.', {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+            ])
+        });
         return await ctx.scene.leave();
     }
 
@@ -117,7 +133,12 @@ async function setDefaultWallet(ctx: GlobalContext, walletId: string): Promise<v
             await ctx.reply(
                 '❌ *Error Setting Default Wallet*\n\n' +
                 'We encountered an issue while updating your default wallet. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return;
         }
@@ -139,14 +160,24 @@ async function setDefaultWallet(ctx: GlobalContext, walletId: string): Promise<v
         await ctx.reply(
             '❌ *Error Setting Default Wallet*\n\n' +
             'We encountered an error while updating your default wallet. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
     }
 }
 
 defaultWalletScene.action('cancel', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.reply('Operation cancelled.');
+    await ctx.reply('Operation cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return await ctx.scene.leave();
 });
 

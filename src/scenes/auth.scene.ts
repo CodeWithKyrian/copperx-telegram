@@ -68,7 +68,12 @@ async function handleEmailInput(ctx: AuthSceneContext, email: string) {
         await ctx.reply(
             '❌ *Invalid Email*\n\n' +
             'Please enter a valid email address:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
         return;
     }
@@ -100,7 +105,12 @@ async function handleEmailInput(ctx: AuthSceneContext, email: string) {
             '📧 *Verification Code Sent*\n\n' +
             `A verification code has been sent to ${email}.\n\n` +
             'Please enter the code:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
     } catch (error: any) {
         logger.error('Failed to initiate email authentication', {
@@ -113,7 +123,12 @@ async function handleEmailInput(ctx: AuthSceneContext, email: string) {
             '❌ *Authentication Failed*\n\n' +
             'We could not send a verification code to this email. Please make sure you have a registered CopperX account and try again.\n\n' +
             'Use /cancel to exit the login process.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
     }
 };
@@ -169,7 +184,12 @@ async function handleOtpVerification(ctx: AuthSceneContext, otp: string) {
             '❌ *Verification Failed*\n\n' +
             'The OTP you entered is invalid or has expired.\n\n' +
             'Please try again or use /cancel to abort the login process.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
     }
 };

@@ -41,7 +41,12 @@ createPayeeScene.enter(async (ctx) => {
         await ctx.reply(
             '📧 *Add New Recipient*\n\n' +
             'Please enter the email address of the recipient:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel_payee')]
+                ])
+            }
         );
     }
 });
@@ -224,7 +229,12 @@ async function createPayee(ctx: CreatePayeeContext): Promise<void> {
             await ctx.reply(
                 '❌ *Failed to Create Recipient*\n\n' +
                 'We encountered an error creating this recipient. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return ctx.scene.leave();
         }
@@ -250,7 +260,12 @@ async function createPayee(ctx: CreatePayeeContext): Promise<void> {
         await ctx.reply(
             '❌ *Failed to Create Recipient*\n\n' +
             'We encountered an error creating this recipient. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }

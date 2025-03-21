@@ -34,7 +34,12 @@ const walletCreateScene = new Scenes.WizardScene<WalletCreateContext>(
             await ctx.reply(
                 '❌ *Error*\n\n' +
                 'We couldn\'t retrieve the list of supported networks. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return await ctx.scene.leave();
         }
@@ -112,7 +117,12 @@ async function createWallet(ctx: GlobalContext, network: string): Promise<void> 
             await ctx.reply(
                 '❌ *Error Creating Wallet*\n\n' +
                 'We encountered an issue while creating your wallet. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return;
         }
@@ -138,14 +148,26 @@ async function createWallet(ctx: GlobalContext, network: string): Promise<void> 
         await ctx.reply(
             '❌ *Error Creating Wallet*\n\n' +
             'We encountered an error while creating your wallet. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
+
+        return await ctx.scene.leave();
     }
 }
 
 walletCreateScene.action('cancel', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.reply('Wallet creation cancelled.');
+    await ctx.reply('Wallet creation cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return await ctx.scene.leave();
 });
 

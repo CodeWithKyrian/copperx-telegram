@@ -35,7 +35,14 @@ transferDetailsScene.on(message('text'), async (ctx) => {
     const transferId = ctx.message.text.trim();
 
     if (!transferId) {
-        await ctx.reply('Please enter a valid transfer ID.');
+        await ctx.reply('Please enter a valid transfer ID.',
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
+        );
         return;
     }
 
@@ -45,7 +52,12 @@ transferDetailsScene.on(message('text'), async (ctx) => {
 
 // Handle /cancel command
 transferDetailsScene.command('cancel', async (ctx) => {
-    await ctx.reply('Operation cancelled.');
+    await ctx.reply('Operation cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Transfer History', 'history')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
@@ -62,7 +74,12 @@ async function showTransferDetails(ctx: TransferDetailsContext, transferId: stri
             await ctx.reply(
                 '❌ *Transfer Not Found*\n\n' +
                 'We couldn\'t find a transfer with that ID. Please check the ID and try again.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Transfer History', 'history')]
+                    ])
+                }
             );
             return;
         }
@@ -86,7 +103,12 @@ async function showTransferDetails(ctx: TransferDetailsContext, transferId: stri
         await ctx.reply(
             '❌ *Error Retrieving Transfer*\n\n' +
             'We encountered an error while retrieving transfer details. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Transfer History', 'history')]
+                ])
+            }
         );
     }
 }
@@ -104,6 +126,17 @@ transferDetailsScene.action('view_wallets', async (ctx) => {
     await ctx.answerCbQuery();
     await ctx.reply('Opening your wallet...');
     await ctx.reply('Use /wallet to view your wallet.');
+    return ctx.scene.leave();
+});
+
+transferDetailsScene.action('cancel', async (ctx) => {
+    await ctx.answerCbQuery();
+    await ctx.reply('Operation cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Transfer History', 'history')]
+        ])
+    });
     return ctx.scene.leave();
 });
 

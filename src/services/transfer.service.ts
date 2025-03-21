@@ -12,7 +12,7 @@ import {
 } from '../types/api.types';
 import transferApi from '../api/transfer.api';
 import logger from '../utils/logger.utils';
-import { formatDate, formatTransferType, formatTransferStatus, formatPurposeCode, formatRawAmount, toRawAmount, formatWalletAddress } from '../utils/formatters.utils';
+import { formatDate, formatTransferType, formatTransferStatus, formatPurposeCode, formatRawAmount, formatWalletAddress } from '../utils/formatters.utils';
 import { formatNetworkName } from '../utils/chain.utils';
 
 /**
@@ -29,11 +29,9 @@ export class TransferService {
         currency: Currency = 'USDC'
     ): Promise<TransferWithAccount | null> {
         try {
-            const rawAmount = toRawAmount(amount);
-
             const transferRequest: CreateSendTransferRequest = {
                 email,
-                amount: rawAmount,
+                amount,
                 purposeCode,
                 currency
             };
@@ -56,11 +54,9 @@ export class TransferService {
         currency: Currency = 'USDC'
     ): Promise<TransferWithAccount | null> {
         try {
-            const rawAmount = toRawAmount(amount);
-
             const transferRequest: CreateSendTransferRequest = {
                 walletAddress,
-                amount: rawAmount,
+                amount,
                 purposeCode,
                 currency
             };
@@ -83,11 +79,9 @@ export class TransferService {
         currency: Currency = 'USDC'
     ): Promise<TransferWithAccount | null> {
         try {
-            const rawAmount = toRawAmount(amount);
-
             const transferRequest: CreateSendTransferRequest = {
                 payeeId,
-                amount: rawAmount,
+                amount,
                 purposeCode,
                 currency
             };
@@ -110,11 +104,9 @@ export class TransferService {
         currency: Currency = 'USDC'
     ): Promise<TransferWithAccount | null> {
         try {
-            const rawAmount = toRawAmount(amount);
-
             const withdrawRequest: CreateWalletWithdrawTransferRequest = {
                 walletAddress,
-                amount: rawAmount,
+                amount,
                 purposeCode,
                 currency
             };

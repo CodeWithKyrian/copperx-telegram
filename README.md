@@ -122,12 +122,19 @@ For a more comprehensive documentation on deployment, see the [Setup Guide](docs
 
 ## 🧪 Testing
 
-Run the test suite:
+The project includes a comprehensive test suite with a fair code coverage:
+
+- **Unit Tests**: For individual components and functions
+- **Integration Tests**: For API clients and services
+
+The tests are automatically run on GitHub Actions CI for every pull request and push to the main branch.
+
+Run the test suite locally:
 ```bash
 npm test
 ```
 
-Generate test coverage:
+Generate test coverage report:
 ```bash
 npm run test:cov
 ```

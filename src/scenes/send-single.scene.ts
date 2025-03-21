@@ -5,7 +5,7 @@ import logger from '../utils/logger.utils';
 import { PurposeCode } from '../types/api.types';
 import { isValidEmail, isValidWalletAddress } from '../utils/validators';
 import { walletService } from '../services/wallet.service';
-import { formatHumanAmount, formatPurposeCode, formatWalletBalance } from '../utils/formatters.utils';
+import { formatHumanAmount, formatPurposeCode, formatWalletBalance, toRawAmount } from '../utils/formatters.utils';
 import { payeeService } from '../services/payee.service';
 import { message } from 'telegraf/filters';
 
@@ -91,14 +91,24 @@ sendSingleScene.action(/recipient_type:(.+)/, async (ctx) => {
         await ctx.reply(
             '📧 *Enter Recipient Email*\n\n' +
             'Please enter the email address of the person you want to send funds to:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
     } else if (recipientType === 'wallet') {
         ctx.scene.session.currentStep = 'enter_recipient';
         await ctx.reply(
             '📝 *Enter Wallet Address*\n\n' +
             'Please enter the wallet address you want to send funds to:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
     } else if (recipientType === 'payee') {
         await showPayeeList(ctx);
@@ -139,6 +149,8 @@ async function showPayeeList(ctx: SendTransferContext, page = 1) {
         } else {
             payeeButtons.push([Markup.button.callback('🔙 Back', 'back_to_recipient_type')]);
         }
+
+        payeeButtons.push([Markup.button.callback('❌ Cancel', 'cancel')]);
 
         await ctx.reply(
             '👤 *Select Recipient*\n\n' +
@@ -196,7 +208,12 @@ sendSingleScene.action(/select_payee:(.+)/, async (ctx) => {
         if (!payee) {
             await ctx.reply('❌ *Payee Not Found*\n\n' +
                 'We encountered an error processing your transfer. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return ctx.scene.leave();
         }
@@ -213,7 +230,12 @@ sendSingleScene.action(/select_payee:(.+)/, async (ctx) => {
             `Recipient: *${payee.nickName}* (${payee.email})\n` +
             `Your current balance: *${formattedBalance}*\n\n` +
             'Please enter the amount of USDC you want to transfer:',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('❌ Cancel', 'cancel')]
+                ])
+            }
         );
     } catch (error) {
         logger.error('Error fetching payee details', { error, payeeId });
@@ -236,7 +258,12 @@ sendSingleScene.on(message('text'), async (ctx) => {
 
     // Handle cancel command anywhere in the flow
     if (input.toLowerCase() === '/cancel') {
-        await ctx.reply('Transfer cancelled.');
+        await ctx.reply('Transfer cancelled.', {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+            ])
+        });
         return ctx.scene.leave();
     }
 
@@ -268,7 +295,12 @@ async function handleRecipientInput(ctx: SendTransferContext, input: string) {
             await ctx.reply(
                 '❌ *Invalid Email Format*\n\n' +
                 'Please enter a valid email address:',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('❌ Cancel', 'cancel')]
+                    ])
+                }
             );
             return;
         }
@@ -277,7 +309,12 @@ async function handleRecipientInput(ctx: SendTransferContext, input: string) {
             await ctx.reply(
                 '❌ *Invalid Wallet Address*\n\n' +
                 'Please enter a valid wallet address:',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('❌ Cancel', 'cancel')]
+                    ])
+                }
             );
             return;
         }
@@ -296,7 +333,12 @@ async function handleRecipientInput(ctx: SendTransferContext, input: string) {
         '💰 *Enter Transfer Amount*\n\n' +
         `Your current balance: *${formattedBalance}*\n\n` +
         'Please enter the amount of USDC you want to transfer:',
-        { parse_mode: 'Markdown' }
+        {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('❌ Cancel', 'cancel')]
+            ])
+        }
     );
 }
 
@@ -413,21 +455,21 @@ sendSingleScene.action('confirm', async (ctx) => {
         if (ctx.scene.session.recipientType === 'payee' && ctx.scene.session.payeeId) {
             result = await transferService.sendToPayee(
                 ctx.scene.session.payeeId,
-                ctx.scene.session.amount!,
+                toRawAmount(ctx.scene.session.amount!),
                 ctx.scene.session.purposeCode!
             );
         }
         else if (ctx.scene.session.recipientType === 'email') {
             result = await transferService.sendToEmail(
                 ctx.scene.session.recipient!,
-                ctx.scene.session.amount!,
+                toRawAmount(ctx.scene.session.amount!),
                 ctx.scene.session.purposeCode!
             );
         }
         else {
             result = await transferService.sendToWallet(
                 ctx.scene.session.recipient!,
-                ctx.scene.session.amount!,
+                toRawAmount(ctx.scene.session.amount!),
                 ctx.scene.session.purposeCode!
             );
         }
@@ -436,7 +478,12 @@ sendSingleScene.action('confirm', async (ctx) => {
             await ctx.reply(
                 '❌ *Transfer Failed*\n\n' +
                 'We encountered an error processing your transfer. Please try again later.',
-                { parse_mode: 'Markdown' }
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                    ])
+                }
             );
             return ctx.scene.leave();
         }
@@ -485,7 +532,12 @@ sendSingleScene.action('confirm', async (ctx) => {
         await ctx.reply(
             '❌ *Transfer Failed*\n\n' +
             'We encountered an error processing your transfer. Please try again later.',
-            { parse_mode: 'Markdown' }
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
+            }
         );
         return ctx.scene.leave();
     }
@@ -494,13 +546,23 @@ sendSingleScene.action('confirm', async (ctx) => {
 // Cancel action handler
 sendSingleScene.action('cancel', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.reply('Transfer cancelled.');
+    await ctx.reply('Transfer cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 
 // Cancel command handler
 sendSingleScene.command('cancel', async (ctx) => {
-    await ctx.reply('Transfer cancelled.');
+    await ctx.reply('Transfer cancelled.', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+        ])
+    });
     return ctx.scene.leave();
 });
 

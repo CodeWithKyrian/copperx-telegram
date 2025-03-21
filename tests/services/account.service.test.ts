@@ -104,10 +104,10 @@ describe('Account Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve accounts',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve accounts'
             );
         });
     });
@@ -137,10 +137,10 @@ describe('Account Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                expect.stringContaining('Failed to retrieve'),
                 expect.objectContaining({
                     error: expect.any(Error)
-                })
+                }),
+                expect.stringContaining('Failed to retrieve'),
             );
         });
 
@@ -183,11 +183,11 @@ describe('Account Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to create bank account',
                 expect.objectContaining({
                     error: mockError,
                     data: mockCreateAccountRequest
-                })
+                }),
+                'Failed to create bank account'
             );
         });
     });
@@ -216,11 +216,11 @@ describe('Account Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve account',
                 expect.objectContaining({
                     error: mockError,
                     id: mockAccountId
-                })
+                }),
+                'Failed to retrieve account'
             );
         });
     });
@@ -249,11 +249,11 @@ describe('Account Service', () => {
             // Assert
             expect(result).toBe(false);
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to delete account',
                 expect.objectContaining({
                     error: mockError,
                     id: mockAccountId
-                })
+                }),
+                'Failed to delete account'
             );
         });
     });
@@ -285,10 +285,10 @@ describe('Account Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve providers',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve providers'
             );
         });
     });

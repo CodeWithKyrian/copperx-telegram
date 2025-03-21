@@ -19,7 +19,7 @@ export class QuoteService {
             const response = await quoteApi.getOfframpQuote(data);
             return response;
         } catch (error) {
-            logger.error('Failed to get offramp quote', { error, data });
+            logger.error({ error, data }, 'Failed to get offramp quote');
             return null;
         }
     }
@@ -32,7 +32,7 @@ export class QuoteService {
             const response = await quoteApi.getOnrampQuote(data);
             return response;
         } catch (error) {
-            logger.error('Failed to get onramp quote', { error, data });
+            logger.error({ error, data }, 'Failed to get onramp quote');
             return null;
         }
     }

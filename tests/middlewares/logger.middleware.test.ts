@@ -41,12 +41,12 @@ describe('Logger Middleware', () => {
             await callMiddleware(middleware, ctx, mockNext);
 
             // Assert
-            expect(logger.info).toHaveBeenCalledWith('Received message', {
+            expect(logger.info).toHaveBeenCalledWith({
                 userId: 987654321,
                 username: 'testuser',
                 messageText: '/start',
                 updateType: 'message'
-            });
+            }, 'Received message');
             expect(mockNext).toHaveBeenCalled();
         });
     });
@@ -74,12 +74,12 @@ describe('Logger Middleware', () => {
             await callMiddleware(middleware, ctx, mockNext);
 
             // Assert
-            expect(logger.info).toHaveBeenCalledWith('Received callback_query', {
+            expect(logger.info).toHaveBeenCalledWith({
                 userId: 123456789,
                 username: 'callbackuser',
                 messageText: undefined,
                 updateType: 'callback_query'
-            });
+            }, 'Received callback_query');
             expect(mockNext).toHaveBeenCalled();
         });
     });
@@ -107,12 +107,12 @@ describe('Logger Middleware', () => {
             await callMiddleware(middleware, ctx, mockNext);
 
             // Assert
-            expect(logger.info).toHaveBeenCalledWith('Received photo', {
+            expect(logger.info).toHaveBeenCalledWith({
                 userId: 555555555,
                 username: 'photouser',
                 messageText: undefined,
                 updateType: 'photo'
-            });
+            }, 'Received photo');
             expect(mockNext).toHaveBeenCalled();
         });
     });
@@ -135,12 +135,12 @@ describe('Logger Middleware', () => {
             await callMiddleware(middleware, ctx, mockNext);
 
             // Assert
-            expect(logger.info).toHaveBeenCalledWith('Received photo', {
+            expect(logger.info).toHaveBeenCalledWith({
                 userId: undefined,
                 username: undefined,
                 messageText: undefined,
                 updateType: 'photo'
-            });
+            }, 'Received photo');
             expect(mockNext).toHaveBeenCalled();
         });
     });

@@ -28,12 +28,12 @@ export const initBot = (): Telegraf<GlobalContext> => {
 
 const configureErrorHandler = (bot: Telegraf<GlobalContext>) => {
     bot.catch((err: any, ctx: Context) => {
-        logger.error(`Error processing update`, {
+        logger.error({
             error: err.message,
             stack: err.stack,
             updateType: ctx.updateType,
             userId: ctx.from?.id,
-        });
+        }, 'Error processing update');
         ctx.reply('An error occurred while processing your request. Please try again later.');
     });
 };

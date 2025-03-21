@@ -46,17 +46,18 @@ A Telegram bot built with TypeScript and Node.js that integrates with CopperX Pa
 - Rate limiting to prevent abuse
 - Comprehensive error handling
 - Automatic session expiration based on configurable TTL
+- Automatic redaction of sensitive data in logs (tokens, API keys, etc.)
 
 ## 🧩 Technical Stack
 
-- **TypeScript/Node.js** - Strongly typed JavaScript
-- **Telegraf** - Modern Telegram Bot API framework
-- **Fastify** - High-performance web framework
-- **Axios** - Promise-based HTTP client
-- **Pusher** - Real-time notifications
-- **Multiple session storage options** - Redis, SQLite, MongoDB, PostgreSQL
-- **Winston** - Logging
-- **Docker** - Containerized deployment
+- **[TypeScript](https://www.typescriptlang.org/)/[Node.js](https://nodejs.org/)** - Strongly typed JavaScript
+- **[Telegraf](https://telegraf.js.org/)** - Modern Telegram Bot API framework
+- **[Fastify](https://www.fastify.io/)** - High-performance web framework
+- **[Axios](https://axios-http.com/)** - Promise-based HTTP client
+- **[Pusher](https://pusher.com/)** - Real-time notifications
+- **Multiple session storage options** - [Redis](https://redis.io/), [SQLite](https://www.sqlite.org/), [MongoDB](https://www.mongodb.com/), [PostgreSQL](https://www.postgresql.org/)
+- **[Pino](https://getpino.io/)** - Logging
+- **[Docker](https://www.docker.com/)** - Containerized deployment
 
 ## 🚀 Quick Start
 

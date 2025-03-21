@@ -27,14 +27,11 @@ export class AuthService {
             ctx.scene.session.tempOtpSid = response.sid;
             ctx.scene.session.waitingForOtp = true;
 
-            logger.info('Email authentication initiated', { email });
+            logger.info({ email }, 'Email authentication initiated');
 
             return response;
         } catch (error: any) {
-            logger.error('Failed to initiate email authentication', {
-                error: error.message,
-                email,
-            });
+            logger.error({ error: error.message, email }, 'Failed to initiate email authentication');
             throw error;
         }
     }
@@ -74,16 +71,11 @@ export class AuthService {
                 notificationService.subscribeToDeposits(ctx.from.id, authResponse.user.organizationId);
             }
 
-            logger.info('User authenticated successfully', {
-                userId: authResponse.user.id,
-                email: email,
-            });
+            logger.info({ userId: authResponse.user.id, email }, 'User authenticated successfully');
 
             return authResponse.user;
         } catch (error: any) {
-            logger.error('Failed to verify OTP', {
-                error: error.message,
-            });
+            logger.error({ error: error.message }, 'Failed to verify OTP');
             throw error;
         }
     }
@@ -104,9 +96,7 @@ export class AuthService {
             expiresAtMs = new Date(authResponse.expireAt).getTime();
         } catch (error) {
             // If parsing fails, default to 24 hours from now
-            logger.warn('Failed to parse expiration date, using default', {
-                expireAt: authResponse.expireAt
-            });
+            logger.warn({ expireAt: authResponse.expireAt }, 'Failed to parse expiration date, using default');
             expiresAtMs = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
         }
 
@@ -120,10 +110,7 @@ export class AuthService {
             email: ctx.session.auth?.email,
         };
 
-        logger.info('User authenticated successfully', {
-            email: ctx.session.auth.email,
-            expiresAt: new Date(expiresAtMs).toISOString(),
-        });
+        logger.info({ email: ctx.session.auth.email, expiresAt: new Date(expiresAtMs).toISOString() }, 'User authenticated successfully');
     }
 
     /**
@@ -135,9 +122,7 @@ export class AuthService {
             const userProfile = await authApi.getAuthUser();
             return userProfile;
         } catch (error: any) {
-            logger.error('Failed to get current user profile', {
-                error: error.message,
-            });
+            logger.error({ error: error.message }, 'Failed to get current user profile');
             throw error;
         }
     }
@@ -177,9 +162,7 @@ export class AuthService {
             apiClient.setAccessToken(null);
             logger.info('User logged out successfully');
         } catch (error: any) {
-            logger.error('Failed to logout', {
-                error: error.message,
-            });
+            logger.error({ error: error.message }, 'Failed to logout');
             throw error;
         }
     }
@@ -224,7 +207,7 @@ export class AuthService {
         try {
             return Encryption.decrypt(ctx.session.auth.accessToken);
         } catch (error) {
-            logger.error('Failed to decrypt token', { error });
+            logger.error({ error }, 'Failed to decrypt token');
             this.handleAuthError(ctx);
             this.clearSessionAuth(ctx);
             return null;

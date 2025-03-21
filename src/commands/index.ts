@@ -41,7 +41,7 @@ export const configureCommands = (bot: Telegraf<GlobalContext>): void => {
     // Catch all handler for unknown commands
     bot.on(message('text'), (ctx) => {
         if (ctx.message.text.startsWith('/')) {
-            logger.debug(`Unknown command received`, { command: ctx.message.text });
+            logger.debug({ command: ctx.message.text }, 'Unknown command received');
             ctx.reply('Unknown command. Use /help to see available commands.');
         }
 

@@ -25,7 +25,7 @@ export class TransactionService {
             const response = await transactionApi.getTransactions(queryParams);
             return response;
         } catch (error) {
-            logger.error('Failed to retrieve transactions', { error, params });
+            logger.error({ error, params }, 'Failed to retrieve transactions');
             return null;
         }
     }
@@ -40,7 +40,7 @@ export class TransactionService {
             const transaction = await transactionApi.getTransaction(transactionId);
             return transaction;
         } catch (error) {
-            logger.error('Failed to retrieve transaction', { error, transactionId });
+            logger.error({ error, transactionId }, 'Failed to retrieve transaction');
             return null;
         }
     }

@@ -495,7 +495,7 @@ withdrawScene.action('confirm_bank_account', async (ctx) => {
         );
 
     } catch (error) {
-        logger.error('Error creating bank account', { error });
+        logger.error({ error }, 'Error creating bank account');
         await ctx.reply(
             '❌ *Error Creating Bank Account*\n\n' +
             'We encountered an error while creating your bank account. Please try again later.',
@@ -574,11 +574,11 @@ withdrawScene.action('confirm', async (ctx) => {
         return ctx.scene.leave();
 
     } catch (error) {
-        logger.error('Error processing withdrawal', {
+        logger.error({
             error,
             accountId: ctx.scene.session.accountId,
             amount: ctx.scene.session.amount
-        });
+        }, 'Error processing withdrawal');
 
         await ctx.reply(
             '❌ *Withdrawal Failed*\n\n' +

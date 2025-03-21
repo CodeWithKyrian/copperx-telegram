@@ -79,12 +79,12 @@ describe('Payee Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve payees',
                 expect.objectContaining({
                     error: mockError,
                     page: 1,
                     limit: 10
-                })
+                }),
+                'Failed to retrieve payees'
             );
         });
     });
@@ -113,11 +113,11 @@ describe('Payee Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to create payee',
                 expect.objectContaining({
                     error: mockError,
                     data: mockCreatePayeeRequest
-                })
+                }),
+                'Failed to create payee'
             );
         });
     });
@@ -146,11 +146,11 @@ describe('Payee Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve payee',
                 expect.objectContaining({
                     error: mockError,
                     id: mockPayeeId
-                })
+                }),
+                'Failed to retrieve payee'
             );
         });
     });
@@ -180,12 +180,12 @@ describe('Payee Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to update payee',
                 expect.objectContaining({
                     error: mockError,
                     id: mockPayeeId,
                     data: mockUpdatePayeeRequest
-                })
+                }),
+                'Failed to update payee'
             );
         });
     });
@@ -214,11 +214,11 @@ describe('Payee Service', () => {
             // Assert
             expect(result).toBe(false);
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to delete payee',
                 expect.objectContaining({
                     error: mockError,
                     id: mockPayeeId
-                })
+                }),
+                'Failed to delete payee'
             );
         });
     });

@@ -45,7 +45,7 @@ export const depositCommand = async (ctx: GlobalContext) => {
             }
         );
     } catch (error) {
-        logger.error('Error in deposit command', { error });
+        logger.error({ error }, 'Error in deposit command');
         await ctx.reply(
             '❌ *Error*\n\n' +
             'We encountered an error while trying to process your deposit request. Please try again later.',
@@ -137,7 +137,7 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
         });
 
     } catch (error) {
-        logger.error('Error in deposit action with wallet', { error, walletId });
+        logger.error({ error, walletId }, 'Error in deposit action with wallet');
         await ctx.reply(
             '❌ *Error*\n\n' +
             'We encountered an error while retrieving your deposit information. Please try again later.',

@@ -150,9 +150,9 @@ describe('Notification Service', () => {
             // Assert
             expect(notificationService['bot']).toBe(mockBot);
             expect(notificationService['pusher']).toBeNull();
-            expect(logger.error).toHaveBeenCalledWith('Failed to initialize Pusher client', {
+            expect(logger.error).toHaveBeenCalledWith({
                 error: mockError
-            });
+            }, 'Failed to initialize Pusher client');
         });
     });
 
@@ -197,10 +197,10 @@ describe('Notification Service', () => {
             await authorizer(mockPusherChannel).authorize(mockSocketId, mockCallback);
 
             // Assert
-            expect(logger.error).toHaveBeenCalledWith('Pusher authorization failed', {
+            expect(logger.error).toHaveBeenCalledWith({
                 error: mockError,
                 channel: 'private-test-channel'
-            });
+            }, 'Pusher authorization failed');
             expect(mockCallback).toHaveBeenCalledWith(mockError, null);
         });
 
@@ -255,10 +255,13 @@ describe('Notification Service', () => {
                 userId
             });
 
-            expect(logger.info).toHaveBeenCalledWith('Successfully subscribed to deposit notifications', {
-                channel: 'private-org-org-123',
-                userId
-            });
+            expect(logger.info).toHaveBeenCalledWith(
+                {
+                    channel: 'private-org-org-123',
+                    userId
+                },
+                'Successfully subscribed to deposit notifications'
+            );
         });
 
         it('should return false if Pusher is not initialized', () => {
@@ -289,11 +292,11 @@ describe('Notification Service', () => {
 
             // Assert
             expect(result).toBe(true); // Initial return is true as the error happens async
-            expect(logger.error).toHaveBeenCalledWith('Failed to subscribe to deposit notifications', {
+            expect(logger.error).toHaveBeenCalledWith({
                 error: mockError,
                 channel: 'private-org-org-123',
                 userId
-            });
+            }, 'Failed to subscribe to deposit notifications');
 
             // Check that the subscription was deleted
             expect(notificationService['subscriptions'].get(`${userId}:${organizationId}`)).toBeUndefined();
@@ -315,11 +318,11 @@ describe('Notification Service', () => {
 
             // Assert
             expect(result).toBe(false);
-            expect(logger.error).toHaveBeenCalledWith('Error subscribing to deposit notifications', {
+            expect(logger.error).toHaveBeenCalledWith({
                 error: mockError,
                 channel: 'private-org-org-123',
                 userId
-            });
+            }, 'Error subscribing to deposit notifications');
         });
 
         it('should not resubscribe if already subscribed', () => {
@@ -367,10 +370,10 @@ describe('Notification Service', () => {
             expect(result).toBe(true);
             expect(mockPusher.unsubscribe).toHaveBeenCalledWith(channelName);
             expect(notificationService['subscriptions'].get(`${userId}:${organizationId}`)).toBeUndefined();
-            expect(logger.info).toHaveBeenCalledWith('Unsubscribed from deposit notifications', {
+            expect(logger.info).toHaveBeenCalledWith({
                 channel: channelName,
                 userId
-            });
+            }, 'Unsubscribed from deposit notifications');
         });
 
         it('should return false if Pusher is not initialized', () => {
@@ -429,10 +432,10 @@ describe('Notification Service', () => {
                 })
             );
 
-            expect(logger.info).toHaveBeenCalledWith('Deposit notification sent to user', {
+            expect(logger.info).toHaveBeenCalledWith({
                 userId,
                 data: mockDepositEvent
-            });
+            }, 'Deposit notification sent to user');
         });
 
         it('should do nothing if bot is not initialized', async () => {
@@ -460,11 +463,11 @@ describe('Notification Service', () => {
             await (notificationService as any).handleDepositEvent(userId, mockDepositEvent);
 
             // Assert
-            expect(logger.error).toHaveBeenCalledWith('Error sending deposit notification', {
+            expect(logger.error).toHaveBeenCalledWith({
                 error: mockError,
                 userId,
                 data: mockDepositEvent
-            });
+            }, 'Error sending deposit notification');
         });
     });
 
@@ -767,10 +770,13 @@ describe('Notification Service', () => {
 
             // Assert
             expect(result).toBe(false);
-            expect(logger.error).toHaveBeenCalledWith('Error testing notifications', {
-                error: mockError,
-                userId: 123456
-            });
+            expect(logger.error).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    error: mockError,
+                    userId: 123456
+                }),
+                'Error testing notifications'
+            );
         });
     });
 

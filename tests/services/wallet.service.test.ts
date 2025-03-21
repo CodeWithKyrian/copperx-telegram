@@ -46,10 +46,10 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve wallets',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve wallets'
             );
         });
     });
@@ -99,10 +99,10 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve wallets',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve wallets'
             );
         });
     });
@@ -132,10 +132,10 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve default wallet',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve default wallet'
             );
         });
     });
@@ -168,11 +168,11 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to set default wallet',
                 expect.objectContaining({
                     error: mockError,
                     walletId
-                })
+                }),
+                'Failed to set default wallet'
             );
         });
     });
@@ -212,11 +212,11 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to generate wallet',
                 expect.objectContaining({
                     error: mockError,
                     params
-                })
+                }),
+                'Failed to generate wallet'
             );
         });
     });
@@ -245,10 +245,10 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve default wallet balance',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve default wallet balance'
             );
         });
     });
@@ -278,10 +278,10 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve wallet balances',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve wallet balances'
             );
         });
     });
@@ -310,10 +310,10 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve total balance',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve total balance'
             );
         });
     });
@@ -343,10 +343,10 @@ describe('Wallet Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve supported networks',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to retrieve supported networks'
             );
         });
     });

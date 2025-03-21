@@ -99,7 +99,7 @@ async function showTransferDetails(ctx: TransferDetailsContext, transferId: stri
         });
 
     } catch (error) {
-        logger.error('Error showing transfer details', { error, transferId });
+        logger.error({ error, transferId }, 'Error showing transfer details');
         await ctx.reply(
             '❌ *Error Retrieving Transfer*\n\n' +
             'We encountered an error while retrieving transfer details. Please try again later.',

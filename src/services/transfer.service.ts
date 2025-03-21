@@ -39,7 +39,7 @@ export class TransferService {
             const result = await transferApi.createSend(transferRequest);
             return result;
         } catch (error) {
-            logger.error('Failed to send funds to email', { error, email, amount });
+            logger.error({ error, email, amount }, 'Failed to send funds to email');
             return null;
         }
     }
@@ -64,7 +64,7 @@ export class TransferService {
             const result = await transferApi.createSend(transferRequest);
             return result;
         } catch (error) {
-            logger.error('Failed to send funds to wallet', { error, walletAddress, amount });
+            logger.error({ error, walletAddress, amount }, 'Failed to send funds to wallet');
             return null;
         }
     }
@@ -89,7 +89,7 @@ export class TransferService {
             const result = await transferApi.createSend(transferRequest);
             return result;
         } catch (error) {
-            logger.error('Failed to send funds to payee', { error, payeeId, amount });
+            logger.error({ error, payeeId, amount }, 'Failed to send funds to payee');
             return null;
         }
     }
@@ -114,7 +114,7 @@ export class TransferService {
             const result = await transferApi.createWalletWithdraw(withdrawRequest);
             return result;
         } catch (error) {
-            logger.error('Failed to withdraw funds to wallet', { error, walletAddress, amount });
+            logger.error({ error, walletAddress, amount }, 'Failed to withdraw funds to wallet');
             return null;
         }
     }
@@ -133,7 +133,7 @@ export class TransferService {
             const result = await transferApi.createOfframpTransfer(withdrawRequest);
             return result;
         } catch (error) {
-            logger.error('Failed to withdraw funds to bank account', { error });
+            logger.error({ error }, 'Failed to withdraw funds to bank account');
             return null;
         }
     }
@@ -147,7 +147,7 @@ export class TransferService {
         try {
             return await transferApi.createSendBatch(batchRequest);
         } catch (error) {
-            logger.error('Error sending batch transfer', { error, requestCount: batchRequest.requests.length });
+            logger.error({ error, requestCount: batchRequest.requests.length }, 'Error sending batch transfer');
             throw error;
         }
     }
@@ -163,7 +163,7 @@ export class TransferService {
             });
             return result as unknown as PaginatedResponse<TransferWithAccount>;
         } catch (error) {
-            logger.error('Failed to retrieve transfer history', { error, page, limit });
+            logger.error({ error, page, limit }, 'Failed to retrieve transfer history');
             return null;
         }
     }
@@ -176,7 +176,7 @@ export class TransferService {
             const result = await transferApi.getTransfer(transferId);
             return result;
         } catch (error) {
-            logger.error('Failed to retrieve transfer details', { error, transferId });
+            logger.error({ error, transferId }, 'Failed to retrieve transfer details');
             return null;
         }
     }

@@ -52,7 +52,7 @@ export const payeesCommand = async (ctx: GlobalContext): Promise<void> => {
         });
 
     } catch (error) {
-        logger.error('Error in payees command', { error });
+        logger.error({ error }, 'Error in payees command');
         await ctx.reply(
             '❌ *Error Retrieving Recipients*\n\n' +
             'We encountered an error while retrieving your saved recipients. Please try again later.',
@@ -115,7 +115,7 @@ export async function payeesPageAction(ctx: GlobalContext & { match: RegExpExecA
         });
 
     } catch (error) {
-        logger.error('Error in payees pagination', { error, page });
+        logger.error({ error, page }, 'Error in payees pagination');
         await ctx.reply(
             '❌ *Error Retrieving Recipients*\n\n' +
             'We encountered an error while retrieving your saved recipients. Please try again later.',

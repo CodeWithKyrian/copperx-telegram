@@ -46,7 +46,7 @@ export const walletCommand = async (ctx: GlobalContext): Promise<void> => {
         await displayWalletSummary(ctx, wallets, balances);
 
     } catch (error) {
-        logger.error('Error in wallet command', { error });
+        logger.error({ error }, 'Error in wallet command');
         await ctx.reply(
             '❌ *Something went wrong*\n\n' +
             'We encountered an error while processing your request. Please try again later.',

@@ -49,14 +49,14 @@ export class KycService {
                     message: '🔍 No KYC verification record found. Please start the verification process.'
                 };
             } catch (error) {
-                logger.error('Error fetching KYC status', { error, email });
+                logger.error({ error, email }, 'Error fetching KYC status');
                 return {
                     status: null,
                     message: '❌ Unable to retrieve your KYC status. Please try again later.'
                 };
             }
         } catch (error) {
-            logger.error('Error in KYC service', { error });
+            logger.error({ error }, 'Error in KYC service');
             return {
                 status: null,
                 message: '❌ An unexpected error occurred. Please try again later.'

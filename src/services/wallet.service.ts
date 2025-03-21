@@ -15,7 +15,7 @@ export class WalletService {
             const wallets = await walletApi.getWallets();
             return wallets;
         } catch (error) {
-            logger.error('Failed to retrieve wallets', { error });
+            logger.error({ error }, 'Failed to retrieve wallets');
             return null;
         }
     }
@@ -32,7 +32,7 @@ export class WalletService {
 
             return wallets.find(wallet => wallet.id === walletId) || null;
         } catch (error) {
-            logger.error('Failed to retrieve wallet by ID', { error, walletId });
+            logger.error({ error, walletId }, 'Failed to retrieve wallet by ID');
             return null;
         }
     }
@@ -46,7 +46,7 @@ export class WalletService {
             const wallet = await walletApi.getDefaultWallet();
             return wallet;
         } catch (error) {
-            logger.error('Failed to retrieve default wallet', { error });
+            logger.error({ error }, 'Failed to retrieve default wallet');
             return null;
         }
     }
@@ -61,7 +61,7 @@ export class WalletService {
             const wallet = await walletApi.setDefaultWallet(walletId);
             return wallet;
         } catch (error) {
-            logger.error('Failed to set default wallet', { error, walletId });
+            logger.error({ error, walletId }, 'Failed to set default wallet');
             return null;
         }
     }
@@ -76,7 +76,7 @@ export class WalletService {
             const wallet = await walletApi.generateWallet(params);
             return wallet;
         } catch (error) {
-            logger.error('Failed to generate wallet', { error, params });
+            logger.error({ error, params }, 'Failed to generate wallet');
             return null;
         }
     }
@@ -86,7 +86,7 @@ export class WalletService {
             const balance = await walletApi.getBalance();
             return balance;
         } catch (error) {
-            logger.error('Failed to retrieve default wallet balance', { error });
+            logger.error({ error }, 'Failed to retrieve default wallet balance');
             return null;
         }
     }
@@ -100,7 +100,7 @@ export class WalletService {
             const balances = await walletApi.getWalletBalances();
             return balances;
         } catch (error) {
-            logger.error('Failed to retrieve wallet balances', { error });
+            logger.error({ error }, 'Failed to retrieve wallet balances');
             return null;
         }
     }
@@ -114,7 +114,7 @@ export class WalletService {
             const balance = await walletApi.getBalance();
             return balance;
         } catch (error) {
-            logger.error('Failed to retrieve total balance', { error });
+            logger.error({ error }, 'Failed to retrieve total balance');
             return null;
         }
     }
@@ -128,7 +128,7 @@ export class WalletService {
             const networks = await walletApi.getSupportedNetworks();
             return networks;
         } catch (error) {
-            logger.error('Failed to retrieve supported networks', { error });
+            logger.error({ error }, 'Failed to retrieve supported networks');
             return null;
         }
     }

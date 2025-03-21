@@ -40,7 +40,7 @@ export const historyCommand = async (ctx: GlobalContext): Promise<void> => {
         });
 
     } catch (error) {
-        logger.error('Error in history command', { error });
+        logger.error({ error }, 'Error in history command');
         await ctx.reply(
             '❌ *Error Retrieving Transaction History*\n\n' +
             'We encountered an error while retrieving your transaction history. Please try again later.',

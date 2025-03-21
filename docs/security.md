@@ -168,6 +168,43 @@ Logs include:
 4. IP information
 5. Relevant context (without sensitive data)
 
+## Log Security and Redaction
+
+The bot implements automatic redaction of sensitive information in logs:
+
+1. **Automatic Redaction** - Sensitive data is automatically redacted from logs
+   - Authentication tokens
+   - API keys
+   - Authorization headers
+   - CSRF tokens
+   - Other credentials
+
+2. **Implementation**
+   ```typescript
+   // Configuration for log redaction
+   redact: [
+       'req.headers.authorization',
+       'req.headers.x-api-key',
+       'req.headers.x-csrf-token',
+       'token',
+       'accessToken',
+       // ...
+   ]
+   ```
+
+3. **Benefits**
+   - Prevents accidental exposure of credentials in logs
+   - Secures debugging information
+   - Allows safe log sharing for troubleshooting
+   - Compliance with data protection requirements
+
+4. **What Gets Redacted**
+   - Access tokens
+   - API keys and secrets
+   - Session identifiers
+   - User credentials
+   - Any specified sensitive paths
+
 ## Error Handling
 
 Secure error handling:

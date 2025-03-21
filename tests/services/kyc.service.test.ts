@@ -257,11 +257,11 @@ describe('KYC Service', () => {
 
                 // Assert
                 expect(logger.error).toHaveBeenCalledWith(
-                    'Error fetching KYC status',
                     expect.objectContaining({
                         error: mockError,
                         email: mockEmail
-                    })
+                    }),
+                    'Error fetching KYC status'
                 );
                 expect(result).toEqual({
                     status: null,
@@ -309,10 +309,10 @@ describe('KYC Service', () => {
 
                 // Assert
                 expect(logger.error).toHaveBeenCalledWith(
-                    'Error in KYC service',
                     expect.objectContaining({
                         error: mockError
-                    })
+                    }),
+                    'Error in KYC service'
                 );
                 expect(result).toEqual({
                     status: null,

@@ -20,7 +20,7 @@ export class AccountService {
             const response = await accountApi.getAccounts();
             return response.data;
         } catch (error) {
-            logger.error('Failed to retrieve accounts', { error });
+            logger.error({ error }, 'Failed to retrieve accounts');
             return null;
         }
     }
@@ -35,7 +35,7 @@ export class AccountService {
 
             return accounts.filter(account => account.type === 'bank_account');
         } catch (error) {
-            logger.error('Failed to retrieve bank accounts', { error });
+            logger.error({ error }, 'Failed to retrieve bank accounts');
             return null;
         }
     }
@@ -48,7 +48,7 @@ export class AccountService {
             const response = await accountApi.createAccount(data);
             return response;
         } catch (error) {
-            logger.error('Failed to create bank account', { error, data });
+            logger.error({ error, data }, 'Failed to create bank account');
             return null;
         }
     }
@@ -63,7 +63,7 @@ export class AccountService {
             const response = await accountApi.getAccount(id);
             return response;
         } catch (error) {
-            logger.error('Failed to retrieve account', { error, id });
+            logger.error({ error, id }, 'Failed to retrieve account');
             return null;
         }
     }
@@ -78,7 +78,7 @@ export class AccountService {
             await accountApi.deleteAccount(id);
             return true;
         } catch (error) {
-            logger.error('Failed to delete account', { error, id });
+            logger.error({ error, id }, 'Failed to delete account');
             return false;
         }
     }
@@ -94,7 +94,7 @@ export class AccountService {
             });
             return response.data;
         } catch (error) {
-            logger.error('Failed to retrieve providers', { error });
+            logger.error({ error }, 'Failed to retrieve providers');
             return null;
         }
     }

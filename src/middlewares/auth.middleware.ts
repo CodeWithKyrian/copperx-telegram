@@ -20,11 +20,7 @@ export const authMiddleware = (): Middleware<GlobalContext> => {
             // Check if this command requires authentication
             if (isProtectedCommand(command)) {
                 if (!authService.isAuthenticated(ctx)) {
-                    logger.info('Unauthenticated access attempt to protected command', {
-                        command,
-                        userId: ctx.from?.id,
-                        username: ctx.from?.username,
-                    });
+                    logger.info({ command, userId: ctx.from?.id, username: ctx.from?.username }, 'Unauthenticated access attempt to protected command');
 
                     await ctx.reply(
                         '🔒 *Authentication Required*\n\n' +
@@ -35,7 +31,7 @@ export const authMiddleware = (): Middleware<GlobalContext> => {
                     return; // Stop middleware chain
                 }
 
-                logger.debug('Authenticated access to protected command', { command });
+                logger.debug({ command }, 'Authenticated access to protected command');
             }
         }
 
@@ -46,11 +42,7 @@ export const authMiddleware = (): Middleware<GlobalContext> => {
             // Check if this action requires authentication
             if (isProtectedAction(action)) {
                 if (!authService.isAuthenticated(ctx)) {
-                    logger.info('Unauthenticated access attempt to protected action', {
-                        action,
-                        userId: ctx.from?.id,
-                        username: ctx.from?.username,
-                    });
+                    logger.info({ action, userId: ctx.from?.id, username: ctx.from?.username }, 'Unauthenticated access attempt to protected action');
 
                     // Answer the callback query to stop the loading indicator
                     await ctx.answerCbQuery('Authentication required. Please log in first.');
@@ -65,7 +57,7 @@ export const authMiddleware = (): Middleware<GlobalContext> => {
                     return; // Stop middleware chain
                 }
 
-                logger.debug('Authenticated access to protected action', { action });
+                logger.debug({ action }, 'Authenticated access to protected action');
             }
         }
 

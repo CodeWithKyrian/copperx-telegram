@@ -216,12 +216,15 @@ describe('Bot Integration', () => {
         errorHandler(mockError, mockContext);
 
         // Verify logger was called with the correct parameters
-        expect(logger.error).toHaveBeenCalledWith('Error processing update', {
-            error: 'Test error',
-            stack: mockError.stack,
-            updateType: 'message',
-            userId: 12345,
-        });
+        expect(logger.error).toHaveBeenCalledWith(
+            expect.objectContaining({
+                error: 'Test error',
+                stack: mockError.stack,
+                updateType: 'message',
+                userId: 12345,
+            }),
+            'Error processing update'
+        );
 
         // Verify that the context's reply method was called
         expect(mockContext.reply).toHaveBeenCalledWith(
@@ -255,12 +258,15 @@ describe('Bot Integration', () => {
         errorHandler(new Error('No user error'), mockContext);
 
         // Verify that the logger was still called correctly
-        expect(logger.error).toHaveBeenCalledWith('Error processing update', {
-            error: 'No user error',
-            stack: expect.any(String),
-            updateType: 'callback_query',
-            userId: undefined,
-        });
+        expect(logger.error).toHaveBeenCalledWith(
+            expect.objectContaining({
+                error: 'No user error',
+                stack: expect.any(String),
+                updateType: 'callback_query',
+                userId: undefined,
+            }),
+            'Error processing update'
+        );
 
         // Verify the reply was still sent
         expect(mockContext.reply).toHaveBeenCalled();

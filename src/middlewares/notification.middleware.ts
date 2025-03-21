@@ -18,7 +18,7 @@ export function notificationMiddleware(): Middleware<GlobalContext> {
                 }
             }
         } catch (error) {
-            logger.error('Error in notification middleware', { error });
+            logger.error({ error }, 'Error in notification middleware');
         }
 
         return next();

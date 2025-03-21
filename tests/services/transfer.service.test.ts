@@ -74,7 +74,7 @@ describe('Transfer Service', () => {
             // Assert
             expect(transferApi.createSend).toHaveBeenCalledWith({
                 email,
-                amount: '1000000000', // Converted by toRawAmount
+                amount: '10',
                 purposeCode,
                 currency
             });
@@ -96,7 +96,7 @@ describe('Transfer Service', () => {
             // Assert
             expect(transferApi.createSend).toHaveBeenCalledWith({
                 email,
-                amount: '1000000000',
+                amount: '10',
                 purposeCode,
                 currency: 'USDC'
             });
@@ -119,12 +119,12 @@ describe('Transfer Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to send funds to email',
                 expect.objectContaining({
                     error: mockError,
                     email,
                     amount
-                })
+                }),
+                'Failed to send funds to email'
             );
         });
     });
@@ -145,7 +145,7 @@ describe('Transfer Service', () => {
             // Assert
             expect(transferApi.createSend).toHaveBeenCalledWith({
                 walletAddress,
-                amount: '1000000000',
+                amount,
                 purposeCode,
                 currency
             });
@@ -168,12 +168,12 @@ describe('Transfer Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to send funds to wallet',
                 expect.objectContaining({
                     error: mockError,
                     walletAddress,
                     amount
-                })
+                }),
+                'Failed to send funds to wallet'
             );
         });
     });
@@ -194,7 +194,7 @@ describe('Transfer Service', () => {
             // Assert
             expect(transferApi.createSend).toHaveBeenCalledWith({
                 payeeId,
-                amount: '1000000000',
+                amount,
                 purposeCode,
                 currency
             });
@@ -217,12 +217,12 @@ describe('Transfer Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to send funds to payee',
                 expect.objectContaining({
                     error: mockError,
                     payeeId,
                     amount
-                })
+                }),
+                'Failed to send funds to payee'
             );
         });
     });
@@ -243,7 +243,7 @@ describe('Transfer Service', () => {
             // Assert
             expect(transferApi.createWalletWithdraw).toHaveBeenCalledWith({
                 walletAddress,
-                amount: '1000000000',
+                amount,
                 purposeCode,
                 currency
             });
@@ -266,12 +266,12 @@ describe('Transfer Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to withdraw funds to wallet',
                 expect.objectContaining({
                     error: mockError,
                     walletAddress,
                     amount
-                })
+                }),
+                'Failed to withdraw funds to wallet'
             );
         });
     });
@@ -313,10 +313,10 @@ describe('Transfer Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to withdraw funds to bank account',
                 expect.objectContaining({
                     error: mockError
-                })
+                }),
+                'Failed to withdraw funds to bank account'
             );
         });
     });
@@ -344,11 +344,11 @@ describe('Transfer Service', () => {
                 .rejects.toThrow(mockError);
 
             expect(logger.error).toHaveBeenCalledWith(
-                'Error sending batch transfer',
                 expect.objectContaining({
                     error: mockError,
                     requestCount: mockBatchTransferRequest.requests.length
-                })
+                }),
+                'Error sending batch transfer'
             );
         });
 
@@ -410,12 +410,12 @@ describe('Transfer Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve transfer history',
                 expect.objectContaining({
                     error: mockError,
                     page: 1,
                     limit: 10
-                })
+                }),
+                'Failed to retrieve transfer history'
             );
         });
     });
@@ -446,11 +446,11 @@ describe('Transfer Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to retrieve transfer details',
                 expect.objectContaining({
                     error: mockError,
                     transferId
-                })
+                }),
+                'Failed to retrieve transfer details'
             );
         });
     });

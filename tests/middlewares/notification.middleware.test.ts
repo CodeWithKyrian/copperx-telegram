@@ -171,7 +171,9 @@ describe('Notification Middleware', () => {
 
             // Assert
             expect(notificationService.subscribeToDeposits).toHaveBeenCalled();
-            expect(logger.error).toHaveBeenCalledWith('Error in notification middleware', { error });
+            expect(logger.error).toHaveBeenCalledWith({
+                error
+            }, 'Error in notification middleware');
             expect(mockNext).toHaveBeenCalled();
         });
     });

@@ -73,19 +73,13 @@ export class ApiClient {
         if (response) {
             // The request was made and the server responded with an error status
             const { status, data } = response;
-            logger.error(`API Error: ${status}`, {
-                status,
-                data,
-                url: request.url,
-            });
+            logger.error({ status, data, url: request.url }, `API Error: ${status}`);
         } else if (request) {
             // The request was made but no response was received
-            logger.error('API Error: No response received', {
-                request,
-            });
+            logger.error({ request }, 'API Error: No response received');
         } else {
             // Something happened in setting up the request
-            logger.error(`API Error: ${message}`, { error });
+            logger.error({ error: message }, 'API Error: No response received');
         }
     }
 

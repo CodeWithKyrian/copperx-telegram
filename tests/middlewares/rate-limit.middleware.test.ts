@@ -328,13 +328,13 @@ describe('Rate Limit Middleware', () => {
             await callMiddleware(middleware, ctx, mockNext);
 
             // Assert
-            expect(logger.debug).toHaveBeenCalledWith('Rate limit check', {
+            expect(logger.debug).toHaveBeenCalledWith({
                 key: 'api:123456789',
                 attempts: 5,
                 remaining: 25,
                 exceeds: false,
                 resetAt: new Date(resetTime).toISOString()
-            });
+            }, 'Rate limit check');
         });
     });
 }); 

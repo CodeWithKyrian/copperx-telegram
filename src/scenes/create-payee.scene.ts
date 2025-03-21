@@ -255,7 +255,7 @@ async function createPayee(ctx: CreatePayeeContext): Promise<void> {
 
         return ctx.scene.leave();
     } catch (error) {
-        logger.error('Error creating payee', { error });
+        logger.error({ error }, 'Error creating payee');
 
         await ctx.reply(
             '❌ *Failed to Create Recipient*\n\n' +

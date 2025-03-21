@@ -144,7 +144,7 @@ async function createWallet(ctx: GlobalContext, network: string): Promise<void> 
             ])
         );
     } catch (error) {
-        logger.error('Error creating wallet', { error, network });
+        logger.error({ error, network }, 'Error creating wallet');
         await ctx.reply(
             '❌ *Error Creating Wallet*\n\n' +
             'We encountered an error while creating your wallet. Please try again later.',

@@ -48,7 +48,7 @@ export const testNotificationCommand = async (ctx: GlobalContext): Promise<void>
             );
         }
     } catch (error) {
-        logger.error('Error testing notifications', { error, userId: ctx.from?.id });
+        logger.error({ error, userId: ctx.from?.id }, 'Error testing notifications');
 
         await ctx.reply(
             '❌ *Error Testing Notifications*\n\n' +

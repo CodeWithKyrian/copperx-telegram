@@ -44,7 +44,7 @@ export class NotificationService {
 
             logger.info('Notification service initialized successfully');
         } catch (error) {
-            logger.error('Failed to initialize Pusher client', { error });
+            logger.error({ error }, 'Failed to initialize Pusher client');
             this.pusher = null;
         }
     }
@@ -69,7 +69,7 @@ export class NotificationService {
                         callback(new Error('Invalid authentication response'), null);
                     }
                 } catch (error) {
-                    logger.error('Pusher authorization failed', { error, channel: channel.name });
+                    logger.error({ error, channel: channel.name }, 'Pusher authorization failed');
                     callback(error as Error, null);
                 }
             }
@@ -98,20 +98,16 @@ export class NotificationService {
 
             // Success handler
             channel.bind('pusher:subscription_succeeded', () => {
-                logger.info('Successfully subscribed to deposit notifications', {
+                logger.info({
                     channel: channelName,
                     userId
-                });
+                }, 'Successfully subscribed to deposit notifications');
                 this.subscriptions.set(subscriptionKey, { channelName, userId });
             });
 
             // Error handler
             channel.bind('pusher:subscription_error', (error: any) => {
-                logger.error('Failed to subscribe to deposit notifications', {
-                    error,
-                    channel: channelName,
-                    userId
-                });
+                logger.error({ error, channel: channelName, userId }, 'Failed to subscribe to deposit notifications');
                 this.subscriptions.delete(subscriptionKey);
             });
 
@@ -122,11 +118,7 @@ export class NotificationService {
 
             return true;
         } catch (error) {
-            logger.error('Error subscribing to deposit notifications', {
-                error,
-                channel: channelName,
-                userId
-            });
+            logger.error({ error, channel: channelName, userId }, 'Error subscribing to deposit notifications');
             return false;
         }
     }
@@ -149,17 +141,10 @@ export class NotificationService {
         try {
             this.pusher.unsubscribe(subscription.channelName);
             this.subscriptions.delete(subscriptionKey);
-            logger.info('Unsubscribed from deposit notifications', {
-                channel: subscription.channelName,
-                userId
-            });
+            logger.info({ channel: subscription.channelName, userId }, 'Unsubscribed from deposit notifications');
             return true;
         } catch (error) {
-            logger.error('Error unsubscribing from deposit notifications', {
-                error,
-                channel: subscription.channelName,
-                userId
-            });
+            logger.error({ error, channel: subscription.channelName, userId }, 'Error unsubscribing from deposit notifications');
             return false;
         }
     }
@@ -185,16 +170,9 @@ export class NotificationService {
                 ...keyboard
             });
 
-            logger.info('Deposit notification sent to user', {
-                userId,
-                data
-            });
+            logger.info({ userId, data }, 'Deposit notification sent to user');
         } catch (error) {
-            logger.error('Error sending deposit notification', {
-                error,
-                userId,
-                data
-            });
+            logger.error({ error, userId, data }, 'Error sending deposit notification');
         }
     }
 
@@ -268,16 +246,9 @@ export class NotificationService {
             try {
                 this.pusher.unsubscribe(subscription.channelName);
                 this.subscriptions.delete(key);
-                logger.info('Unsubscribed user from channel', {
-                    userId,
-                    channel: subscription.channelName
-                });
+                logger.info({ userId, channel: subscription.channelName }, 'Unsubscribed user from channel');
             } catch (error) {
-                logger.error('Error unsubscribing from channel', {
-                    error,
-                    userId,
-                    channel: subscription.channelName
-                });
+                logger.error({ error, userId, channel: subscription.channelName }, 'Error unsubscribing from channel');
             }
         }
     }
@@ -290,7 +261,7 @@ export class NotificationService {
             await notificationApi.testNotifications();
             return true;
         } catch (error) {
-            logger.error('Error testing notifications', { error, userId: ctx.from?.id });
+            logger.error({ error, userId: ctx.from?.id }, 'Error testing notifications');
             return false;
         }
     }

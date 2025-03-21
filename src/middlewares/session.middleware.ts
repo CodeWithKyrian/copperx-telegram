@@ -103,12 +103,12 @@ async function checkAndHandleExpiredSession(
         }
 
         // Session has expired - log the expiration
-        logger.info(`Session expired for ${key}`, {
+        logger.info({
             userId: session.auth?.userId || 'unknown',
             email: session.auth?.email || 'unknown',
             lastActivity: new Date(lastActivity).toISOString(),
             idleTime: Math.round(idleTime / 1000) + ' seconds'
-        });
+        }, `Session expired for ${key}`);
 
         // Clear the session
         await store.delete(key);
@@ -126,10 +126,10 @@ async function checkAndHandleExpiredSession(
 
         return true;
     } catch (error) {
-        logger.error('Error checking session expiration', {
+        logger.error({
             error: error instanceof Error ? error.message : String(error),
             key
-        });
+        }, 'Error checking session expiration');
         return false;
     }
 }

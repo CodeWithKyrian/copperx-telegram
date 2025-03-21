@@ -156,7 +156,7 @@ async function showPayeeList(ctx: SendBatchContext, page = 1) {
             }
         );
     } catch (error) {
-        logger.error('Error fetching payees for selection', { error });
+        logger.error({ error }, 'Error fetching payees for selection');
         await ctx.reply(
             '❌ *Error Retrieving Recipients*\n\n' +
             'We encountered an error retrieving your saved recipients. Please try again or choose a different method.',
@@ -444,7 +444,7 @@ sendBatchScene.action('confirm_batch', async (ctx) => {
 
         return ctx.scene.leave();
     } catch (error) {
-        logger.error('Error processing batch transfer', { error });
+        logger.error({ error }, 'Error processing batch transfer');
 
         await ctx.reply(
             '❌ *Batch Transfer Failed*\n\n' +

@@ -17,12 +17,12 @@ export const loggerMiddleware = (): Middleware<Context> => {
         }
 
         // Log the incoming request
-        logger.info(`Received ${updateType}`, {
+        logger.info({
             userId,
             username,
             messageText,
             updateType,
-        });
+        }, `Received ${updateType}`);
 
         await next();
     };

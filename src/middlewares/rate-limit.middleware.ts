@@ -23,13 +23,13 @@ export const rateLimitMiddleware = (config: RateLimitConfig = RateLimits.API): M
         const limitInfo = RateLimiterService.getRateLimitInfo(ctx, limitConfig);
 
         // Log rate limit status with safe handling of resetAt
-        logger.debug('Rate limit check', {
+        logger.debug({
             key: userKey,
             attempts: limitInfo.attempts,
             remaining: limitInfo.remaining,
             exceeds: limitInfo.exceeds,
             resetAt: limitInfo.resetAt ? new Date(limitInfo.resetAt).toISOString() : 'unknown'
-        });
+        }, 'Rate limit check');
 
         // If rate limit exceeded, send message and stop
         if (limitInfo.exceeds) {

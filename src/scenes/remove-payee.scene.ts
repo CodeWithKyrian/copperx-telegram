@@ -46,7 +46,7 @@ removePayeeScene.enter(async (ctx) => {
         });
 
     } catch (error) {
-        logger.error('Error fetching payees for removal', { error });
+        logger.error({ error }, 'Error fetching payees for removal');
         await ctx.reply(
             '❌ *Error Retrieving Recipients*\n\n' +
             'We encountered an error while retrieving your saved recipients. Please try again later.',
@@ -111,7 +111,7 @@ removePayeeScene.on(message('text'), async (ctx) => {
         );
 
     } catch (error) {
-        logger.error('Error fetching payee for removal', { error, payeeId });
+        logger.error({ error, payeeId }, 'Error fetching payee for removal');
         await ctx.reply(
             '❌ *Error Finding Recipient*\n\n' +
             'We encountered an error while finding this recipient. Please try again later.',
@@ -166,7 +166,7 @@ removePayeeScene.action(/confirm_remove:(.+)/, async (ctx) => {
         return ctx.scene.leave();
 
     } catch (error) {
-        logger.error('Error removing payee', { error, payeeId });
+        logger.error({ error, payeeId }, 'Error removing payee');
         await ctx.reply(
             '❌ *Failed to Remove Recipient*\n\n' +
             'We encountered an error while removing this recipient. Please try again later.',

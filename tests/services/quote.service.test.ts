@@ -43,11 +43,11 @@ describe('Quote Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to get offramp quote',
                 expect.objectContaining({
                     error: mockError,
                     data: mockOfframpQuoteRequest
-                })
+                }),
+                'Failed to get offramp quote'
             );
         });
 
@@ -88,11 +88,11 @@ describe('Quote Service', () => {
             // Assert
             expect(result).toBeNull();
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to get onramp quote',
                 expect.objectContaining({
                     error: mockError,
                     data: mockOnrampQuoteRequest
-                })
+                }),
+                'Failed to get onramp quote'
             );
         });
 

@@ -1,38 +1,41 @@
-import { createLogger, format, transports } from 'winston';
+import pino from 'pino';
 import { config } from '../config';
 
-// Create a Winston logger instance
-export const logger = createLogger({
+export const logger = pino({
     level: config.logging.level,
-    format: format.combine(
-        format.timestamp(),
-        format.printf(({ level, message, timestamp, ...meta }) => {
-            return `${timestamp} [${level.toUpperCase()}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta) : ''}`;
-        })
-    ),
-    transports: [
-        new transports.Console({
-            format: format.combine(
-                format.colorize(),
-                format.simple()
-            ),
-        }),
-    ],
+    timestamp: config.env.isDevelopment,
+    transport: {
+        target: 'pino-pretty',
+        options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname',
+        },
+    },
+    redact: [
+        'req.headers.authorization',
+        'req.headers.x-api-key',
+        'req.headers.x-csrf-token',
+        'token',
+        'accessToken',
+        'refreshToken',
+        'apiKey',
+        'apiSecret',
+        'apiToken',
+        'apiKey',
+        'password',
+        'otp'
+    ]
 });
 
-// Add file transport in production
+// In production, we could add file logging
 // if (config.env.isProduction) {
-//     logger.add(
-//         new transports.File({
-//             filename: 'logs/error.log',
-//             level: 'error'
-//         })
-//     );
-//     logger.add(
-//         new transports.File({
-//             filename: 'logs/combined.log'
-//         })
-//     );
+//   const streams = [
+//     { stream: process.stdout },
+//     { stream: pino.destination('logs/combined.log') },
+//     { level: 'error', stream: pino.destination('logs/error.log') },
+//   ];
+//   logger = pino({ level: config.logging.level }, pino.multistream(streams));
 // }
 
 export default logger;

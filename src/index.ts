@@ -16,11 +16,11 @@ const bootstrap = async () => {
 
         logger.info('Environment validation passed');
 
-        logger.info('CopperX Telegram Bot starting', {
+        logger.info({
             environment: config.nodeEnv,
             logLevel: config.logging.level,
             sessionDriver: config.session.driver,
-        });
+        }, 'CopperX Telegram Bot starting');
 
         const bot = initBot();
 
@@ -35,10 +35,10 @@ const bootstrap = async () => {
 
         setupGracefulShutdown(app, bot);
     } catch (error: any) {
-        logger.error('Failed to start bot', {
+        logger.error({
             error: error.message,
             stack: error.stack
-        });
+        }, 'Failed to start bot');
         process.exit(1);
     }
 };
@@ -59,7 +59,7 @@ const setupGracefulShutdown = (app: FastifyInstance, bot: Telegraf<GlobalContext
 
             process.exit(0);
         } catch (err) {
-            logger.error('Error during shutdown', { error: err });
+            logger.error({ error: err }, 'Error during shutdown');
             process.exit(1);
         }
     };

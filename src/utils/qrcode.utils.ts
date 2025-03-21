@@ -46,7 +46,7 @@ export async function generateQRCodeWithLogo(address: string, chainId: string): 
             });
             logoBuffer = Buffer.from(response.data);
         } catch (logoError) {
-            logger.warn('Error downloading logo, proceeding without logo', { logoError });
+            logger.warn({ logoError }, 'Error downloading logo, proceeding without logo');
             // Continue without logo if there's an error
         }
 
@@ -106,7 +106,7 @@ export async function generateQRCodeWithLogo(address: string, chainId: string): 
             try {
                 fs.unlinkSync(tempQrPath);
             } catch (cleanupError) {
-                logger.warn('Error cleaning up temporary QR code file', { cleanupError });
+                logger.warn({ cleanupError }, 'Error cleaning up temporary QR code file');
             }
         } else {
             // Just use the original QR code if we couldn't get a logo
@@ -115,7 +115,7 @@ export async function generateQRCodeWithLogo(address: string, chainId: string): 
 
         return qrPath;
     } catch (error) {
-        logger.error('Error generating QR code with logo', { error });
+        logger.error({ error }, 'Error generating QR code with logo');
         // If there's an error, fall back to simple QR code generation
         return await generateSimpleQRCode(address);
     }
@@ -140,7 +140,7 @@ export async function generateSimpleQRCode(data: string): Promise<string> {
         });
         return qrPath;
     } catch (error) {
-        logger.error('Error generating simple QR code', { error });
+        logger.error({ error }, 'Error generating simple QR code');
         throw new Error('Failed to generate QR code');
     }
 } 

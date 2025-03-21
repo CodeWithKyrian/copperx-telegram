@@ -161,7 +161,7 @@ async function showPayeeList(ctx: SendTransferContext, page = 1) {
             }
         );
     } catch (error) {
-        logger.error('Error fetching payees for selection', { error });
+        logger.error({ error }, 'Error fetching payees for selection');
         await ctx.reply(
             '❌ *Error Retrieving Recipients*\n\n' +
             'We encountered an error retrieving your saved recipients. Please try again or choose a different method.',
@@ -238,7 +238,7 @@ sendSingleScene.action(/select_payee:(.+)/, async (ctx) => {
             }
         );
     } catch (error) {
-        logger.error('Error fetching payee details', { error, payeeId });
+        logger.error({ error, payeeId }, 'Error fetching payee details');
         await ctx.reply(
             '❌ *Error Retrieving Recipient*\n\n' +
             'We encountered an error retrieving the recipient details. Please try again.',
@@ -523,11 +523,11 @@ sendSingleScene.action('confirm', async (ctx) => {
         return ctx.scene.leave();
 
     } catch (error) {
-        logger.error('Error processing transfer', {
+        logger.error({
             error,
             recipientType: ctx.scene.session.recipientType,
             recipient: ctx.scene.session.recipient || ctx.scene.session.payeeId
-        });
+        }, 'Error processing transfer');
 
         await ctx.reply(
             '❌ *Transfer Failed*\n\n' +

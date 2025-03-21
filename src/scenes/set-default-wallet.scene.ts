@@ -156,7 +156,7 @@ async function setDefaultWallet(ctx: GlobalContext, walletId: string): Promise<v
             }
         );
     } catch (error) {
-        logger.error('Error setting default wallet', { error, walletId });
+        logger.error({ error, walletId }, 'Error setting default wallet');
         await ctx.reply(
             '❌ *Error Setting Default Wallet*\n\n' +
             'We encountered an error while updating your default wallet. Please try again later.',

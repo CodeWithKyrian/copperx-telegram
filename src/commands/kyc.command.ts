@@ -22,7 +22,7 @@ export const kycCommand = async (ctx: GlobalContext): Promise<void> => {
         });
 
     } catch (error) {
-        logger.error('Error handling KYC command', { error });
+        logger.error({ error }, 'Error handling KYC command');
         await ctx.reply(
             '❌ Something went wrong while checking your KYC status.\n' +
             'Please try again later or contact support if the issue persists.'

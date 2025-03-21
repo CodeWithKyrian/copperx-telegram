@@ -17,7 +17,7 @@ export const startCommand = async (ctx: GlobalContext): Promise<void> => {
 
         await showMainMenu(ctx);
     } catch (error) {
-        logger.error('Error handling start command', { error });
+        logger.error({ error }, 'Error handling start command');
         await ctx.reply('Sorry, something went wrong while starting the bot. Please try again.');
     }
 };
@@ -75,7 +75,7 @@ export const showMainMenu = async (ctx: GlobalContext): Promise<void> => {
             );
         }
     } catch (error) {
-        logger.error('Error showing main menu', { error });
+        logger.error({ error }, 'Error showing main menu');
         await ctx.reply('Sorry, something went wrong. Please try again.');
     }
 };

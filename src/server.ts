@@ -36,10 +36,10 @@ const setupHealthRoutes = (app: FastifyInstance) => {
 export const getWebhookInfo = async (bot: Telegraf<GlobalContext>) => {
     try {
         const webhookInfo = await bot.telegram.getWebhookInfo();
-        logger.info('Webhook info', { webhookInfo });
+        logger.info({ webhookInfo }, 'Webhook info');
         return webhookInfo;
     } catch (error) {
-        logger.error('Failed to get webhook info', { error });
+        logger.error({ error }, 'Failed to get webhook info');
         throw error;
     }
 };
@@ -82,7 +82,7 @@ const configureWebhook = async (app: FastifyInstance, bot: Telegraf<GlobalContex
         logger.info(`Webhook set to ${webhookUrl}`);
         return true;
     } catch (error) {
-        logger.error('Failed to set webhook', { error });
+        logger.error({ error }, 'Failed to set webhook');
         return false;
     }
 };
@@ -102,7 +102,7 @@ const configureLongPolling = async (bot: Telegraf<GlobalContext>): Promise<boole
         logger.info('Bot started successfully in long-polling mode');
         return true;
     } catch (error) {
-        logger.error('Failed to start long polling', { error });
+        logger.error({ error }, 'Failed to start long polling');
         return false;
     }
 };

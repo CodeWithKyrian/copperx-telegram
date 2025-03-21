@@ -107,7 +107,7 @@ export async function handleNaturalLanguage(ctx: GlobalContext & { message: Mess
         );
 
     } catch (error) {
-        logger.error('Error handling natural language input', { error });
+        logger.error({ error }, 'Error handling natural language input');
         await ctx.reply('Sorry, I had trouble understanding that. Please try using the menu options.');
         return await showMainMenu(ctx);
     }

@@ -63,7 +63,12 @@ describe('Auth Service', () => {
                 waitingForOtp: true
             });
             expect(result).toEqual(mockResponse);
-            expect(logger.info).toHaveBeenCalledWith('Email authentication initiated', { email: mockEmail });
+            expect(logger.info).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    email: mockEmail
+                }),
+                'Email authentication initiated'
+            );
         });
 
         it('should handle and log errors', async () => {
@@ -78,11 +83,11 @@ describe('Auth Service', () => {
                 .rejects.toThrow(mockError);
 
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to initiate email authentication',
                 expect.objectContaining({
                     error: mockError.message,
                     email: mockEmail
-                })
+                }),
+                'Failed to initiate email authentication'
             );
         });
     });
@@ -118,11 +123,11 @@ describe('Auth Service', () => {
             expect(apiClient.setAccessToken).toHaveBeenCalledWith(mockToken);
             expect(result).toEqual(mockAuthResponse.user);
             expect(logger.info).toHaveBeenCalledWith(
-                'User authenticated successfully',
                 expect.objectContaining({
                     userId: mockAuthResponse.user.id,
                     email: mockEmail
-                })
+                }),
+                'User authenticated successfully'
             );
         });
 
@@ -198,10 +203,10 @@ describe('Auth Service', () => {
                 .rejects.toThrow(mockError);
 
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to verify OTP',
                 expect.objectContaining({
                     error: mockError.message
-                })
+                }),
+                'Failed to verify OTP'
             );
         });
     });
@@ -258,10 +263,10 @@ describe('Auth Service', () => {
                 .rejects.toThrow(mockError);
 
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to get current user profile',
                 expect.objectContaining({
                     error: mockError.message
-                })
+                }),
+                'Failed to get current user profile'
             );
         });
     });
@@ -372,10 +377,10 @@ describe('Auth Service', () => {
                 .rejects.toThrow(mockError);
 
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to logout',
                 expect.objectContaining({
                     error: mockError.message
-                })
+                }),
+                'Failed to logout'
             );
         });
     });
@@ -538,8 +543,10 @@ describe('Auth Service', () => {
 
             // Assert
             expect(logger.error).toHaveBeenCalledWith(
-                'Failed to decrypt token',
-                expect.objectContaining({ error: mockError })
+                expect.objectContaining({
+                    error: mockError
+                }),
+                'Failed to decrypt token'
             );
             expect(authService.handleAuthError).toHaveBeenCalledWith(ctx);
             expect(authService.clearSessionAuth).toHaveBeenCalledWith(ctx);

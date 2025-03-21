@@ -16,7 +16,7 @@ export class PayeeService {
             const response = await payeeApi.getPayees(page, limit);
             return response;
         } catch (error) {
-            logger.error('Failed to retrieve payees', { error, page, limit });
+            logger.error({ error, page, limit }, 'Failed to retrieve payees');
             return null;
         }
     }
@@ -29,7 +29,7 @@ export class PayeeService {
             const response = await payeeApi.createPayee(data);
             return response;
         } catch (error) {
-            logger.error('Failed to create payee', { error, data });
+            logger.error({ error, data }, 'Failed to create payee');
             return null;
         }
     }
@@ -44,7 +44,7 @@ export class PayeeService {
             const response = await payeeApi.getPayee(id);
             return response;
         } catch (error) {
-            logger.error('Failed to retrieve payee', { error, id });
+            logger.error({ error, id }, 'Failed to retrieve payee');
             return null;
         }
     }
@@ -57,7 +57,7 @@ export class PayeeService {
             const response = await payeeApi.updatePayee(id, data);
             return response;
         } catch (error) {
-            logger.error('Failed to update payee', { error, id, data });
+            logger.error({ error, id, data }, 'Failed to update payee');
             return null;
         }
     }
@@ -72,7 +72,7 @@ export class PayeeService {
             await payeeApi.deletePayee(id);
             return true;
         } catch (error) {
-            logger.error('Failed to delete payee', { error, id });
+            logger.error({ error, id }, 'Failed to delete payee');
             return false;
         }
     }

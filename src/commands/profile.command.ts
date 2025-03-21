@@ -56,7 +56,7 @@ export const profileCommand = async (ctx: GlobalContext): Promise<void> => {
             }
         );
     } catch (error) {
-        logger.error('Error fetching profile', { error });
+        logger.error({ error }, 'Error fetching profile');
         await ctx.reply(
             '❌ *Error Retrieving Profile*\n\n' +
             'There was a problem retrieving your profile. Please try again later.',

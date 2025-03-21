@@ -184,8 +184,8 @@ The bot implements automatic redaction of sensitive information in logs:
    // Configuration for log redaction
    redact: [
        'req.headers.authorization',
-       'req.headers.x-api-key',
-       'req.headers.x-csrf-token',
+       'req.headers["x-api-key"]',
+      'req.headers["x-csrf-token"]',
        'token',
        'accessToken',
        // ...

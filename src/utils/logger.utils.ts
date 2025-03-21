@@ -14,8 +14,8 @@ export const logger = pino({
     },
     redact: [
         'req.headers.authorization',
-        'req.headers.x-api-key',
-        'req.headers.x-csrf-token',
+        'req.headers["x-api-key"]',
+        'req.headers["x-csrf-token"]',
         'token',
         'accessToken',
         'refreshToken',

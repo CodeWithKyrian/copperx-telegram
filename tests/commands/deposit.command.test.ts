@@ -1,4 +1,4 @@
-import { depositCommand, depositAction, depositActionWithWallet, depositDoneAction } from '../../src/commands/deposit.command';
+import { depositCommand, depositAction, depositWithWalletAction, depositDoneAction } from '../../src/commands/deposit.command';
 import { createMockContext } from '../__mocks__/context.mock';
 import { walletService } from '../../src/services/wallet.service';
 import { mockWallets, mockWallet, mockWalletWithoutAddress } from '../__mocks__/wallet.mock';
@@ -99,13 +99,13 @@ describe('Deposit Commands', () => {
         });
     });
 
-    describe('depositActionWithWallet', () => {
+    describe('depositWithWalletAction', () => {
         describe('when wallet has address', () => {
             beforeEach(() => {
                 (walletService.getWalletById as jest.Mock).mockResolvedValue(mockWallet);
             });
 
-            it('should display deposit instructions and QR code', async () => {
+            it('should display deposit instructions', async () => {
                 // Arrange
                 const mockMatch = ['full_match', 'wallet-123'];
                 Object.setPrototypeOf(mockMatch, RegExp.prototype);
@@ -113,19 +113,13 @@ describe('Deposit Commands', () => {
                 (ctxWithMatch as GlobalContextWithMatch).match = mockMatch as RegExpExecArray;
 
                 // Act
-                await depositActionWithWallet(ctxWithMatch as GlobalContextWithMatch);
+                await depositWithWalletAction(ctxWithMatch as GlobalContextWithMatch);
 
                 // Assert
                 expect(ctxWithMatch.reply).toHaveBeenCalledWith(
                     expect.stringContaining('Deposit to CopperX Wallet'),
                     expect.objectContaining({ parse_mode: 'Markdown' })
                 );
-                expect(showLoading).toHaveBeenCalledWith(
-                    ctxWithMatch,
-                    expect.stringContaining('Generating QR code')
-                );
-                expect(generateQRCodeWithLogo).toHaveBeenCalled();
-                expect(ctxWithMatch.replyWithPhoto).toHaveBeenCalled();
             });
         });
 
@@ -142,7 +136,7 @@ describe('Deposit Commands', () => {
                 (ctxWithMatch as GlobalContextWithMatch).match = mockMatch as RegExpExecArray;
 
                 // Act
-                await depositActionWithWallet(ctxWithMatch as GlobalContextWithMatch);
+                await depositWithWalletAction(ctxWithMatch as GlobalContextWithMatch);
 
                 // Assert
                 expect(ctxWithMatch.reply).toHaveBeenCalledWith(
@@ -161,7 +155,7 @@ describe('Deposit Commands', () => {
             (ctxWithMatch as GlobalContextWithMatch).match = mockMatch as RegExpExecArray;
 
             // Act
-            await depositActionWithWallet(ctxWithMatch as GlobalContextWithMatch);
+            await depositWithWalletAction(ctxWithMatch as GlobalContextWithMatch);
 
             // Assert
             expect(ctxWithMatch.reply).toHaveBeenCalledWith(
@@ -179,7 +173,7 @@ describe('Deposit Commands', () => {
             (ctxWithMatch as GlobalContextWithMatch).match = mockMatch as RegExpExecArray;
 
             // Act
-            await depositActionWithWallet(ctxWithMatch as GlobalContextWithMatch);
+            await depositWithWalletAction(ctxWithMatch as GlobalContextWithMatch);
 
             // Assert
             expect(ctxWithMatch.reply).toHaveBeenCalledWith(

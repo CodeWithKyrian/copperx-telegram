@@ -59,7 +59,7 @@ export async function depositAction(ctx: GlobalContext) {
     await depositCommand(ctx);
 }
 
-export async function depositActionWithWallet(ctx: GlobalContext & { match: RegExpExecArray }) {
+export async function depositWithWalletAction(ctx: GlobalContext & { match: RegExpExecArray }) {
     await ctx.answerCbQuery();
     const walletId = ctx.match[1];
 
@@ -93,14 +93,14 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
                     parse_mode: 'Markdown',
                     ...Markup.inlineKeyboard([
                         [Markup.button.callback('🔙 Back to Menu', 'main_menu')],
-                        [Markup.button.callback('📞 Contact Support', 'support')]
+                        [Markup.button.url('📞 Contact Support', 'https://t.me/copperxcommunity/2183')]
                     ])
                 }
             );
             return;
         }
 
-        // Send the main deposit information message first
+        // Send the main deposit information message with QR code generation option
         await ctx.reply(
             `📥 *Deposit to CopperX Wallet*\n\n` +
             `*Step-by-Step Instructions:*\n\n` +
@@ -110,37 +110,61 @@ export async function depositActionWithWallet(ctx: GlobalContext & { match: RegE
             `*${network}*\n\n` +
             `3️⃣ *Send USDC to this address*\n\n` +
             `4️⃣ *Wait for blockchain confirmation*\n\n` +
-            `⚠️ *Important Reminders:*\n` +
-            `• Only send USDC to this address\n` +
+            `⚠️ *Important Reminders:*\n\n` +
+            `• Only send *USDC* to this address\n` +
             `• Triple-check the network before sending\n` +
             `• Small test transactions are recommended\n` +
             `• Funds will appear after network confirmation`,
             {
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('📱 Generate QR Code', `generate_qr:${walletId}`)],
+                    [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+                ])
             }
         );
-
-        const loadingMsg = await showLoading(ctx, '🔄 *Generating QR code for your deposit address...*');
-
-        const qrCodeImagePath = await generateQRCodeWithLogo(address, wallet.network!);
-
-        await loadingMsg.complete();
-
-        await ctx.replyWithPhoto({ source: qrCodeImagePath }, {
-            caption: `📱 *Scan QR Code to Deposit*\n\nNetwork: *${network}*\n\nUse /history to check your deposit status.`,
-            parse_mode: 'Markdown',
-            ...Markup.inlineKeyboard([
-                [Markup.button.callback('✅ I\'ve Completed My Deposit', 'deposit_done')],
-                [Markup.button.callback('📜 Transaction History', 'history')],
-                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
-            ])
-        });
 
     } catch (error) {
         logger.error({ error, walletId }, 'Error in deposit action with wallet');
         await ctx.reply(
             '❌ *Error*\n\n' +
             'We encountered an error while retrieving your deposit information. Please try again later.',
+            { parse_mode: 'Markdown' }
+        );
+    }
+}
+
+export async function generateQRCodeAction(ctx: GlobalContext & { match: RegExpExecArray }) {
+    await ctx.answerCbQuery();
+    const walletId = ctx.match[1];
+
+    try {
+        const wallet = await walletService.getWalletById(walletId);
+        if (!wallet || !wallet.walletAddress) {
+            throw new Error('Invalid wallet or missing address');
+        }
+
+        const loadingMsg = await showLoading(ctx, '🔄 *Generating QR code for your deposit address...*');
+        const qrCodeImagePath = await generateQRCodeWithLogo(wallet.walletAddress, wallet.network!);
+        await loadingMsg.complete();
+
+        await ctx.replyWithPhoto({ source: qrCodeImagePath }, {
+            caption: `📱 *Scan QR Code to Deposit*\n\n` +
+                `Network: *${formatNetworkName(wallet.network)}*\n\n` +
+                `Currency: *USDC*\n\n` +
+                `Use /history to check your deposit status.`,
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('📜 Transaction History', 'history')],
+                [Markup.button.callback('🔙 Back to Menu', 'main_menu')]
+            ])
+        });
+
+    } catch (error) {
+        logger.error({ error, walletId }, 'Error generating QR code');
+        await ctx.reply(
+            '❌ *Error*\n\n' +
+            'We encountered an error while generating the QR code. Please try again later.',
             { parse_mode: 'Markdown' }
         );
     }

@@ -14,7 +14,7 @@ import {
     walletSetDefaultAction,
     walletSetDefaultActionWithWallet,
 } from "./wallet.command";
-import { depositAction, depositActionWithWallet, depositCommand, depositDoneAction } from "./deposit.command";
+import { depositAction, depositWithWalletAction, depositCommand, depositDoneAction, generateQRCodeAction } from "./deposit.command";
 import { sendCommand, transferDetailsAction, sendAction, sendBatchAction, sendSingleAction } from "./send.command";
 import { historyCommand, historyAction } from "./history.command";
 import { message } from "telegraf/filters";
@@ -101,7 +101,8 @@ const registerActionHandlers = (bot: Telegraf<GlobalContext>): void => {
     bot.action(/set_default_wallet:(.+)/, walletSetDefaultActionWithWallet);
 
     bot.action('deposit_funds', depositAction);
-    bot.action(/deposit_funds:(.+)/, depositActionWithWallet);
+    bot.action(/deposit_funds:(.+)/, depositWithWalletAction);
+    bot.action(/generate_qr:(.+)/, generateQRCodeAction);
     bot.action('deposit_done', depositDoneAction);
 
     bot.action('send_funds', sendAction);
